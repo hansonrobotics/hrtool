@@ -9,8 +9,7 @@ set -e
 BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 ############# Configurations #############
-HR_VERSION=0.1.2
-HRTOOL_VERSION=0.1.10
+HRTOOL_VERSION=0.1.11
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
@@ -20,7 +19,6 @@ declare -A MD5SUMS
 
 DEFAULT_HR_WORKSPACE=~/hansonrobotics
 HR_ENVFILE_PATH=~/.hr/env.sh
-HR_VERSION_FILE=~/.hr/versions.txt
 HR_PREFIX=/opt/hansonrobotics
 DEFAULT_HRTOOL_PREFIX=/usr/local/bin
 HR_CACHE=$HOME/.hr/cache
@@ -33,7 +31,6 @@ if [[ -z $PIP_CACHE ]]; then
 fi
 APT_CACHE_DIR=$HR_CACHE/archives
 PIP_CACHE_DIR=$HR_CACHE/pip
-LOG_DIR="$HOME/.hr/log"
 
 if [[ -z $ROS_PKG_PREFIX ]]; then
     ROS_PKG_PREFIX=$HR_PREFIX/ros
@@ -119,51 +116,6 @@ if [[ $(id -u) != 0 ]]; then
     SUDO="sudo"
 fi
 
-vercomp() {
-    # Compare version
-    # Return one of these values
-    #  0: equal
-    # -1: less than
-    #  1: greater than
-    local s=$1
-    local s2=$2
-    if [[ $s == $s2 ]]; then
-        echo 0
-    else
-        ss=$(echo -e "$s\n$s2"|sort -V|head -n1)
-        if [[ $s == $ss ]]; then
-            echo -1
-        else
-            echo 1
-        fi
-    fi
-}
-
-_update_version() {
-    k=$1
-    v=$2
-    if ! grep -E "$k=.*" $HR_VERSION_FILE >/dev/null 2>&1; then
-        echo "$k=$v" >> $HR_VERSION_FILE
-    else
-        sed -i "s/$k=.*/$k=$v/" $HR_VERSION_FILE
-    fi
-}
-
-_print_version() {
-    k=$1
-    if grep -E "$k=.*" $HR_VERSION_FILE >/dev/null 2>&1; then
-        ver=$(grep -E "$k=.*" $HR_VERSION_FILE)
-        echo $ver
-    fi
-}
-
-_remove_version() {
-    k=$1
-    if grep -E "$k=.*" $HR_VERSION_FILE >/dev/null 2>&1; then
-        sed -i "/^${k}=/d" $HR_VERSION_FILE
-    fi
-}
-
 md5str() {
   local FNAME=$1
   case $(uname) in
@@ -202,7 +154,6 @@ timeit() {
     local elapsed=$(echo "$(date +%s.%N)-$start" | bc)
     info "Time used $elapsed"
 }
-
 
 echo_installed_deb_package() {
     for pkg in $@; do
@@ -585,8 +536,6 @@ hr_init() {
     set_workspace $@
     echo export HR_WORKSPACE=$HR_WORKSPACE > $HR_ENVFILE_PATH
 cat <<EOF >>$HR_ENVFILE_PATH
-export HR_ENVFILE_PATH=$HR_ENVFILE_PATH
-export HR_VERSION_FILE=$HR_VERSION_FILE
 export HR_PREFIX=$HR_PREFIX
 export HR_CACHE=$HR_CACHE
 
@@ -655,11 +604,6 @@ hr_stop() {
 install_all() {
     install_head
     install_opencog
-}
-
-install_all-deps() {
-    install_head-deps
-    install_opencog-deps
 }
 
 install_head() {
@@ -1148,9 +1092,11 @@ hr install <dependency> [<dependency>] ...
 
 Install dependencies
 
-    all             Install all the depencencies
-    head-deps       Install dependencies for HEAD
-    opencog-deps    Install dependencies for OpenCog
+    all             Install HEAD and its depencencies, OpenCog and its dependencies
+    head            Install HEAD and its depencencies
+    opencog         Install OpenCog and its dependencies
+    head-deps       Install HEAD dependencies
+    opencog-deps    Install OpenCog dependencies
     head-hr-msgs    Install hr_msgs, a shared set of ROS messages for HR
     head-hr-ext     Install hr tool extension
 EOF
@@ -1253,7 +1199,6 @@ get_head() {
         cd $HR_WORKSPACE
         clone hansonrobotics $repo
     done
-    _update_version HEAD $HR_VERSION
     info "Cloning HR source code is done"
 }
 
@@ -1306,24 +1251,18 @@ _build_head() {
         catkin init
     fi
 
-    catkin config --blacklist $@
-    catkin build --force-cmake -j$(nproc) --no-status --make-args install --cmake-args -DCMAKE_INSTALL_PREFIX=$ROS_PKG_PREFIX
+    if [[ $# > 0 ]]; then
+        catkin config --blacklist $@
+    fi
+    catkin build --force-cmake -j$(nproc) --no-status --make-args install
 
-    TARGET=$ROS_PKG_PREFIX/lib/python2.7/dist-packages
+    TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
     rm -rf $TARGET/pololu*
     rm -rf $TARGET/roscom*
     info "Installing pololu-motors"
     pip2 install -t $TARGET $HR_WORKSPACE/HEAD/src/hardware/pololu-motors --no-deps
     info "Installing blender roscom"
     pip3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
-
-    TARGET2=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
-    rm -rf $TARGET2/pololu*
-    rm -rf $TARGET2/roscom*
-    info "Installing pololu-motors"
-    pip2 install -t $TARGET2 $HR_WORKSPACE/HEAD/src/hardware/pololu-motors --no-deps
-    info "Installing blender roscom"
-    pip3 install -t $TARGET2 $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
 }
 
 build_head() {
@@ -1344,15 +1283,16 @@ build_head() {
         icog_face_tracker
     )
     _build_head ${blacklist[@]}
+    _build_webui-js
 }
 
-build_webui-js() {
+_build_webui-js() {
     read_workspace
     cd $HR_WORKSPACE/HEAD/src/webui
     npm install
 }
 
-build_head-full() {
+_build_full-head() {
     local blacklist=(
         eva_behavior
         speech2command
@@ -1384,10 +1324,8 @@ hr build <component> [<component>] ...
 
 Build components
 
-    head        Build only active packages HEAD
-    head-full   Build all packages in HEAD
+    head        Build only whitelist packages HEAD
     opencog     Build OpenCog components
-    webui-js    Install webui local JS packages
 EOF
 }
 
