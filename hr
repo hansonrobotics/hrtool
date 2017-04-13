@@ -10,7 +10,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 ############# Configurations #############
 HR_VERSION=0.1.2
-HRTOOL_VERSION=0.1.7
+HRTOOL_VERSION=0.1.8
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
@@ -282,7 +282,9 @@ curl_cache() {
         done
     fi
 
-    info "Downloading $(basename $1) is done"
+    if [[ -f ${HR_CACHE}/${ofile} ]]; then
+        info "Downloading $(basename $1) is done"
+    fi
 }
 
 wget_cache() {
@@ -307,7 +309,9 @@ wget_cache() {
         done
     fi
 
-    info "Downloading $(basename $1) is done"
+    if [[ -f ${HR_CACHE}/${ofile} ]]; then
+        info "Downloading $(basename $1) is done"
+    fi
 }
 
 _get_confirm() {
@@ -1107,97 +1111,17 @@ _install_calib_tools() {
 }
 
 install_hr() {
-    # Check/add the github host key to ~/.ssh/known_hosts
-    ssh -o StrictHostKeyChecking=no github.com 2>/dev/null|| true
-
-    local hr_installed_file=$HOME/.hr/hr_installed.txt
-    local prefix=${1:-${DEFAULT_HRTOOL_PREFIX}}
-    if [[ ! -d $prefix ]]; then
-        mkdir -p $prefix
-    fi
-
-    if [[ $BASEDIR == $prefix ]]; then
-        error "Can't install itself"
-        exit 1
-    fi
-    $SUDO cp $BASEDIR/hr $prefix/hr-base
-    $SUDO chmod +x $prefix/hr-base
-    info "Copied hr to $prefix/hr-base"
-    echo "$prefix/hr-base" >> $hr_installed_file
-    _update_version hr $HRTOOL_VERSION
-
-    $SUDO ln -sf -T hr-base $prefix/hr
-    info "Linked hr to $prefix/hr-base"
-    echo "$prefix/hr" >> $hr_installed_file
-
-    local tmp_file=/tmp/hrcomp
-    curl -sLo $tmp_file ${GITHUB_HRCOMP_URL}
-    bash_flag=$(file $tmp_file | grep bash | wc -l)
-    if [[ $bash_flag != "1" ]]; then
-        error "Can't get hr-ext"
-        exit 1
-    fi
-
-    $SUDO cp $tmp_file /etc/bash_completion.d/hr-completion.bash
-    info "Copied hr-completion.bash to /etc/bash_completion.d"
-    echo "/etc/bash_completion.d/hr-completion.bash" >> $hr_installed_file
-
-    _install_hr-ext
-}
-
-_install_hr-ext() {
-    local hr_installed_file=$HOME/.hr/hr_installed.txt
-    if [[ -z $GITHUB_TOKEN ]]; then
-        info "GITHUB_TOKEN is not set"
-        return
-    fi
-    local prefix=${1:-${DEFAULT_HRTOOL_PREFIX}}
-    if [[ ! -d $prefix ]]; then
-        mkdir -p $prefix
-    fi
-    local ext_url=$GITHUB_HR_EXT_URL
-    info "Getting hr-ext"
-    local ext_file=/tmp/hrtmp
-    curl -sLo $ext_file ${ext_url}
-    bash_flag=$(file $ext_file | grep bash | wc -l)
-    if [[ $bash_flag != "1" ]]; then
-        error "Can't get hr-ext"
-        exit 1
-    fi
-
-    $SUDO cp $ext_file $prefix/hr-ext
-    info "Copied hr to $prefix/hr-ext"
-    echo "$prefix/hr-ext" >> $hr_installed_file
-    HRTOOL_EXT_VERSION=$(grep -E "^HRTOOL_EXT_VERSION=" $prefix/hr-ext|cut -d= -f2)
-    _update_version hr-ext $HRTOOL_EXT_VERSION
-
-    $SUDO chmod +x $prefix/hr-ext
-
-    $SUDO ln -sf -T hr-ext $prefix/hr
-    info "Linked hr to $prefix/hr-ext"
-    echo "$prefix/hr" >> $hr_installed_file
-
-    rm $ext_file
+    MD5SUMS["head-hr_msgs_0.0.1_amd64.deb"]=929a4a64addc22596203b511518ee6c1
+    wget_cache https://github.com/hansonrobotics/hr_msgs/releases/download/v0.0.1/head-hr_msgs_0.0.1_amd64.deb
+    $SUDO dpkg -i "${HR_CACHE}/head-hr_msgs_0.0.1_amd64.deb"
+    $SUDO apt-get install -f
 }
 
 install_hr_msgs() {
-    local installed_ver=$(_print_version hr_msgs|cut -d= -f2)
-    if [[ ! -z $installed_ver ]]; then
-        warn "hr_msgs==${installed_ver} is already installed"
-        return
-    fi
-    MD5SUMS["hr_msgs_v0.0.1.tar.gz"]=6d36ede47634b45e37eeca9639699208
-    wget_cache https://github.com/hansonrobotics/hr_msgs/archive/v0.0.1.tar.gz hr_msgs_v0.0.1.tar.gz
-    local tmp_ws=/tmp/ws
-    mkdir -p $tmp_ws/src
-    tar zxf ${HR_CACHE}/hr_msgs_v0.0.1.tar.gz -C $tmp_ws/src
-    rosdep install --from-paths $tmp_ws/src --ignore-src --rosdistro indigo
-    source /opt/ros/indigo/setup.bash
-    catkin_make_isolated --directory $tmp_ws --install --install-space $ROS_PKG_PREFIX -DCMAKE_BUILD_TYPE=Release
-    cp /tmp/ws/build_isolated/hr_msgs/install_manifest.txt $HOME/.hr/hr_msgs_installed.txt
-    sed -i '/hr_msgs/!d' ~/.hr/hr_msgs_installed.txt
-    _update_version hr_msgs 0.0.1
-    rm -r $tmp_ws
+    MD5SUMS["head-hr_msgs_0.0.1_amd64.deb"]=929a4a64addc22596203b511518ee6c1
+    wget_cache https://github.com/hansonrobotics/hr_msgs/releases/download/v0.0.1/head-hr_msgs_0.0.1_amd64.deb
+    $SUDO dpkg -i "${HR_CACHE}/head-hr_msgs_0.0.1_amd64.deb"
+    $SUDO apt-get install -f
 }
 
 help_install() {
@@ -1209,14 +1133,16 @@ Install dependencies
     all             Install all the depencencies
     head-deps       Install dependencies for HEAD
     opencog-deps    Install dependencies for OpenCog
-    hr              Install hrtool
     hr_msgs         Install hr_msgs, a shared set of ROS messages for HR
 EOF
 }
 
 uninstall_hr() {
-    remove_installed_files $HOME/.hr/hr_installed.txt
-    _remove_version hr
+    sudo apt-get remove head-hr
+}
+
+uninstall_hr-ext() {
+    sudo apt-get remove head-hr-ext
 }
 
 uninstall_opencv() {
@@ -1225,8 +1151,7 @@ uninstall_opencv() {
 }
 
 uninstall_hr_msgs() {
-    remove_installed_files $HOME/.hr/hr_msgs_installed.txt
-    _remove_version hr_msgs
+    sudo apt-get remove head-hr_msgs
 }
 
 help_uninstall() {
@@ -1236,6 +1161,7 @@ hr uninstall <component> [<component>] ...
 Uninstall components
 
     hr      Uninstall hr tool
+    hr-ext  Uninstall hr-ext
     hr_msgs Uninstall hr_msgs
 EOF
 }
