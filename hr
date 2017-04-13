@@ -9,7 +9,7 @@ set -e
 BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 ############# Configurations #############
-HRTOOL_VERSION=0.1.12
+HRTOOL_VERSION=0.1.13
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
@@ -1074,8 +1074,6 @@ _install_calib_tools() {
 
 install_head-hr-ext() {
     local version=0.1.1
-    MD5SUMS["head-hr-ext_0.1.0_amd64.deb"]=2f63dd72cec2b02742b67440d6397b2d
-    MD5SUMS["head-hr-ext_0.1.1_amd64.deb"]=ee696bd2958d9c9bc44b9acb10204e01
     curl_cache ${GITHUB_STORAGE2_URL}/head-hr-ext_${version}_amd64.deb
     $SUDO dpkg -i "${HR_CACHE}/head-hr-ext_${version}_amd64.deb"
 }
