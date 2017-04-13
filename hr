@@ -203,6 +203,15 @@ timeit() {
     info "Time used $elapsed"
 }
 
+get_installed_deb_package_version() {
+    local pkg=$1
+    local s=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$pkg")
+    local ver=${s##*=}
+    if [[ ${s:1:1} == 'i' ]]; then
+        echo "$pkg==$ver"
+    fi
+}
+
 check_apt_installed() {
     # Check if the given debian packages are installed
     local pkgs=$@
@@ -606,15 +615,10 @@ hr_env() {
 }
 
 hr_version() {
-    hrver=$(_print_version hr|cut -d= -f2)
-    if [[ ! -z $hrver ]]; then
-        echo "HR Tool Version ${hrver}"
-    fi
-    hrextver=$(_print_version hr-ext|cut -d= -f2)
-    if [[ ! -z $hrextver ]]; then
-        echo "HR Tool Extension Version ${hrextver}"
-    fi
-    echo ""
+    get_installed_deb_package_version head-hr 2>/dev/null
+    get_installed_deb_package_version head-hr-ext 2>/dev/null
+    get_installed_deb_package_version head-hr-msgs 2>/dev/null
+    echo ''
     print_repo_info
 }
 
