@@ -10,13 +10,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 ############# Configurations #############
 HR_VERSION=0.1.2
-HRTOOL_VERSION=0.1.8
+HRTOOL_VERSION=0.1.9
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
-GITHUB_HRCOMP_URL=https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/hr/hr-completion.bash
-GITHUB_HR_EXT_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/private_ws/master/scripts/_hr
+GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
 declare -A MD5SUMS
 
 DEFAULT_HR_WORKSPACE=~/hansonrobotics
@@ -264,7 +263,7 @@ curl_cache() {
     url=$1
     ofile=${2-${url##*/}}
     info "Downloading $(basename $1)"
-    [[ -f ${HR_CACHE}/${ofile} ]] || curl -L ${url} -o ${HR_CACHE}/${ofile}
+    [[ -f ${HR_CACHE}/${ofile} ]] || curl -L ${url} -o ${HR_CACHE}/${ofile} || rm ${HR_CACHE}/${ofile}
 
     # check md5sum
     local sum=${MD5SUMS[$ofile]}
@@ -291,7 +290,7 @@ wget_cache() {
     url=$1
     ofile=${2-${url##*/}}
     info "Downloading $(basename $1)"
-    [[ -f ${HR_CACHE}/${ofile} ]] || wget ${url} -O ${HR_CACHE}/${ofile}
+    [[ -f ${HR_CACHE}/${ofile} ]] || wget ${url} -O ${HR_CACHE}/${ofile} || rm ${HR_CACHE}/${ofile}
 
     # check md5sum
     local sum=${MD5SUMS[$ofile]}
@@ -510,8 +509,8 @@ hr_uninstall() {
         local func=uninstall_${arg}
         info "Uninstalling ${arg}"
         eval $func
-        if [[ $? == 0 ]]; then
-            info "${arg} is uninstalled"
+        if [[ $? != 0 ]]; then
+            error "Uninstall ${arg} failed return code $?"
         fi
     done
 }
@@ -1110,16 +1109,16 @@ _install_calib_tools() {
     fi
 }
 
-install_hr() {
-    MD5SUMS["head-hr_msgs_0.0.1_amd64.deb"]=929a4a64addc22596203b511518ee6c1
-    wget_cache https://github.com/hansonrobotics/hr_msgs/releases/download/v0.0.1/head-hr_msgs_0.0.1_amd64.deb
-    $SUDO dpkg -i "${HR_CACHE}/head-hr_msgs_0.0.1_amd64.deb"
-    $SUDO apt-get install -f
+install_hr-ext() {
+    local version=0.1.0
+    MD5SUMS["head-hr-ext_0.1.0_amd64.deb"]=2f63dd72cec2b02742b67440d6397b2d
+    curl_cache ${GITHUB_STORAGE2_URL}/head-hr-ext_${version}_amd64.deb
+    $SUDO dpkg -i "${HR_CACHE}/head-hr-ext_${version}_amd64.deb"
 }
 
 install_hr_msgs() {
     MD5SUMS["head-hr_msgs_0.0.1_amd64.deb"]=929a4a64addc22596203b511518ee6c1
-    wget_cache https://github.com/hansonrobotics/hr_msgs/releases/download/v0.0.1/head-hr_msgs_0.0.1_amd64.deb
+    curl_cache https://github.com/hansonrobotics/hr_msgs/releases/download/v0.0.1/head-hr_msgs_0.0.1_amd64.deb
     $SUDO dpkg -i "${HR_CACHE}/head-hr_msgs_0.0.1_amd64.deb"
     $SUDO apt-get install -f
 }
@@ -1134,6 +1133,7 @@ Install dependencies
     head-deps       Install dependencies for HEAD
     opencog-deps    Install dependencies for OpenCog
     hr_msgs         Install hr_msgs, a shared set of ROS messages for HR
+    hr-ext          Install hr tool extension
 EOF
 }
 
@@ -1151,7 +1151,7 @@ uninstall_opencv() {
 }
 
 uninstall_hr_msgs() {
-    sudo apt-get remove head-hr_msgs
+    sudo apt-get remove head-hr-msgs
 }
 
 help_uninstall() {
