@@ -9,7 +9,7 @@ set -e
 BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 ############# Configurations #############
-HRTOOL_VERSION=0.1.13
+HRTOOL_VERSION=0.1.14
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
@@ -325,7 +325,7 @@ list_robots() {
 }
 
 list_installed() {
-    echo_installed_deb_package head-hr head-hr-ext head-hr-msgs
+    echo_installed_deb_package head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot
 }
 
 list_components() {
@@ -417,7 +417,7 @@ print_repo_info() {
     read_workspace >/dev/null
     local lg='git log -1 --no-merges --abbrev-commit --decorate --date=relative'
     local commit='--format=format:"%C(bold blue)%h%C(reset) %C(white)%<(50,trunc)%s%C(reset) %C(dim white)- %<(20,trunc)%an%C(reset) %C(bold green)%<(20,trunc)%ar%C(reset)"'
-    local format="%-32s %-10s %s"
+    local format="%-32s %-15s %s"
     printf "${format}\n" "Repository" "Branch" "Commit"
     for repo in ${HR_REPOS[*]}
     do
@@ -582,6 +582,8 @@ hr_version() {
     get_installed_deb_package_version head-hr 2>/dev/null
     get_installed_deb_package_version head-hr-ext 2>/dev/null
     get_installed_deb_package_version head-hr-msgs 2>/dev/null
+    get_installed_deb_package_version head-chatbot 2>/dev/null
+    get_installed_deb_package_version head-saliency-tracker 2>/dev/null
     echo ''
     print_repo_info
 }
@@ -1085,19 +1087,33 @@ install_head-hr-msgs() {
     $SUDO apt-get install -f
 }
 
+install_head-saliency-tracker() {
+    curl_cache https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/v0.1.0/head-saliency-tracker_0.1.0_amd64.deb
+    $SUDO dpkg -i "${HR_CACHE}/head-saliency-tracker_0.1.0_amd64.deb"
+    $SUDO apt-get install -f
+}
+
+install_head-chatbot() {
+    curl_cache https://github.com/hansonrobotics/chatbot/releases/download/v0.0.1/head-chatbot_0.0.1_amd64.deb
+    $SUDO dpkg -i "${HR_CACHE}/head-chatbot_0.0.1_amd64.deb"
+    $SUDO apt-get install -f
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
 
 Install dependencies
 
-    all             Install HEAD and its depencencies, OpenCog and its dependencies
-    head            Install HEAD and its depencencies
-    opencog         Install OpenCog and its dependencies
-    head-deps       Install HEAD dependencies
-    opencog-deps    Install OpenCog dependencies
-    head-hr-msgs    Install hr_msgs, a shared set of ROS messages for HR
-    head-hr-ext     Install hr tool extension
+    all                     Install HEAD and its depencencies, OpenCog and its dependencies
+    head                    Install HEAD and its depencencies
+    opencog                 Install OpenCog and its dependencies
+    head-deps               Install HEAD dependencies
+    opencog-deps            Install OpenCog dependencies
+    head-hr-msgs            Install hr_msgs, a shared set of ROS messages for HR
+    head-hr-ext             Install hr tool extension
+    head-chatbot            Install chatbot
+    head-saliency-tracker   Install saliency tracker
 EOF
 }
 
@@ -1118,15 +1134,29 @@ uninstall_head-hr-msgs() {
     sudo apt-get remove head-hr-msgs
 }
 
+uninstall_head-hr-msgs() {
+    sudo apt-get remove head-hr-msgs
+}
+
+uninstall_head-chatbot() {
+    sudo apt-get remove head-chatbot
+}
+
+uninstall_head-saliency-tracker() {
+    sudo apt-get remove head-saliency-tracker
+}
+
 help_uninstall() {
 cat << EOF
 hr uninstall <component> [<component>] ...
 
 Uninstall components
 
-    head-hr      Uninstall hr tool
-    head-hr-ext  Uninstall hr-ext
-    head-hr-msgs Uninstall hr_msgs
+    head-hr                 Uninstall hr tool
+    head-hr-ext             Uninstall hr-ext
+    head-hr-msgs            Uninstall hr_msgs
+    head-chatbot            Uninstall chatbot
+    head-saliency-tracker   Uninstall saliency tracker
 EOF
 }
 
