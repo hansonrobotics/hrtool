@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /opt/hansonrobotics/ros/setup.sh
