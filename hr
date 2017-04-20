@@ -1072,30 +1072,44 @@ _install_calib_tools() {
     fi
 }
 
+_install_deb_packages() {
+    [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
+    if [[ -z ${url} || -z $debname ]]; then
+        error "requires url and debname variables"
+        return 1
+    fi
+    curl_cache ${url} ${debname}
+    $SUDO dpkg -i "${HR_CACHE}/${debname}"
+    $SUDO apt-get install -f
+    [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
+}
+
 install_head-hr-ext() {
     local version=0.1.1
     local debname=head-hr-ext_${version}_amd64.deb
-    curl_cache ${GITHUB_STORAGE2_URL}/$debname
-    $SUDO dpkg -i "${HR_CACHE}/${debname}" || rm "${HR_CACHE}/${debname}"
+    local url=${GITHUB_STORAGE2_URL}/$debname
+    _install_deb_packages
 }
 
 install_head-hr-msgs() {
-    MD5SUMS["head-hr_msgs_0.0.1_amd64.deb"]=929a4a64addc22596203b511518ee6c1
-    curl_cache https://github.com/hansonrobotics/hr_msgs/releases/download/v0.0.1/head-hr_msgs_0.0.1_amd64.deb
-    $SUDO dpkg -i "${HR_CACHE}/head-hr_msgs_0.0.1_amd64.deb"
-    $SUDO apt-get install -f
+    local version=0.0.1
+    local debname=head-hr_msgs_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/hr_msgs/releases/download/v${version}/${debname}
+    _install_deb_packages
 }
 
 install_head-saliency-tracker() {
-    curl_cache https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/v0.1.0/head-saliency-tracker_0.1.0_amd64.deb
-    $SUDO dpkg -i "${HR_CACHE}/head-saliency-tracker_0.1.0_amd64.deb"
-    $SUDO apt-get install -f
+    local version=0.1.0
+    local debname=head-saliency-tracker_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/v${version}/$debname
+    _install_deb_packages
 }
 
 install_head-chatbot() {
-    curl_cache https://github.com/hansonrobotics/chatbot/releases/download/v0.0.1/head-chatbot_0.0.1_amd64.deb
-    $SUDO dpkg -i "${HR_CACHE}/head-chatbot_0.0.1_amd64.deb"
-    $SUDO apt-get install -f
+    local version=0.0.1
+    local debname=head-chatbot_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/chatbot/releases/download/v${version}/$debname
+    _install_deb_packages
 }
 
 help_install() {
