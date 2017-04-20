@@ -1496,7 +1496,7 @@ execute() {
     esac
 }
 
-if [[ ! $(basename $BASH_SOURCE) == $(basename $(readlink -f $0)) ]]; then return; fi
+if [[ ! $(readlink -f ${BASH_SOURCE[0]}) == $(readlink -f $0) ]]; then return; fi
 if [[ $# == 0 ]]; then show_help; exit 0; fi
 execute $@
 ############# End of Main #############
