@@ -1074,8 +1074,9 @@ _install_calib_tools() {
 
 install_head-hr-ext() {
     local version=0.1.1
-    curl_cache ${GITHUB_STORAGE2_URL}/head-hr-ext_${version}_amd64.deb
-    $SUDO dpkg -i "${HR_CACHE}/head-hr-ext_${version}_amd64.deb"
+    local debname=head-hr-ext_${version}_amd64.deb
+    curl_cache ${GITHUB_STORAGE2_URL}/$debname
+    $SUDO dpkg -i "${HR_CACHE}/${debname}" || rm "${HR_CACHE}/${debname}"
 }
 
 install_head-hr-msgs() {
@@ -1495,7 +1496,7 @@ execute() {
     esac
 }
 
-if [[ ! $BASH_SOURCE == $0 ]]; then return; fi
+if [[ ! $(basename $BASH_SOURCE) == $(basename $(readlink -f $0)) ]]; then return; fi
 if [[ $# == 0 ]]; then show_help; exit 0; fi
 execute $@
 ############# End of Main #############
