@@ -889,7 +889,7 @@ _install_webui_deps() {
 }
 
 _install_scipy_stack() {
-    $SUDO apt_get_install libblas-dev liblapack-dev libatlas-base-dev gfortran
+    apt_get_install libblas-dev liblapack-dev libatlas-base-dev gfortran
     $SUDO pip2 install ${PIP_OPTS} numpy pandas scipy
 }
 
