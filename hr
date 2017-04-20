@@ -609,6 +609,7 @@ install_all() {
 install_head() {
     install_head-deps
     get_head
+    build_head
 }
 
 install_head-deps() {
@@ -664,6 +665,7 @@ _install_ros() {
 install_opencog() {
     install_opencog-deps
     get_opencog
+    build_opencog
 }
 
 install_opencog-deps() {
