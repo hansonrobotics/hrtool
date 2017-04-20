@@ -21,11 +21,15 @@ HR_PREFIX=/opt/hansonrobotics
 DEFAULT_HRTOOL_PREFIX=/usr/local/bin
 HR_CACHE=$HOME/.hr/cache
 HR_MODELS=$HOME/.hr/models
+HR_PY2_VIRTUALENV=$HR_PREFIX/python2_env
+HR_PY3_VIRTUALENV=$HR_PREFIX/python3_env
+PIP2=$HR_PY2_VIRTUALENV/bin/pip
+PIP3=$HR_PY3_VIRTUALENV/bin/pip
+PYTHON2=$HR_PY2_VIRTUALENV/bin/python
+PYTHON3=$HR_PY2_VIRTUALENV/bin/python3
+
 if [[ -z $APT_CACHE ]]; then
     APT_CACHE=0
-fi
-if [[ -z $PIP_CACHE ]]; then
-    PIP_CACHE=0
 fi
 APT_CACHE_DIR=$HR_CACHE/archives
 PIP_CACHE_DIR=$HR_CACHE/pip
@@ -86,11 +90,6 @@ fi
 APT_GET_OPTS="-y"
 if [[ $APT_CACHE == 1 ]]; then
     APT_GET_OPTS="$APT_GET_OPTS -o dir::cache::archives=$APT_CACHE_DIR"
-fi
-
-PIP_OPTS=""
-if [[ $PIP_CACHE == 1 ]]; then
-    PIP_OPTS="$PIP_OPTS --download-cache $PIP_CACHE_DIR"
 fi
 ############# End of Configurations #############
 
@@ -630,6 +629,9 @@ _install_basic() {
     local pkgs=(git wget telnet python3-pip python-pip build-essential
             software-properties-common)
     apt_get_install "${pkgs[@]}"
+    $SUDO pip2 install virtualenv
+    virtualenv --system-site-packages $HR_PY2_VIRTUALENV
+    virtualenv --system-site-packages $HR_PY3_VIRTUALENV
 }
 
 _install_ros() {
@@ -657,7 +659,7 @@ _install_ros() {
     apt_get_install "${pkgs[@]}"
 
     # for blender to find ros packages
-    $SUDO pip3 install ${PIP_OPTS} rospkg catkin_pkg
+    $PIP3 install rospkg catkin_pkg
 
     if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
         $SUDO rosdep init -q
@@ -694,8 +696,8 @@ install_opencog-deps() {
 }
 
 _install_nltk() {
-    $SUDO pip2 install ${PIP_OPTS} nltk
-    $SUDO python -m nltk.downloader -d /usr/local/share/nltk_data punkt averaged_perceptron_tagger
+    $PIP2 install nltk
+    $PYTHON2 -m nltk.downloader -d /usr/local/share/nltk_data punkt averaged_perceptron_tagger
 }
 
 _install_marky_markov() {
@@ -828,19 +830,21 @@ _install_misc() {
     apt_get_install "${pkgs[@]}"
 
     # For chatbot
-    $SUDO pip2 install num2words
+    $PIP2 install num2words
 
     # For Chinese tts
-    $SUDO pip2 install ${PIP_OPTS} pinyin==0.2.5
+    $PIP2 install pinyin==0.2.5
 
     # For speech2command
-    $SUDO pip2 install ${PIP_OPTS} pyparsing
+    $PIP2 install pyparsing
 
     # For performances
-    $SUDO pip2 install transitions
+    $PIP2 install transitions
 
     # For webui
-    $SUDO pip2 install ${PIP_OPTS} flask EasyProcess psutil natsort
+    $PIP2 install flask EasyProcess psutil natsort
+
+    $PIP2 install https://github.com/hansonrobotics/pololu-motors/archive/v0.2.1.tar.gz --no-deps
 }
 
 _install_manyears_deps() {
@@ -890,7 +894,7 @@ _install_webui_deps() {
 
 _install_scipy_stack() {
     apt_get_install libblas-dev liblapack-dev libatlas-base-dev gfortran
-    $SUDO pip2 install ${PIP_OPTS} numpy pandas scipy
+    $PIP2 install numpy pandas scipy
 }
 
 _install_opencv() {
@@ -986,7 +990,7 @@ _install_torch() {
 _install_openface() {
     # This is to install scikit-images as the pip version requires cython0.23 which can't be installed otherwise.
     apt_get_install python-skimage
-    $SUDO pip2 install ${PIP_OPTS} numpy pandas scipy scikit-learn
+    $PIP2 install numpy pandas scipy scikit-learn
 
     if [ ! -d $OPENFACE_DIR ]; then
       info "Cloning openface"
@@ -1048,8 +1052,8 @@ _install_vision_deps() {
     apt_get_install libopencv-dev ros-indigo-opencv-apps
 
     # Tkinter error other wise.
-    $SUDO pip2 install ${PIP_OPTS} -I Pillow
-    $SUDO pip2 install ${PIP_OPTS} imgurpython
+    $PIP2 install -I Pillow
+    $PIP2 install imgurpython
 
     _install_dlib
     _install_clandmarks
@@ -1304,10 +1308,7 @@ _build_head() {
     catkin build --force-cmake -j$(nproc) --no-status --make-args install
 
     TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
-    rm -rf $TARGET/pololu*
     rm -rf $TARGET/roscom*
-    info "Installing pololu-motors"
-    pip2 install -t $TARGET $HR_WORKSPACE/HEAD/src/hardware/pololu-motors --no-deps
     info "Installing blender roscom"
     pip3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
 }
