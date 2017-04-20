@@ -621,6 +621,9 @@ install_head-deps() {
     _install_scipy_stack
     _install_pocketsphinx
     _install_misc
+
+    wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
+    $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
 }
 
 _install_basic() {
