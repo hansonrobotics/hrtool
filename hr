@@ -601,11 +601,6 @@ hr_stop() {
 ############# End of Entries #############
 
 ############# Functions #############
-install_all() {
-    install_head
-    install_opencog
-}
-
 install_head() {
     install_head-deps
     get_head
@@ -620,6 +615,7 @@ install_head-deps() {
     _install_marky_markov
     _install_scipy_stack
     _install_pocketsphinx
+    _install_festival_tts
     _install_misc
 
     wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
@@ -1349,7 +1345,6 @@ build_head() {
         manyears_ros
         rt_audio_ros
         speech2command
-        testing_tools
         icog_face_tracker
     )
     _build_head ${blacklist[@]}
