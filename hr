@@ -524,6 +524,7 @@ hr_clean() {
 }
 
 hr_cmd() {
+    validate_component_args cmd $@
     local func=$1
     shift
     $func $@
@@ -1447,6 +1448,7 @@ check_local_changes() {
 switch_opencog_repo() {
     read_workspace
     DOMAIN=${1}
+    [[ -z $DOMAIN ]] && error "Wrong arguments, either hansonrobotics or opencog" && exit
     check_local_changes || exit 1
     warn "Switching to $DOMAIN repositories"
     for repo in ${OPENCOG_REPOS[*]}
@@ -1474,6 +1476,17 @@ set_normal_opencog() {
 set_dev_opencog() {
     switch_opencog_repo opencog
     update_opencog
+}
+
+help_cmd() {
+cat << EOF
+hr cmd <command> [args]
+
+Some useful commands:
+
+    switch_opencog_repo <hansonrobotics|opencog>        Set the upstream of OpenCog repositories
+
+EOF
 }
 
 ############# End of Functions #############
