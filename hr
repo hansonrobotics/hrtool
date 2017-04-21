@@ -628,7 +628,7 @@ install_head-deps() {
 
 _install_basic() {
     local pkgs=(git wget telnet python3-pip python-pip build-essential
-            software-properties-common)
+            software-properties-common bc)
     apt_get_install "${pkgs[@]}"
     $SUDO pip2 install virtualenv
     virtualenv --system-site-packages $HR_PY2_VIRTUALENV
