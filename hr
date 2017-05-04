@@ -1204,6 +1204,14 @@ uninstall_head-saliency-tracker() {
     sudo apt-get remove head-saliency-tracker
 }
 
+uninstall_head-motor-control() {
+    sudo apt-get remove head-motor-control
+}
+
+uninstall_head-sound() {
+    sudo apt-get remove head-sound
+}
+
 help_uninstall() {
 cat << EOF
 hr uninstall <component> [<component>] ...
