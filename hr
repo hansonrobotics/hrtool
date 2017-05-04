@@ -524,7 +524,6 @@ hr_clean() {
 }
 
 hr_cmd() {
-    validate_component_args cmd $@
     local func=$1
     shift
     $func $@
@@ -615,6 +614,7 @@ install_head-deps() {
     _install_marky_markov
     _install_scipy_stack
     _install_pocketsphinx
+    _install_ttsserver
     _install_festival_tts
     _install_misc
 
@@ -785,6 +785,10 @@ _install_ffmpeg() {
     # For blender_api_test
     add_ppa ppa:mc3man/trusty-media
     apt_get_install ffmpeg
+}
+
+_install_ttsserver() {
+    $PIP2 install https://github.com/hansonrobotics/ttsserver/archive/v0.1.0.tar.gz
 }
 
 _install_festival_tts() {
@@ -1133,9 +1137,23 @@ install_head-saliency-tracker() {
 }
 
 install_head-chatbot() {
-    local version=0.0.1
+    local version=0.1.0
     local debname=head-chatbot_${version}_amd64.deb
     local url=https://github.com/hansonrobotics/chatbot/releases/download/v${version}/$debname
+    _install_deb_packages
+}
+
+install_head-motor-control() {
+    local version=0.1.1
+    local debname=head-motor-control_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/motor_control/releases/download/v${version}/$debname
+    _install_deb_packages
+}
+
+install_head-sound() {
+    local version=0.1.1
+    local debname=head-sound_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/sound/releases/download/v${version}/$debname
     _install_deb_packages
 }
 
