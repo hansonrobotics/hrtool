@@ -11,6 +11,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 ############# Configurations #############
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound)
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
 declare -A MD5SUMS
@@ -322,7 +323,7 @@ list_robots() {
 }
 
 list_installed() {
-    echo_installed_deb_package head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot
+    echo_installed_deb_package ${HEAD_PACKAGES[@]}
 }
 
 list_components() {
@@ -432,6 +433,7 @@ print_repo_info() {
             printf "${format}\n" "opencog/$repo" "$branch" "$(eval $lg $commit)"
         fi
     done
+    echo ''
 }
 
 remove_installed_files() {
@@ -576,11 +578,9 @@ hr_env() {
 }
 
 hr_version() {
-    get_installed_deb_package_version head-hr 2>/dev/null
-    get_installed_deb_package_version head-hr-ext 2>/dev/null
-    get_installed_deb_package_version head-hr-msgs 2>/dev/null
-    get_installed_deb_package_version head-chatbot 2>/dev/null
-    get_installed_deb_package_version head-saliency-tracker 2>/dev/null
+    for pkg in ${HEAD_PACKAGES[@]}; do
+        get_installed_deb_package_version ${pkg} 2>/dev/null
+    done
     echo ''
     print_repo_info
 }
