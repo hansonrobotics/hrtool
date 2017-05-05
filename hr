@@ -11,7 +11,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 ############# Configurations #############
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-ttsserver)
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
 declare -A MD5SUMS
@@ -628,7 +628,6 @@ install_head-deps() {
     _install_marky_markov
     _install_scipy_stack
     _install_pocketsphinx
-    _install_ttsserver
     _install_festival_tts
     _install_misc
 
@@ -799,14 +798,6 @@ _install_ffmpeg() {
     # For blender_api_test
     add_ppa ppa:mc3man/trusty-media
     apt_get_install ffmpeg
-}
-
-_install_ttsserver() {
-    ( $PIP2 list | grep ttsserver ) && $PIP2 uninstall ttsserver
-    local latest_version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ttsserver/releases)
-    local tarball_url=https://github.com/hansonrobotics/ttsserver/archive/${latest_version}.tar.gz
-    info "Installig ${tarball_url}"
-    $PIP2 install ${tarball_url}
 }
 
 _install_festival_tts() {
@@ -1175,6 +1166,14 @@ install_head-sound() {
     _install_deb_packages
 }
 
+install_head-ttsserver() {
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ttsserver/releases)
+    local debname=head-ttsserver_${version#v}_all.deb
+    local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -1210,10 +1209,6 @@ uninstall_head-hr-msgs() {
     sudo apt-get remove head-hr-msgs
 }
 
-uninstall_head-hr-msgs() {
-    sudo apt-get remove head-hr-msgs
-}
-
 uninstall_head-chatbot() {
     sudo apt-get remove head-chatbot
 }
@@ -1230,6 +1225,10 @@ uninstall_head-sound() {
     sudo apt-get remove head-sound
 }
 
+uninstall_head-ttsserver() {
+    sudo apt-get remove head-ttsserver
+}
+
 help_uninstall() {
 cat << EOF
 hr uninstall <component> [<component>] ...
@@ -1241,6 +1240,9 @@ Uninstall components
     head-hr-msgs            Uninstall hr_msgs
     head-chatbot            Uninstall chatbot
     head-saliency-tracker   Uninstall saliency tracker
+    head-motor-control      Uninstall motor control
+    head-sound              Uninstall sound tools
+    head-ttsserver          Uninstall tts server
 EOF
 }
 
