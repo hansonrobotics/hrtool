@@ -462,6 +462,20 @@ remove_installed_files() {
     fi
 }
 
+get_release_versions() {
+    local url=$1
+    if [[ ! -z ${url} ]]; then
+        curl -s ${url%/} | jq -r '.[] | select(.prerelease == false) | .tag_name'
+    fi
+}
+
+get_latest_version() {
+    local url=$1
+    if [[ ! -z ${url} ]]; then
+        curl -s "${url%/}/latest" | jq -r 'select(.prerelease == false) | .tag_name'
+    fi
+}
+
 ############# End of Common #############
 
 ############# Entries #############
@@ -788,7 +802,11 @@ _install_ffmpeg() {
 }
 
 _install_ttsserver() {
-    $PIP2 install https://github.com/hansonrobotics/ttsserver/archive/v0.1.0.tar.gz
+    ( $PIP2 list | grep ttsserver ) && $PIP2 uninstall ttsserver
+    local latest_version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ttsserver/releases)
+    local tarball_url=https://github.com/hansonrobotics/ttsserver/archive/${latest_version}.tar.gz
+    info "Installig ${tarball_url}"
+    $PIP2 install ${tarball_url}
 }
 
 _install_festival_tts() {
@@ -1123,37 +1141,37 @@ install_head-hr-ext() {
 }
 
 install_head-hr-msgs() {
-    local version=0.0.1
-    local debname=head-hr_msgs_${version}_amd64.deb
-    local url=https://github.com/hansonrobotics/hr_msgs/releases/download/v${version}/${debname}
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/hr_msgs/releases)
+    local debname=head-hr_msgs_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/hr_msgs/releases/download/${version}/${debname}
     _install_deb_packages
 }
 
 install_head-saliency-tracker() {
-    local version=0.1.0
-    local debname=head-saliency-tracker_${version}_amd64.deb
-    local url=https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/v${version}/$debname
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ros_nmpt_saliency/releases)
+    local debname=head-saliency-tracker_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-chatbot() {
-    local version=0.1.0
-    local debname=head-chatbot_${version}_amd64.deb
-    local url=https://github.com/hansonrobotics/chatbot/releases/download/v${version}/$debname
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/chatbot/releases)
+    local debname=head-chatbot_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/chatbot/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-motor-control() {
-    local version=0.1.1
-    local debname=head-motor-control_${version}_amd64.deb
-    local url=https://github.com/hansonrobotics/motor_control/releases/download/v${version}/$debname
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/motor_control/releases)
+    local debname=head-motor-control_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/motor_control/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-sound() {
-    local version=0.1.1
-    local debname=head-sound_${version}_amd64.deb
-    local url=https://github.com/hansonrobotics/sound/releases/download/v${version}/$debname
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/sound/releases)
+    local debname=head-sound_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/sound/releases/download/${version}/$debname
     _install_deb_packages
 }
 
