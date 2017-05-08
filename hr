@@ -9,36 +9,34 @@ set -e
 BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 ############# Configurations #############
+DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
+USER_DATA_DIR=$HOME/.hr
+HR_PREFIX=/opt/hansonrobotics
+
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-ttsserver)
+
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
 declare -A MD5SUMS
 
-DEFAULT_HR_WORKSPACE=~/hansonrobotics
-HR_ENVFILE_PATH=~/.hr/env.sh
-HR_PREFIX=/opt/hansonrobotics
-DEFAULT_HRTOOL_PREFIX=/usr/local/bin
-HR_CACHE=$HOME/.hr/cache
-HR_MODELS=$HOME/.hr/models
-HR_PY2_VIRTUALENV=$HR_PREFIX/python2_env
-HR_PY3_VIRTUALENV=$HR_PREFIX/python3_env
+HR_ENVFILE_PATH=$USER_DATA_DIR/env.sh
+HR_CACHE=$USER_DATA_DIR/cache
+HR_MODELS=$USER_DATA_DIR/models
+
+HR_PY2_VIRTUALENV=$HR_PREFIX/py2env
+HR_PY3_VIRTUALENV=$HR_PREFIX/py3env
 PIP2=$HR_PY2_VIRTUALENV/bin/pip
-PIP3=$HR_PY3_VIRTUALENV/bin/pip
+PIP3=$HR_PY3_VIRTUALENV/bin/pip3
 PYTHON2=$HR_PY2_VIRTUALENV/bin/python
 PYTHON3=$HR_PY2_VIRTUALENV/bin/python3
-
-if [[ -z $APT_CACHE ]]; then
-    APT_CACHE=0
-fi
-APT_CACHE_DIR=$HR_CACHE/archives
-PIP_CACHE_DIR=$HR_CACHE/pip
 
 if [[ -z $ROS_PKG_PREFIX ]]; then
     ROS_PKG_PREFIX=$HR_PREFIX/ros
 fi
 
+# vision tools
 VISION_TOOL_PREFIX=$HR_PREFIX/vision
 DLIB_DIR=$VISION_TOOL_PREFIX/dlib
 TORCH_DIR=$VISION_TOOL_PREFIX/torch
@@ -61,7 +59,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HR_PREFIX/lib:$CPPMT_DIR:$EMOTIME_DIR/b
 
 INCLUDE_DIRS=($EMOTIME_DIR/src/{facedetector,utils,gaborbank,detector,training})
 INCLUDE_PATH=$(printf "%s:" "${INCLUDE_DIRS[@]}")
-
 export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HR_PREFIX/include:$CPPMT_DIR:$EMOTIME_DIR/include:$CLANDMARK_DIR/include:$INCLUDE_PATH
 export CPATH=$CPLUS_INCLUDE_PATH
 export LIBRARY_PATH=$LIBRARY_PATH:$HR_PREFIX/lib:$CLANDMARK_DIR/lib/:$CPPMT_DIR:$EMOTIME_DIR/build/src
@@ -71,27 +68,16 @@ if [[ -z $ASSUME_YES ]]; then
     ASSUME_YES=0
 fi
 
-if [[ ! -d $HOME/.hr ]]; then
-    mkdir -p $HOME/.hr
-fi
+folder_to_create=($USER_DATA_DIR $HR_CACHE $HR_MODELS $HR_PREFIX)
+for d in ${folder_to_create[@]}; do
+    if [[ ! -d $d ]]; then
+        mkdir -p $d
+    fi
+done
 
-if [[ ! -d $HR_PREFIX ]]; then
-    sudo mkdir -p $HR_PREFIX
-    sudo chmod 777 $HR_PREFIX
-fi
-
-if [[ ! -d $HR_CACHE ]]; then
-    mkdir -p $HR_CACHE
-fi
-
-if [[ ! -d $HR_MODELS ]]; then
-    mkdir -p $HR_MODELS
-fi
+sudo chmod 777 $HR_PREFIX
 
 APT_GET_OPTS="-y"
-if [[ $APT_CACHE == 1 ]]; then
-    APT_GET_OPTS="$APT_GET_OPTS -o dir::cache::archives=$APT_CACHE_DIR"
-fi
 ############# End of Configurations #############
 
 ############# Common #############
@@ -203,11 +189,22 @@ check_apt_installed() {
 }
 
 apt_get_install() {
+    echo $@ >> ~/.hr/apt-get-requirements.txt
     if ! check_apt_installed "$@"; then
         $SUDO apt-get ${APT_GET_OPTS} install "$@" || (
             $SUDO apt-get ${APT_GET_OPTS} update &&
             $SUDO apt-get ${APT_GET_OPTS} install "$@")
     fi
+}
+
+pip2_install() {
+    echo $@ >> ~/.hr/pip2_requirements.txt
+    $PIP2 install $@
+}
+
+pip3_install() {
+    echo $@ >> ~/.hr/pip3_requirements.txt
+    $PIP3 install $@
 }
 
 add_ppa() {
@@ -475,7 +472,6 @@ get_latest_version() {
         curl -s "${url%/}/latest" | jq -r 'select(.prerelease == false) | .tag_name'
     fi
 }
-
 ############# End of Common #############
 
 ############# Entries #############
@@ -564,8 +560,7 @@ export MARKY_MARKOV_DIR=$MARKY_MARKOV_DIR
 export HR_MODELS=$HR_MODELS
 
 export ROS_LOG_DIR="$HOME/.hr/log"
-export OCBHAVE="$HR_WORKSPACE/opencog/ros-behavior-scripting"
-export PYTHONPATH=$ROS_PKG_PREFIX/lib/python2.7/dist-packages:\$PYTHONPATH:$OCBHAVE/src:$OPENFACE_DIR:$DLIB_DIR/dlib-${DLIB_VERSION}/dist:/usr/local/share/opencog/python
+export PYTHONPATH=\$PYTHONPATH:$OPENFACE_DIR:$DLIB_DIR/dlib-${DLIB_VERSION}/dist:/usr/local/share/opencog/python
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export LIBRARY_PATH=$LIBRARY_PATH
@@ -578,6 +573,10 @@ export OpenBR_DIR=$OpenBR_DIR
 
 if [[ -f $TORCH_DIR/install/bin/torch-activate ]]; then
   source $TORCH_DIR/install/bin/torch-activate
+fi
+
+if [[ -f $ROS_PKG_PREFIX/setup.bash ]]; then
+  source $ROS_PKG_PREFIX/setup.bash
 fi
 EOF
     info HR_WORKSPACE=$HR_WORKSPACE
@@ -640,8 +639,8 @@ _install_basic() {
             software-properties-common bc)
     apt_get_install "${pkgs[@]}"
     $SUDO pip2 install virtualenv
-    virtualenv --system-site-packages $HR_PY2_VIRTUALENV
-    virtualenv --system-site-packages $HR_PY3_VIRTUALENV
+    virtualenv --system-site-packages -p /usr/bin/python2 $HR_PY2_VIRTUALENV
+    virtualenv --system-site-packages -p /usr/bin/python3 $HR_PY3_VIRTUALENV
 }
 
 _install_ros() {
@@ -669,7 +668,7 @@ _install_ros() {
     apt_get_install "${pkgs[@]}"
 
     # for blender to find ros packages
-    $PIP3 install rospkg catkin_pkg
+    pip3_install rospkg catkin_pkg
 
     if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
         $SUDO rosdep init -q
@@ -706,7 +705,7 @@ install_opencog-deps() {
 }
 
 _install_nltk() {
-    $PIP2 install nltk
+    pip2_install nltk
     $PYTHON2 -m nltk.downloader -d /usr/local/share/nltk_data punkt averaged_perceptron_tagger
 }
 
@@ -861,21 +860,21 @@ _install_misc() {
     apt_get_install "${pkgs[@]}"
 
     # For chatbot
-    $PIP2 install num2words
+    pip2_install num2words
 
     # For Chinese tts
-    $PIP2 install pinyin==0.2.5
+    pip2_install pinyin==0.2.5
 
     # For speech2command
-    $PIP2 install pyparsing
+    pip2_install pyparsing
 
     # For performances
-    $PIP2 install transitions
+    pip2_install transitions
 
     # For webui
-    $PIP2 install flask EasyProcess psutil natsort
+    pip2_install flask EasyProcess psutil natsort
 
-    $PIP2 install https://github.com/hansonrobotics/pololu-motors/archive/v0.2.1.tar.gz --no-deps
+    pip2_install https://github.com/hansonrobotics/pololu-motors/archive/v0.2.1.tar.gz --no-deps
 }
 
 _install_manyears_deps() {
@@ -925,7 +924,7 @@ _install_webui_deps() {
 
 _install_scipy_stack() {
     apt_get_install libblas-dev liblapack-dev libatlas-base-dev gfortran
-    $PIP2 install numpy pandas scipy
+    pip2_install numpy pandas scipy
 }
 
 _install_opencv() {
@@ -1021,7 +1020,7 @@ _install_torch() {
 _install_openface() {
     # This is to install scikit-images as the pip version requires cython0.23 which can't be installed otherwise.
     apt_get_install python-skimage
-    $PIP2 install numpy pandas scipy scikit-learn
+    pip2_install numpy pandas scipy scikit-learn
 
     if [ ! -d $OPENFACE_DIR ]; then
       info "Cloning openface"
@@ -1083,8 +1082,8 @@ _install_vision_deps() {
     apt_get_install libopencv-dev ros-indigo-opencv-apps
 
     # Tkinter error other wise.
-    $PIP2 install -I Pillow
-    $PIP2 install imgurpython
+    pip2_install -I Pillow
+    pip2_install imgurpython
 
     _install_dlib
     _install_clandmarks
