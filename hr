@@ -620,6 +620,7 @@ install_head() {
 }
 
 install_head-deps() {
+    setup_venv
     _install_basic
     _install_ros
     _install_blender
@@ -638,6 +639,9 @@ _install_basic() {
     local pkgs=(git wget telnet python3-pip python-pip build-essential
             software-properties-common bc)
     apt_get_install "${pkgs[@]}"
+}
+
+setup_venv() {
     $SUDO pip2 install virtualenv
     virtualenv --system-site-packages -p /usr/bin/python2 $HR_PY2_VIRTUALENV
     virtualenv --system-site-packages -p /usr/bin/python3 $HR_PY3_VIRTUALENV
@@ -1158,6 +1162,13 @@ install_head-motor-control() {
     _install_deb_packages
 }
 
+install_head-python-pololu-motors() {
+    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/pololu-motors/releases)
+    local debname=head-python-pololu-motors_${version#v}_all.deb
+    local url=https://github.com/hansonrobotics/pololu-motors/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
 install_head-sound() {
     local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/sound/releases)
     local debname=head-sound_${version#v}_amd64.deb
@@ -1169,6 +1180,25 @@ install_head-ttsserver() {
     local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ttsserver/releases)
     local debname=head-ttsserver_${version#v}_all.deb
     local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+install_head-all() {
+    local version=0.1.0
+    local debname=head-all_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
+
+    setup_venv
+    # setup ROS repository
+    $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+    $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net --recv-key 0xB01FA116
+    # setup nodejs repository
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    # setup python2.6 repository
+    add_ppa ppa:fkrull/deadsnakes
+    # setup ruby2.3
+    add_ppa ppa:brightbox/ruby-ng
+
     _install_deb_packages
 }
 
