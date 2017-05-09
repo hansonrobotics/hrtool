@@ -15,7 +15,7 @@ _hr() {
     _init_completion || return
   else
     cur=${COMP_WORDS[COMP_CWORD]}
-    words=${COMP_WORDS[@]}
+    words=( ${COMP_WORDS[@]} )
     cword=$COMP_CWORD
     prev=${COMP_WORDS[COMP_CWORD-1]}
   fi
