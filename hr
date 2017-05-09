@@ -313,7 +313,7 @@ _list_robots() {
 }
 
 list_robots() {
-    read_workspace >/dev/null
+    read_workspace
     _list_robots $HR_WORKSPACE/HEAD/src/robots_config
 }
 
@@ -372,7 +372,7 @@ check_or_create_ws() {
 
 set_workspace() {
     local new_hr_workspace=${1:-$DEFAULT_HR_WORKSPACE}
-    read_workspace >/dev/null
+    read_workspace >/dev/null || true
     if [[ ! "$new_hr_workspace" = /* ]]; then
         new_hr_workspace=$(pwd)/$new_hr_workspace
     fi
@@ -1332,7 +1332,7 @@ EOF
 }
 
 get_opencog() {
-    read_workspace
+    read_workspace || hr_init
     info "Cloning OpenCog source code"
     for repo in ${OPENCOG_REPOS[*]}
     do
@@ -1343,7 +1343,7 @@ get_opencog() {
 }
 
 get_head() {
-    read_workspace
+    read_workspace || hr_init
     info "Cloning HR source code"
     for repo in ${HR_REPOS[*]}
     do
