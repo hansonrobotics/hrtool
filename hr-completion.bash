@@ -8,13 +8,17 @@
 #    . ~/.hr/hr-completion.sh
 
 _hr() {
-  local command
+  local command cur prev words cword
   local hr_commands="init install uninstall build clean cmd env update run stop version"
-  local cur=${COMP_WORDS[COMP_CWORD]}
-  local words=${COMP_WORDS[@]}
-  local cword=$COMP_CWORD
 
-  _init_completion || return
+  if type -t _init_completion >/dev/null; then
+    _init_completion || return
+  else
+    cur=${COMP_WORDS[COMP_CWORD]}
+    words=${COMP_WORDS[@]}
+    cword=$COMP_CWORD
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+  fi
 
   for (( i=1 ; i < ${cword} ; i++ )) ; do
     if [[ ${words[i]} == -* ]] ; then continue; fi
@@ -48,4 +52,4 @@ _hr() {
   esac
 }
 
-complete -F _hr hr
+complete -o dirnames -F _hr hr
