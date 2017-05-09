@@ -75,8 +75,6 @@ for d in ${folder_to_create[@]}; do
     fi
 done
 
-sudo chmod 777 $HR_PREFIX
-
 APT_GET_OPTS="-y"
 ############# End of Configurations #############
 
@@ -286,7 +284,7 @@ _get_confirm() {
         confirm=1
         return
     fi
-    printf '%s ' "$message"
+    printf "$message"
     read -r answer
     ! printf '%s\n' "$answer" | grep -Eq "$(locale yesexpr)"
     confirm=$?
@@ -373,39 +371,48 @@ check_or_create_ws() {
 }
 
 set_workspace() {
-    HR_WORKSPACE=${1:-$DEFAULT_HR_WORKSPACE}
-    if [[ ! "$HR_WORKSPACE" = /* ]]; then
-        HR_WORKSPACE=$(pwd)/$HR_WORKSPACE
+    local new_hr_workspace=${1:-$DEFAULT_HR_WORKSPACE}
+    read_workspace >/dev/null
+    if [[ ! "$new_hr_workspace" = /* ]]; then
+        new_hr_workspace=$(pwd)/$new_hr_workspace
     fi
-    check_or_create_ws $HR_WORKSPACE
-    if [[ ! -d $HR_WORKSPACE ]]; then
+    if [[ $new_hr_workspace != '/' ]]; then
+        new_hr_workspace=${new_hr_workspace%/}
+    fi
+    if [[ ! -z ${HR_WORKSPACE} && ${HR_WORKSPACE} != ${new_hr_workspace} ]]; then
+        local confirm
+        _get_confirm "The workspace is already set to ${COLOR_INFO}${HR_WORKSPACE}${COLOR_RESET}. Do you want to set to ${COLOR_WARN}${new_hr_workspace}${COLOR_RESET}? [y/N]"
+        if [[ ${confirm} != 1 ]]; then
+            return
+        fi
+    fi
+    check_or_create_ws $new_hr_workspace
+    if [[ ! -d $new_hr_workspace ]]; then
         error "HR workspace is incorrect"
         exit 1;
     fi
     if [[ ! -d $(dirname $HR_ENVFILE_PATH) ]]; then mkdir -p $(dirname $HR_ENVFILE_PATH); fi
-    if [[ $HR_WORKSPACE != '/' ]]; then
-        HR_WORKSPACE=${HR_WORKSPACE%/}
-    fi
-    export HR_WORKSPACE=$HR_WORKSPACE
+    export HR_WORKSPACE=$new_hr_workspace
 }
 
 read_workspace() {
     if [[ -f $HR_ENVFILE_PATH ]]; then
         local str=$(cat $HR_ENVFILE_PATH|grep "export HR_WORKSPACE=")
         if [[ -z $str ]]; then
-            error "HR_WORKSPACE is not found in ${HR_ENVFILE_PATH}. Please run \"hr init\" first"
-            exit 1
+            error "HR_WORKSPACE is not found in ${HR_ENVFILE_PATH}. Please re-run \"hr init\""
+            return 1
         else
             HR_WORKSPACE=${str#export HR_WORKSPACE=}
         fi
+        if [[ ! -d $HR_WORKSPACE ]]; then
+            error "HR_WORKSPACE ${HR_WORKSPACE} doesn't exist."
+            return 1
+        else
+            export HR_WORKSPACE=$HR_WORKSPACE
+        fi
     else
-        hr_init
+        return 1
     fi
-    if [[ ! -d $HR_WORKSPACE ]]; then
-        error "HR_WORKSPACE doesn't exist. Please run \"hr init\""
-        exit 1;
-    fi
-    export HR_WORKSPACE=$HR_WORKSPACE
 }
 
 print_repo_info() {
@@ -442,7 +449,7 @@ remove_installed_files() {
                 echo "> $f"
             done
             local confirm
-            _get_confirm "These files will be removed [y/N]"
+            _get_confirm "These files will be removed [y/N] "
             if [[ ${confirm} != 1 ]]; then
                 exit
             fi
