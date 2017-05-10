@@ -1,0 +1,18 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=robot
+Name[en_US]=Run Robot
+Exec=hr run --autoname --autobody --layout --stt --tracker realsense --stt
+Name=Run Robot
+Icon=robot
+X-Desktop-File-Install-Version=0.22
+
+Actions=Stop;
+
+[Desktop Action Stop]
+Name=Stop Robot
+Exec=hr stop
