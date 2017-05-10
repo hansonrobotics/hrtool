@@ -15,7 +15,7 @@ HR_PREFIX=/opt/hansonrobotics
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(HEAD)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-ttsserver)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1129,8 +1129,7 @@ _install_deb_packages() {
         return 1
     fi
     curl_cache ${url} ${debname}
-    $SUDO dpkg -i "${HR_CACHE}/${debname}"
-    $SUDO apt-get install -f
+    $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
     [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
 }
 
@@ -1183,9 +1182,9 @@ install_head-sound() {
     _install_deb_packages
 }
 
-install_head-ttsserver() {
+install_head-python-ttsserver() {
     local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ttsserver/releases)
-    local debname=head-ttsserver_${version#v}_all.deb
+    local debname=head-python-ttsserver_${version#v}_all.deb
     local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
     _install_deb_packages
 }
@@ -1261,8 +1260,8 @@ uninstall_head-sound() {
     sudo apt-get remove head-sound
 }
 
-uninstall_head-ttsserver() {
-    sudo apt-get remove head-ttsserver
+uninstall_head-python-ttsserver() {
+    sudo apt-get remove head-python-ttsserver
 }
 
 help_uninstall() {
@@ -1278,7 +1277,7 @@ Uninstall components
     head-saliency-tracker   Uninstall saliency tracker
     head-motor-control      Uninstall motor control
     head-sound              Uninstall sound tools
-    head-ttsserver          Uninstall tts server
+    head-python-ttsserver   Uninstall tts server
 EOF
 }
 
