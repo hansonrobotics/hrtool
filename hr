@@ -12,10 +12,11 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.2.6
+HRTOOL_VERSION=0.3.0
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
-HR_REPOS=(HEAD)
+HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
+HR_OTHER_REPOS=(robots_config launcher)
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -315,7 +316,7 @@ _list_robots() {
 
 list_robots() {
     read_workspace
-    _list_robots $HR_WORKSPACE/HEAD/src/robots_config
+    _list_robots $HR_WORKSPACE/robots_config
 }
 
 list_installed() {
@@ -587,6 +588,7 @@ if [[ -f $ROS_PKG_PREFIX/setup.bash ]]; then
   source $ROS_PKG_PREFIX/setup.bash
 fi
 EOF
+    git config --global credential.helper 'cache --timeout=36000'
     info HR_WORKSPACE=$HR_WORKSPACE
 }
 
@@ -608,13 +610,13 @@ hr_version() {
 
 hr_run() {
     read_workspace
-    cd $HR_WORKSPACE/HEAD/scripts
-    ./main.sh --autoname --autobody --nogui $@
+    cd $HR_WORKSPACE/launcher
+    ./main.sh --autoname --nogui $@
 }
 
 hr_stop() {
     read_workspace
-    cd $HR_WORKSPACE/HEAD/scripts
+    cd $HR_WORKSPACE/launcher
     ./stop.sh
 }
 
@@ -623,6 +625,7 @@ hr_stop() {
 ############# Functions #############
 install_head() {
     install_head-deps
+    ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
     get_head
     build_head
 }
@@ -1288,7 +1291,7 @@ update_head() {
     local DEFAULT_BRANCH="master"
     for repo in ${HR_REPOS[*]}
     do
-        cd $HR_WORKSPACE/$repo
+        cd $HR_WORKSPACE/HEAD/src/$repo
         branch=$(git rev-parse --abbrev-ref HEAD)
         if [[ $branch != $DEFAULT_BRANCH ]]; then
             warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
@@ -1336,8 +1339,7 @@ get_opencog() {
     info "Cloning OpenCog source code"
     for repo in ${OPENCOG_REPOS[*]}
     do
-        cd $HR_WORKSPACE
-        clone hansonrobotics $repo opencog
+        clone hansonrobotics $repo $HR_WORKSPACE/opencog
     done
     info "Cloning OpenCog source code is done"
 }
@@ -1347,8 +1349,11 @@ get_head() {
     info "Cloning HR source code"
     for repo in ${HR_REPOS[*]}
     do
-        cd $HR_WORKSPACE
-        clone hansonrobotics $repo
+        clone hansonrobotics $repo $HR_WORKSPACE/HEAD/src
+    done
+    for repo in ${HR_OTHER_REPOS[*]}
+    do
+        clone hansonrobotics $repo $HR_WORKSPACE
     done
     info "Cloning HR source code is done"
 }
@@ -1411,6 +1416,11 @@ _build_head() {
     rm -rf $TARGET/roscom*
     info "Installing blender roscom"
     pip3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
+
+    TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
+    rm -rf $TARGET/ttsserver*
+    info "Installing ttsserver"
+    pip install -t $TARGET $HR_WORKSPACE/HEAD/src/ttsserver --no-deps
 }
 
 build_head() {
@@ -1435,8 +1445,10 @@ build_head() {
 
 _build_webui-js() {
     read_workspace
-    cd $HR_WORKSPACE/HEAD/src/webui
-    npm install
+    if [[ -d $HR_WORKSPACE/HEAD/src/webui ]]; then
+        cd $HR_WORKSPACE/HEAD/src/webui
+        npm install
+    fi
 }
 
 _build_full-head() {
@@ -1478,12 +1490,10 @@ EOF
 
 clean_head() {
     read_workspace
-    for repo in ${HR_REPOS[*]}; do
-        cd $HR_WORKSPACE/$repo
-        if [[ -d .catkin_tools ]]; then
-            catkin clean -y || catkin clean -a
-        fi
-    done
+    cd $HR_WORKSPACE/HEAD
+    if [[ -d .catkin_tools ]]; then
+        catkin clean -y || catkin clean -a
+    fi
 }
 
 clean_opencog() {
