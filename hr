@@ -1138,7 +1138,7 @@ _install_deb_packages() {
 }
 
 install_head-hr-ext() {
-    local version=0.1.2
+    local version=0.2.0
     local debname=head-hr-ext_${version}_amd64.deb
     local url=${GITHUB_STORAGE2_URL}/$debname
     _install_deb_packages
