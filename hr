@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.6
+HRTOOL_VERSION=0.3.7
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
@@ -1264,7 +1264,7 @@ install_head-python-ttsserver() {
 }
 
 install_head-deps-all() {
-    local version=0.1.0
+    local version=0.1.1
     local debname=head-deps-all_${version}_amd64.deb
     local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
 
