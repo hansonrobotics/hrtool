@@ -431,6 +431,14 @@ print_repo_info() {
     printf "${format}\n" "Repository" "Branch" "Commit"
     for repo in ${HR_REPOS[*]}
     do
+        if [[ -d $HR_WORKSPACE/HEAD/src/$repo ]]; then
+            cd $HR_WORKSPACE/HEAD/src/$repo
+            branch=$(git rev-parse --abbrev-ref HEAD)
+            printf "${format}\n" "$repo" "$branch" "$(eval $lg $commit)"
+        fi
+    done
+    for repo in ${HR_OTHER_REPOS[*]}
+    do
         if [[ -d $HR_WORKSPACE/$repo ]]; then
             cd $HR_WORKSPACE/$repo
             branch=$(git rev-parse --abbrev-ref HEAD)
