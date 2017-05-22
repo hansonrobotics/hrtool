@@ -1369,6 +1369,21 @@ update_head() {
         git pull origin $DEFAULT_BRANCH
         info "Updating [${repo}] is done"
     done
+    for repo in ${HR_OTHER_REPOS[*]}
+    do
+        if [[ ! -d $HR_WORKSPACE/$repo ]]; then
+            clone hansonrobotics $repo $HR_WORKSPACE
+        fi
+        cd $HR_WORKSPACE/$repo
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [[ $branch != $DEFAULT_BRANCH ]]; then
+            warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
+            continue
+        fi
+        info "Updating [${repo}]"
+        git pull origin $DEFAULT_BRANCH
+        info "Updating [${repo}] is done"
+    done
     info "Updating HEAD source code is done"
 }
 
