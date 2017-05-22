@@ -17,7 +17,7 @@ HRTOOL_VERSION=0.3.3
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -229,7 +229,7 @@ curl_cache() {
     url=$1
     ofile=${2-${url##*/}}
     info "Downloading $(basename $1)"
-    [[ -f ${HR_CACHE}/${ofile} ]] || curl -H "Authorization: token $GITHUB_TOKEN" -L ${url} -o ${HR_CACHE}/${ofile} || rm ${HR_CACHE}/${ofile}
+    [[ -f ${HR_CACHE}/${ofile} ]] || curl -L ${url} -o ${HR_CACHE}/${ofile} || rm ${HR_CACHE}/${ofile}
 
     # check md5sum
     local sum=${MD5SUMS[$ofile]}
@@ -939,8 +939,6 @@ _install_misc() {
 
     # For webui
     pip2_install flask EasyProcess psutil natsort
-
-    pip2_install https://github.com/hansonrobotics/pololu-motors/archive/v0.2.1.tar.gz --no-deps
 }
 
 _install_manyears_deps() {
