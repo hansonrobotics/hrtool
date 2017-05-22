@@ -1265,7 +1265,7 @@ install_head-python-ttsserver() {
 
 install_head-marky-markov() {
     local version=$(get_latest_version hansonrobotics/marky_markov)
-    local debname=head-marky-markov_${version#v}_all.deb
+    local debname=head-marky-markov_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
     _install_deb_packages
 }
