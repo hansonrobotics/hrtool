@@ -1184,7 +1184,7 @@ _install_deb_packages() {
         return 1
     fi
     curl_cache ${url} ${debname}
-    $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
+    $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
     [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
 }
 
