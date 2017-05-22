@@ -703,9 +703,10 @@ _install_basic() {
 }
 
 setup_venv() {
+    apt_get_install python-pip
     $SUDO pip2 install virtualenv
-    virtualenv --system-site-packages -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-    virtualenv --system-site-packages -p /usr/bin/python3 $HR_PY3_VIRTUALENV
+    $SUDO virtualenv --system-site-packages -p /usr/bin/python2 $HR_PY2_VIRTUALENV
+    $SUDO virtualenv --system-site-packages -p /usr/bin/python3 $HR_PY3_VIRTUALENV
 }
 
 _install_ros() {
