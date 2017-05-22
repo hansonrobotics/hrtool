@@ -1183,7 +1183,9 @@ _install_deb_packages() {
         error "requires url and debname variables"
         return 1
     fi
+    [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
     curl_cache ${url} ${debname}
+    $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null
     $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
     [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
 }
