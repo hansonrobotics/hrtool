@@ -1273,6 +1273,7 @@ install_head-all() {
     add_ppa ppa:fkrull/deadsnakes
     # setup ruby2.3
     add_ppa ppa:brightbox/ruby-ng
+    $sudo apt-get update
 
     _install_deb_packages
 }
