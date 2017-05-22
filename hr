@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.5
+HRTOOL_VERSION=0.3.6
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
@@ -1278,7 +1278,7 @@ install_head-deps-all() {
     add_ppa ppa:fkrull/deadsnakes
     # setup ruby2.3
     add_ppa ppa:brightbox/ruby-ng
-    $sudo apt-get update
+    $SUDO apt-get update
 
     _install_deb_packages
 }
