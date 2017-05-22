@@ -1343,6 +1343,9 @@ update_head() {
     local DEFAULT_BRANCH="master"
     for repo in ${HR_REPOS[*]}
     do
+        if [[ ! -d $HR_WORKSPACE/HEAD/src/$repo ]]; then
+            clone hansonrobotics $repo $HR_WORKSPACE/HEAD/src
+        fi
         cd $HR_WORKSPACE/HEAD/src/$repo
         branch=$(git rev-parse --abbrev-ref HEAD)
         if [[ $branch != $DEFAULT_BRANCH ]]; then
