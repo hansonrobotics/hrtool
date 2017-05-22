@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.2
+HRTOOL_VERSION=0.3.3
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
@@ -1183,7 +1183,6 @@ _install_deb_packages() {
         error "requires url and debname variables"
         return 1
     fi
-    [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
     curl_cache ${url} ${debname}
     $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null
     $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
