@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.8
+HRTOOL_VERSION=0.3.9
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1263,6 +1263,13 @@ install_head-python-ttsserver() {
     _install_deb_packages
 }
 
+install_head-marky-markov() {
+    local version=$(get_latest_version hansonrobotics/marky_markov)
+    local debname=head-marky-markov_${version#v}_all.deb
+    local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
 install_head-deps-all() {
     local version=0.1.1
     local debname=head-deps-all_${version}_amd64.deb
@@ -1300,6 +1307,10 @@ Install dependencies
     head-hr-ext             Install hr tool extension
     head-chatbot            Install chatbot
     head-saliency-tracker   Install saliency tracker
+    head-motor-control      Install motor control
+    head-sound              Install sound tools
+    head-python-ttsserver   Install tts server
+    head-marky-markov       Install marky markov
 EOF
 }
 
@@ -1340,6 +1351,11 @@ uninstall_head-python-ttsserver() {
     sudo apt-get remove head-python-ttsserver
 }
 
+uninstall_head-marky-markov() {
+    sudo apt-get remove head-marky-markov
+}
+
+
 help_uninstall() {
 cat << EOF
 hr uninstall <component> [<component>] ...
@@ -1354,6 +1370,7 @@ Uninstall components
     head-motor-control      Uninstall motor control
     head-sound              Uninstall sound tools
     head-python-ttsserver   Uninstall tts server
+    head-marky-markov       Uninstall marky markov
 EOF
 }
 
