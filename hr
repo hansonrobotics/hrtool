@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.0
+HRTOOL_VERSION=0.3.1
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
@@ -229,7 +229,7 @@ curl_cache() {
     url=$1
     ofile=${2-${url##*/}}
     info "Downloading $(basename $1)"
-    [[ -f ${HR_CACHE}/${ofile} ]] || curl -L ${url} -o ${HR_CACHE}/${ofile} || rm ${HR_CACHE}/${ofile}
+    [[ -f ${HR_CACHE}/${ofile} ]] || curl -H "Authorization: token $GITHUB_TOKEN" -L ${url} -o ${HR_CACHE}/${ofile} || rm ${HR_CACHE}/${ofile}
 
     # check md5sum
     local sum=${MD5SUMS[$ofile]}
@@ -250,6 +250,12 @@ curl_cache() {
     if [[ -f ${HR_CACHE}/${ofile} ]]; then
         info "Downloading $(basename $1) is done"
     fi
+}
+
+gh_curl() {
+  curl -H "Authorization: token $GITHUB_TOKEN" \
+       -H "Accept: application/vnd.github.v3+json" \
+       $@
 }
 
 wget_cache() {
@@ -468,19 +474,53 @@ remove_installed_files() {
     fi
 }
 
-get_release_versions() {
-    local url=$1
+get_release_info() {
+    local repo=$1
+    local url=https://api.github.com/repos/$repo/releases
+    if [[ ! -d $USER_DATA_DIR/.release ]]; then
+        mkdir $USER_DATA_DIR/.release
+    fi
+    local release_file=$USER_DATA_DIR/.release/${repo//\//_}
     if [[ ! -z ${url} ]]; then
-        curl -s ${url%/} | jq -r '.[] | select(.prerelease == false) | .tag_name'
+        gh_curl -s ${url} >$release_file
+    fi
+}
+
+get_release_versions() {
+    local repo=$1
+    local release_file=$USER_DATA_DIR/.release/${repo//\//_}
+    if [[ ! -f $release_file ]]; then
+        get_release_info $repo
+    fi
+    if [[ -f $release_file ]]; then
+        cat $release_file | jq -r '.[] | select(.prerelease == false) | .tag_name'
+    else
+        error "Can't get release info"
     fi
 }
 
 get_latest_version() {
-    local url=$1
+    local repo=$1
+    local url=https://api.github.com/repos/$repo/releases/latest
     if [[ ! -z ${url} ]]; then
-        curl -s "${url%/}/latest" | jq -r 'select(.prerelease == false) | .tag_name'
+        gh_curl -s "${url}" | jq -r 'select(.prerelease == false) | .tag_name'
     fi
 }
+
+get_release_assets() {
+    local repo=$1
+    local tag=$2
+    local release_file=$USER_DATA_DIR/.release/${repo//\//_}
+    if [[ ! -f $release_file ]]; then
+        get_release_info $repo
+    fi
+    if [[ -f $release_file ]]; then
+        cat $release_file | jq -r ".|map(select(.tag_name == \"$tag\"))|map(select(.prerelease == false))|.[0].assets|map(.url +\"/\"+ .name)|.[]"
+    else
+        error "Can't get release info"
+    fi
+}
+
 ############# End of Common #############
 
 ############# Entries #############
@@ -1138,56 +1178,68 @@ _install_deb_packages() {
 }
 
 install_head-hr-ext() {
-    local version=0.2.0
-    local debname=head-hr-ext_${version}_amd64.deb
-    local url=${GITHUB_STORAGE2_URL}/$debname
-    _install_deb_packages
+    local versions=$(get_release_versions hansonrobotics/hrtool-ext)
+    local asset
+    for ver in $versions; do
+        asset=$(get_release_assets hansonrobotics/hrtool-ext $ver)
+        if [[ ! -z $asset ]]; then
+            break
+        fi
+    done
+    if [[ ! -z $asset ]]; then
+        local debname=$(basename $asset)
+        curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/$debname
+        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
+        [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
+    else
+        error "Can't get release asset"
+    fi
 }
 
 install_head-hr-msgs() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/hr_msgs/releases)
+    local version=$(get_latest_version hansonrobotics/hr_msgs)
     local debname=head-hr_msgs_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/hr_msgs/releases/download/${version}/${debname}
     _install_deb_packages
 }
 
 install_head-saliency-tracker() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ros_nmpt_saliency/releases)
+    local version=$(get_latest_version hansonrobotics/ros_nmpt_saliency)
     local debname=head-saliency-tracker_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-chatbot() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/chatbot/releases)
+    local version=$(get_latest_version hansonrobotics/chatbot)
     local debname=head-chatbot_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/chatbot/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-motor-control() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/motor_control/releases)
+    local version=$(get_latest_version hansonrobotics/motor_control)
     local debname=head-motor-control_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/motor_control/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-python-pololu-motors() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/pololu-motors/releases)
+    local version=$(get_latest_version hansonrobotics/pololu-motors)
     local debname=head-python-pololu-motors_${version#v}_all.deb
     local url=https://github.com/hansonrobotics/pololu-motors/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-sound() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/sound/releases)
+    local version=$(get_latest_version hansonrobotics/sound)
     local debname=head-sound_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/sound/releases/download/${version}/$debname
     _install_deb_packages
 }
 
 install_head-python-ttsserver() {
-    local version=$(get_latest_version https://api.github.com/repos/hansonrobotics/ttsserver/releases)
+    local version=$(get_latest_version hansonrobotics/ttsserver)
     local debname=head-python-ttsserver_${version#v}_all.deb
     local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
     _install_deb_packages
