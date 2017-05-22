@@ -1412,6 +1412,13 @@ update_opencog() {
     info "Updating OpenCog source code is done"
 }
 
+update_hr() {
+    local version=$(get_latest_version hansonrobotics/hrtool)
+    local debname=head-hr_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/hrtool/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
 help_update() {
 cat << EOF
 hr update <component> [<component>] ...
@@ -1420,6 +1427,7 @@ Update components
 
     head        Update HEAD source code
     opencog     Update OpenCog source code
+    hr          Update hrtool
 EOF
 }
 
