@@ -261,9 +261,12 @@ curl_cache() {
 }
 
 gh_curl() {
-  curl -H "Authorization: token $GITHUB_TOKEN" \
-       -H "Accept: application/vnd.github.v3+json" \
-       $@
+    if [[ ! -z $GITHUB_TOKEN ]]; then
+        curl -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" $@
+    else
+        curl -H "Accept: application/vnd.github.v3+json" $@
+    fi
 }
 
 wget_cache() {
