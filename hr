@@ -199,11 +199,11 @@ apt_get_install() {
 
 pip2_install() {
     echo $@ >> ~/.hr/pip2_requirements.txt
-    $PIP2 install $@
+    $SUDO $PIP2 install $@
 }
 
 pip2_uninstall() {
-    $PIP2 uninstall $@
+    $SUDO $PIP2 uninstall $@
 }
 
 pip3_install() {
