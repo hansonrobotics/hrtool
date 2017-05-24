@@ -70,7 +70,7 @@ if [[ -z $ASSUME_YES ]]; then
     ASSUME_YES=0
 fi
 
-folder_to_create=($USER_DATA_DIR $HR_CACHE $HR_MODELS $HR_PREFIX)
+folder_to_create=($USER_DATA_DIR $HR_CACHE $HR_MODELS $HR_PREFIX $HOME/.ros)
 for d in ${folder_to_create[@]}; do
     if [[ ! -d $d ]]; then
         mkdir -p $d
