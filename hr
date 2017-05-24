@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.9
+HRTOOL_VERSION=0.3.10
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -202,6 +202,10 @@ pip2_install() {
     $PIP2 install $@
 }
 
+pip2_uninstall() {
+    $PIP2 uninstall $@
+}
+
 pip3_install() {
     echo $@ >> ~/.hr/pip3_requirements.txt
     $PIP3 install $@
@@ -223,6 +227,10 @@ add_ppa() {
     done
     info $SUDO add-apt-repository -y $1
     $SUDO add-apt-repository -y $1
+}
+
+remove_ppa() {
+    $SUDO add-apt-repository -yr $1
 }
 
 curl_cache() {
@@ -1289,6 +1297,8 @@ install_head-deps-all() {
     $SUDO apt-get update
 
     _install_deb_packages
+
+    pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
 }
 
 
@@ -1343,6 +1353,10 @@ uninstall_head-motor-control() {
     sudo apt-get remove head-motor-control
 }
 
+uninstall_head-python-pololu-motors() {
+    sudo apt-get remove head-python-pololu-motors
+}
+
 uninstall_head-sound() {
     sudo apt-get remove head-sound
 }
@@ -1353,6 +1367,20 @@ uninstall_head-python-ttsserver() {
 
 uninstall_head-marky-markov() {
     sudo apt-get remove head-marky-markov
+}
+
+uninstall_head-deps-all() {
+    sudo apt-get remove -y head-deps-all
+
+    #remove_ppa ppa:brightbox/ruby-ng
+    #remove_ppa ppa:fkrull/deadsnakes
+
+    #$SUDO npm uninstall -g nodemon
+    #$SUDO npm uninstall -g webpack
+
+    #sudo apt-get remove -y nodejs
+
+    pip2_uninstall numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
 }
 
 
