@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.11
+HRTOOL_VERSION=0.3.12
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all head-pocketsphinx)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all head-pocketsphinx head-festival-api)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1200,7 +1200,6 @@ _install_deb_packages() {
     curl_cache ${url} ${debname}
     $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null
     $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
-    [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
 }
 
 install_head-hr-ext() {
@@ -1313,6 +1312,12 @@ install_head-pocketsphinx() {
     _install_deb_packages
 }
 
+install_head-festival-api() {
+    local version=v0.1.6
+    local debname=head-festival-api_${version#v}_amd64.deb
+    local url=$GITHUB_STORAGE_URL/$debname
+    _install_deb_packages
+}
 
 help_install() {
 cat << EOF
@@ -1397,6 +1402,11 @@ uninstall_head-deps-all() {
 
 uninstall_head-pocketsphinx() {
     sudo apt-get remove head-sphinxbase head-pocketsphinx
+}
+
+
+uninstall_head-festival-api() {
+    sudo apt-get remove head-festival-api
 }
 
 
