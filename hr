@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.10
+HRTOOL_VERSION=0.3.11
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all head-pocketsphinx)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1301,6 +1301,18 @@ install_head-deps-all() {
     pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
 }
 
+install_head-pocketsphinx() {
+    local version=$(get_latest_version hansonrobotics/sphinxbase)
+    local debname=head-sphinxbase_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/sphinxbase/releases/download/${version}/$debname
+    _install_deb_packages
+
+    version=$(get_latest_version hansonrobotics/pocketsphinx)
+    debname=head-pocketsphinx_${version#v}_amd64.deb
+    url=https://github.com/hansonrobotics/pocketsphinx/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
 
 help_install() {
 cat << EOF
@@ -1381,6 +1393,10 @@ uninstall_head-deps-all() {
     #sudo apt-get remove -y nodejs
 
     pip2_uninstall numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
+}
+
+uninstall_head-pocketsphinx() {
+    sudo apt-get remove head-sphinxbase head-pocketsphinx
 }
 
 
