@@ -496,7 +496,7 @@ remove_installed_files() {
     fi
 }
 
-get_release_info() {
+_update_release_info() {
     local repo=$1
     local url=https://api.github.com/repos/$repo/releases
     if [[ ! -d $USER_DATA_DIR/.release ]]; then
@@ -510,10 +510,10 @@ get_release_info() {
     fi
 }
 
-update_release_info() {
+update_release_infos() {
     sort -u $USER_DATA_DIR/.release/repos -o /tmp/repos
     for repo in $(cat /tmp/repos); do
-        get_release_info $repo
+        _update_release_info $repo
     done
     rm /tmp/repos
 }
@@ -522,7 +522,7 @@ get_release_versions() {
     local repo=$1
     local release_file=$USER_DATA_DIR/.release/${repo//\//_}
     if [[ ! -f $release_file ]]; then
-        get_release_info $repo
+        _update_release_info $repo
     fi
     if [[ -f $release_file ]]; then
         cat $release_file | jq -r '.[] | select(.prerelease == false) | .tag_name'
@@ -544,7 +544,7 @@ get_release_assets() {
     local tag=$2
     local release_file=$USER_DATA_DIR/.release/${repo//\//_}
     if [[ ! -f $release_file ]]; then
-        get_release_info $repo
+        _update_release_info $repo
     fi
     if [[ -f $release_file ]]; then
         cat $release_file | jq -r ".|map(select(.tag_name == \"$tag\"))|map(select(.prerelease == false))|.[0].assets|map(.url +\"/\"+ .name)|.[]"
@@ -698,6 +698,7 @@ hr_stop() {
 install_head() {
     if [[ ! -z $GITHUB_TOKEN ]]; then
         info "Installing head-hr-ext"
+        get_release_versions hansonrobotics/hrtool-ext || true
         install_head-hr-ext || true
     fi
     install_head-deps-all
