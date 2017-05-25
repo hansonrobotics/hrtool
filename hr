@@ -208,7 +208,7 @@ pip2_uninstall() {
 
 pip3_install() {
     echo $@ >> ~/.hr/pip3_requirements.txt
-    $PIP3 install $@
+    $SUDO $PIP3 install $@
 }
 
 add_ppa() {
