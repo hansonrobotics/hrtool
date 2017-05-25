@@ -3,7 +3,7 @@ Install hrtool
 
 `curl https://raw.githubusercontent.com/hansonrobotics/hrtool/master/get_hr.bash|bash`
 
-Set GITHUB_TOKEN (optional)
+Install hrtool extension (optional)
 ============
 
 **This allows you to access private resource**
@@ -13,6 +13,9 @@ Set GITHUB_TOKEN (optional)
 2. Add a system environment variable GITHUB_TOKEN
 
 > For example, add "export GITHUB_TOKEN=<**token**>" to ~/.bashrc
+
+3. Install head-hr-ext
+ `hr install head-hr-ext`
 
 Install HEAD
 ============
