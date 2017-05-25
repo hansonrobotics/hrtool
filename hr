@@ -1300,6 +1300,9 @@ install_head-deps-all() {
 
     _install_deb_packages
 
+    # for blender to find ros packages
+    pip3_install rospkg catkin_pkg
+
     pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
 }
 
