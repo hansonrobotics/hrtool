@@ -698,7 +698,7 @@ hr_stop() {
 install_head() {
     if [[ ! -z $GITHUB_TOKEN ]]; then
         info "Installing head-hr-ext"
-        get_release_versions hansonrobotics/hrtool-ext || true
+        _update_release_info hansonrobotics/hrtool-ext || true
         install_head-hr-ext || true
     fi
     install_head-deps-all
