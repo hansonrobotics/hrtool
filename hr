@@ -15,7 +15,7 @@ HR_PREFIX=/opt/hansonrobotics
 HRTOOL_VERSION=0.4.1
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
-HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
+HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api)
 
@@ -228,7 +228,6 @@ add_ppa() {
             return 0
         fi
     done
-    info $SUDO add-apt-repository -y $1
     $SUDO add-apt-repository -y $1
 }
 
@@ -1306,6 +1305,8 @@ install_head-deps() {
     install_head-saliency-tracker
     install_head-chatbot
     install_head-python-ttsserver
+    install_head-pocketsphinx
+    install_head-festival-api
 }
 
 install_head-pocketsphinx() {
