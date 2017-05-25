@@ -15,7 +15,7 @@ HR_PREFIX=/opt/hansonrobotics
 HRTOOL_VERSION=0.3.12
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
-HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ttsserver ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
+HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all head-pocketsphinx head-festival-api)
 
@@ -1591,11 +1591,6 @@ _build_head() {
     rm -rf $TARGET/roscom*
     info "Installing blender roscom"
     pip3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
-
-    TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
-    rm -rf $TARGET/ttsserver*
-    info "Installing ttsserver"
-    pip install -t $TARGET $HR_WORKSPACE/HEAD/src/ttsserver --no-deps
 }
 
 build_head() {
