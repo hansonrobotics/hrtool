@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.3.14
+HRTOOL_VERSION=0.4.1
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control sound ros_nmpt_saliency hr_msgs webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps-all head-pocketsphinx head-festival-api head-ttsserver-voice-api)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -696,32 +696,10 @@ hr_stop() {
 
 ############# Functions #############
 install_head() {
-    if [[ ! -z $GITHUB_TOKEN ]]; then
-        info "Installing head-hr-ext"
-        _update_release_info hansonrobotics/hrtool-ext || true
-        install_head-hr-ext || true
-    fi
-    install_head-deps-all
-    install_head-hr-msgs
+    install_head-deps
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
     get_head
     build_head
-}
-
-install_head-deps() {
-    setup_venv
-    _install_basic
-    _install_ros
-    _install_blender
-    _install_webui_deps
-    _install_marky_markov
-    _install_scipy_stack
-    _install_pocketsphinx
-    _install_festival_tts
-    _install_misc
-
-    wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
-    $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
 }
 
 _install_basic() {
@@ -1290,7 +1268,7 @@ install_head-marky-markov() {
     _install_deb_packages
 }
 
-install_head-deps-all() {
+install_head-deps() {
     local version=0.1.1
     local debname=head-deps-all_${version}_amd64.deb
     local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
@@ -1314,6 +1292,20 @@ install_head-deps-all() {
     pip3_install rospkg catkin_pkg
 
     pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
+
+    wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
+    $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
+
+    if [[ ! -z $GITHUB_TOKEN ]]; then
+        info "Installing head-hr-ext"
+        _update_release_info hansonrobotics/hrtool-ext || true
+        install_head-hr-ext || true
+    fi
+    install_head-hr-msgs
+    install_head-sound
+    install_head-saliency-tracker
+    install_head-chatbot
+    install_head-python-ttsserver
 }
 
 install_head-pocketsphinx() {
@@ -1333,26 +1325,6 @@ install_head-festival-api() {
     local debname=head-festival-api_${version#v}_amd64.deb
     local url=$GITHUB_STORAGE_URL/$debname
     _install_deb_packages
-}
-
-install_head-ttsserver-voice-api() {
-    local versions=$(get_release_versions hansonrobotics/ttsserver-voice-api)
-    local asset
-    for ver in $versions; do
-        asset=$(get_release_assets hansonrobotics/ttsserver-voice-api $ver)
-        if [[ ! -z $asset ]]; then
-            break
-        fi
-    done
-    if [[ ! -z $asset ]]; then
-        local debname=$(basename $asset)
-        curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/$debname
-        $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null 2>&1 || fail "Can't get package" || return 1
-        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
-        [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
-    else
-        error "Can't get release asset"
-    fi
 }
 
 help_install() {
@@ -1422,7 +1394,7 @@ uninstall_head-marky-markov() {
     sudo apt-get remove head-marky-markov
 }
 
-uninstall_head-deps-all() {
+uninstall_head-deps() {
     sudo apt-get remove -y head-deps-all
 
     #remove_ppa ppa:brightbox/ruby-ng
@@ -1440,15 +1412,9 @@ uninstall_head-pocketsphinx() {
     sudo apt-get remove head-sphinxbase head-pocketsphinx
 }
 
-
 uninstall_head-festival-api() {
     sudo apt-get remove head-festival-api
 }
-
-uninstall_head-ttsserver-voice-api() {
-    sudo apt-get remove head-ttsserver-voice-api
-}
-
 
 help_uninstall() {
 cat << EOF
