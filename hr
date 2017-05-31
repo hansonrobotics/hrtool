@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.4.1
+HRTOOL_VERSION=0.4.3
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -1265,6 +1265,7 @@ install_head-marky-markov() {
     local debname=head-marky-markov_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/marky_markov/releases/download/${version}/$debname
     _install_deb_packages
+    $SUDO gem install marky_markov
 }
 
 install_head-deps() {
@@ -1579,6 +1580,7 @@ _build_head() {
     read_workspace
     cd $HR_WORKSPACE/HEAD
     source /opt/ros/indigo/setup.bash
+    source $ROS_PKG_PREFIX/setup.bash
     if [[ ! -d .catkin_tools ]]; then
         catkin init
     fi
