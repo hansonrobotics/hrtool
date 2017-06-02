@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.4.3
+HRTOOL_VERSION=0.4.4
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1329,6 +1329,13 @@ install_head-festival-api() {
     _install_deb_packages
 }
 
+install_head-dynamixel-motor() {
+    local version=$(get_latest_version hansonrobotics/dynamixel_motor)
+    local debname=head-dynamixel-motor_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/dynamixel_motor/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -1416,6 +1423,10 @@ uninstall_head-pocketsphinx() {
 
 uninstall_head-festival-api() {
     sudo apt-get remove head-festival-api
+}
+
+uninstall_head-dynamixel-motor() {
+    sudo apt-get remove head-dynamixel-motor
 }
 
 help_uninstall() {
