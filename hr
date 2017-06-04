@@ -1167,7 +1167,7 @@ _install_calib_tools() {
     MD5SUMS["maestro-linux-150116.tar.gz"]=84feed740c0695bb0eea13ccf7988b97
     wget_cache $GITHUB_STORAGE_URL/maestro-linux-150116.tar.gz
     $SUDO mkdir -p ${HR_PREFIX}/maestro
-    tar zxf ${HR_CACHE}/maestro-linux-150116.tar.gz -C ${HR_PREFIX}/maestro --strip-components 1
+    $SUDO tar zxf ${HR_CACHE}/maestro-linux-150116.tar.gz -C ${HR_PREFIX}/maestro --strip-components 1
     apt_get_install libusb-1.0-0-dev mono-runtime libmono-winforms2.0-cil
     $SUDO cp ${HR_PREFIX}/maestro/99-pololu.rules /etc/udev/rules.d/
     #$SUDO udevadm control --reload-rules
