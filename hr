@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.4.4-1
+HRTOOL_VERSION=0.4.5
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1181,14 +1181,17 @@ _install_calib_tools() {
 }
 
 _install_deb_packages() {
-    [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
     if [[ -z ${url} || -z $debname ]]; then
         error "requires url and debname variables"
         return 1
     fi
     curl_cache ${url} ${debname}
-    $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null
-    $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
+    if $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null; then
+        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
+    else
+        echo "${HR_CACHE}/${debname} is not debian package"
+        rm ${HR_CACHE}/${debname}
+    fi
 }
 
 install_head-hr-ext() {
@@ -1336,6 +1339,13 @@ install_head-dynamixel-motor() {
     _install_deb_packages
 }
 
+install_head-webui() {
+    local version=$(get_latest_version hansonrobotics/webui)
+    local debname=head-webui_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/webui/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -1427,6 +1437,10 @@ uninstall_head-festival-api() {
 
 uninstall_head-dynamixel-motor() {
     sudo apt-get remove head-dynamixel-motor
+}
+
+uninstall_head-webui() {
+    sudo apt-get remove head-webui
 }
 
 help_uninstall() {
