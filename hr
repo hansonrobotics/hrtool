@@ -1516,7 +1516,7 @@ update_head() {
         fi
         info "Updating [${repo}]"
         git pull origin $DEFAULT_BRANCH
-        git -C $HR_WORKSPACE/$repo submodule update --recursive
+        git -C $HR_WORKSPACE/$repo submodule update --recursive --remote
         info "Updating [${repo}] is done"
     done
     info "Updating HEAD source code is done"
