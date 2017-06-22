@@ -152,15 +152,6 @@ echo_installed_deb_package() {
     done
 }
 
-get_installed_deb_package_version() {
-    local pkg=$1
-    local s=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$pkg")
-    local ver=${s##*=}
-    if [[ ${s:1:1} == 'i' ]]; then
-        echo "$pkg==$ver"
-    fi
-}
-
 check_apt_installed() {
     # Check if the given debian packages are installed
     local pkgs=$@
@@ -339,7 +330,7 @@ list_robots() {
 }
 
 list_installed() {
-    echo_installed_deb_package ${HEAD_PACKAGES[@]}
+    dpkg-query -W -f='${Package} ${Status}\n' head-*|grep "installed"|awk '{print $1}'|sort
 }
 
 list_components() {
@@ -672,9 +663,7 @@ hr_env() {
 }
 
 hr_version() {
-    for pkg in ${HEAD_PACKAGES[@]}; do
-        get_installed_deb_package_version ${pkg} 2>/dev/null
-    done
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' head-*|grep "installed"|awk '{print $1 "=" $NF}'|sort
     echo ''
     print_repo_info
 }
