@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.4.6
+HRTOOL_VERSION=0.4.7
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -1294,7 +1294,7 @@ install_head-deps() {
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
 
-    pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
+    pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort apiai
 
     wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
     $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
