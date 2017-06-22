@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.4.7
+HRTOOL_VERSION=0.4.8
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -618,6 +618,7 @@ hr_init() {
 cat <<EOF >>$HR_ENVFILE_PATH
 export HR_PREFIX=$HR_PREFIX
 export HR_CACHE=$HR_CACHE
+export HR_ROLE=user
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export VISION_TOOL_PREFIX=$VISION_TOOL_PREFIX
@@ -680,14 +681,20 @@ hr_stop() {
     ./stop.sh
 }
 
+hr_role() {
+    validate_component_args role $@
+    for arg in $@; do
+        local func=role_${arg}
+        eval $func
+    done
+}
+
 ############# End of Entries #############
 
 ############# Functions #############
 install_head() {
     install_head-deps
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
-    get_head
-    build_head
 }
 
 _install_basic() {
@@ -1809,6 +1816,35 @@ Some useful commands:
 EOF
 }
 
+role_user() {
+    if grep "export HR_ROLE" ${HR_ENVFILE_PATH} 1>/dev/null 2>&1; then
+        sed -i "s#export HR_ROLE=.*#export HR_ROLE=user#" ${HR_ENVFILE_PATH}
+    else
+        echo "export HR_ROLE=user" >> ${HR_ENVFILE_PATH}
+    fi
+}
+
+role_developer() {
+    if grep "export HR_ROLE" ${HR_ENVFILE_PATH} 1>/dev/null 2>&1; then
+        sed -i "s#export HR_ROLE=.*#export HR_ROLE=developer#" ${HR_ENVFILE_PATH}
+    else
+        echo "export HR_ROLE=developer" >> ${HR_ENVFILE_PATH}
+    fi
+    get_head
+}
+
+help_role() {
+cat << EOF
+hr role <command> [args]
+
+Some useful commands:
+
+    user        Go to user role. Under this role, you run the released stack.
+    developer   Go to developer role. Under this role, you download the source code and build the stack locally, and run this local stack.
+
+EOF
+}
+
 ############# End of Functions #############
 
 ############# Main #############
@@ -1830,13 +1866,14 @@ Usage: hr <command> [<args>]
     run [robot name] [arguments]            Run robot
     stop                                    Stop robot
     env                                     Show HR environment variables
+    role                                    Set HR role
     version                                 Show version
 EOF
 }
 
 execute() {
     case "$1" in
-        install|uninstall|build|cmd|init|clean|env|update|run|stop|version)
+        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role)
             command=$1
             shift
             hr_${command} $@

@@ -9,7 +9,7 @@
 
 _hr() {
   local command cur prev words cword
-  local hr_commands="init install uninstall build clean cmd env update run stop version"
+  local hr_commands="init install uninstall build clean cmd env update run stop version role"
 
   if type -t _init_completion >/dev/null; then
     _init_completion || return
@@ -28,7 +28,7 @@ _hr() {
   done
 
   case ${command} in
-    install|build|clean|update|cmd)
+    install|build|clean|update|cmd|role)
       local args=$(hr cmd list_components ${command} 2> /dev/null)
       COMPREPLY=($(compgen -W "${args}" -- ${cur}))
       ;;
