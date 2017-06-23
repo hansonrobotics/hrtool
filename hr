@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.4.9
+HRTOOL_VERSION=0.4.10
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(robots_config launcher)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -1254,10 +1254,35 @@ install_head-chatbot() {
     _install_deb_packages
 }
 
-install_head-motor-control() {
-    local version=$(get_latest_version hansonrobotics/motor_control)
-    local debname=head-motor-control_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/motor_control/releases/download/${version}/$debname
+install_head-ros-pololu() {
+   local repo=hansonrobotics/ros_pololu
+    local version=$(get_latest_version $repo)
+    local debname=head-ros-pololu_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+install_head-motors-safety() {
+    local repo=hansonrobotics/motors_safety
+    local version=$(get_latest_version $repo)
+    local debname=head-motors-safety_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+install_head-basic-head-api() {
+    local repo=hansonrobotics/basic_head_api
+    local version=$(get_latest_version $repo)
+    local debname=head-basic-head-api_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+install_head-pau2motors() {
+    local repo=hansonrobotics/pau2motors
+    local version=$(get_latest_version $repo)
+    local debname=head-pau2motors_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _install_deb_packages
 }
 
@@ -1482,6 +1507,22 @@ uninstall_head-blender-api() {
 
 uninstall_head-blender-api-msgs() {
     sudo apt-get remove head-blender-api-msgs
+}
+
+uninstall_head-ros-pololu() {
+    sudo apt-get remove head-ros-pololu
+}
+
+uninstall_head-motors-safety() {
+    sudo apt-get remove head-motors-safety
+}
+
+uninstall_head-basic-head-api() {
+    sudo apt-get remove head-basic-head-api
+}
+
+uninstall_head-pau2motors() {
+    sudo apt-get remove head-pau2motors
 }
 
 help_uninstall() {
