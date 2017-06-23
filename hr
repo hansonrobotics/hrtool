@@ -1355,7 +1355,10 @@ install_head-deps() {
     install_head-python-ttsserver
     install_head-pocketsphinx
     install_head-festival-api
-}
+    install_head-ros-pololu
+    install_head-motors-safety
+    install_head-basic-head-api
+    install_head-pau2motors
 
 install_head-pocketsphinx() {
     local version=$(get_latest_version hansonrobotics/sphinxbase)
