@@ -1202,59 +1202,105 @@ _install_calib_tools() {
     fi
 }
 
-_install_deb_packages() {
+_download_deb_package() {
     if [[ -z ${url} || -z $debname ]]; then
         error "requires url and debname variables"
         return 1
     fi
     curl_cache ${url} ${debname}
+}
+
+_install_deb_packages() {
+    local debname=$1
+    if [[ ! -f "${HR_CACHE}/${debname}" ]]; then
+        error "${HR_CACHE}/${debname} doesn't exist"
+        return 1
+    fi
     if $SUDO dpkg -c "${HR_CACHE}/${debname}" >/dev/null 2>&1; then
-        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
+        local this_pkg=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Package/{print $2}')
+        local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
+        local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$this_pkg" 2>/dev/null)
+        if [[ ${pkg_status:1:1} == 'i' ]]; then
+            local pkg_ver=${pkg_status##*=}
+            if dpkg --compare-versions $pkg_ver lt $this_ver; then
+                $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
+            else
+                info "$this_pkg is already installed, version $pkg_ver"
+            fi
+        fi
     else
         error "${debname} is not debian package or broken. Please run again"
         rm ${HR_CACHE}/${debname}
     fi
 }
 
-install_head-hr-ext() {
-    local versions=$(get_release_versions hansonrobotics/hrtool-ext)
-    local asset
-    for ver in $versions; do
-        asset=$(get_release_assets hansonrobotics/hrtool-ext $ver)
-        if [[ ! -z $asset ]]; then
-            break
-        fi
-    done
+_install_asset() {
+    local asset=$1
     if [[ ! -z $asset ]]; then
+        info "Asset: $asset"
         local debname=$(basename $asset)
-        curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/$debname
-        $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null 2>&1 || fail "Can't get package" || return 1
-        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
-        [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
+        [[ -f ${HR_CACHE}/${debname} ]] || curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/${debname} || rm ${HR_CACHE}/${debname}
+        _install_deb_packages ${debname}
     else
-        error "Can't get release asset"
+        error "No asset"
     fi
 }
+
+install_head-hr-ext() {
+    local repo=hansonrobotics/hrtool-ext
+    local versions=$(get_release_versions $repo)
+    local assets
+    for ver in $versions; do
+        assets=$(get_release_assets $repo $ver)
+        for asset in ${assets[@]}; do
+            _install_asset $asset
+            return
+        done
+    done
+}
+
+#install_head-hr-ext() {
+#    local versions=$(get_release_versions hansonrobotics/hrtool-ext)
+#    local asset
+#    for ver in $versions; do
+#        asset=$(get_release_assets hansonrobotics/hrtool-ext $ver)
+#        if [[ ! -z $asset ]]; then
+#            break
+#        fi
+#    done
+#    if [[ ! -z $asset ]]; then
+#        local debname=$(basename $asset)
+#        curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/$debname
+#        $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null 2>&1 || fail "Can't get package" || return 1
+#        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
+#        [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
+#    else
+#        error "Can't get release asset"
+#    fi
+#}
 
 install_head-hr-msgs() {
     local version=$(get_latest_version hansonrobotics/hr_msgs)
     local debname=head-hr_msgs_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/hr_msgs/releases/download/${version}/${debname}
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-saliency-tracker() {
     local version=$(get_latest_version hansonrobotics/ros_nmpt_saliency)
     local debname=head-saliency-tracker_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-chatbot() {
     local version=$(get_latest_version hansonrobotics/chatbot)
     local debname=head-chatbot_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/chatbot/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-ros-pololu() {
@@ -1262,7 +1308,8 @@ install_head-ros-pololu() {
     local version=$(get_latest_version $repo)
     local debname=head-ros-pololu_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-motors-safety() {
@@ -1270,7 +1317,8 @@ install_head-motors-safety() {
     local version=$(get_latest_version $repo)
     local debname=head-motors-safety_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-basic-head-api() {
@@ -1278,7 +1326,8 @@ install_head-basic-head-api() {
     local version=$(get_latest_version $repo)
     local debname=head-basic-head-api_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-pau2motors() {
@@ -1286,7 +1335,8 @@ install_head-pau2motors() {
     local version=$(get_latest_version $repo)
     local debname=head-pau2motors_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-perception() {
@@ -1294,7 +1344,8 @@ install_head-perception() {
     local version=$(get_latest_version $repo)
     local debname=head-perception_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-pi-vision() {
@@ -1302,35 +1353,40 @@ install_head-pi-vision() {
     local version=$(get_latest_version $repo)
     local debname=head-pi-vision_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-python-pololu-motors() {
     local version=$(get_latest_version hansonrobotics/pololu-motors)
     local debname=head-python-pololu-motors_${version#v}_all.deb
     local url=https://github.com/hansonrobotics/pololu-motors/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-sound() {
     local version=$(get_latest_version hansonrobotics/sound)
     local debname=head-sound_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/sound/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-python-ttsserver() {
     local version=$(get_latest_version hansonrobotics/ttsserver)
     local debname=head-python-ttsserver_${version#v}_all.deb
     local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-marky-markov() {
     local version=$(get_latest_version hansonrobotics/marky_markov)
     local debname=head-marky-markov_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/marky_markov/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
     $SUDO gem install marky_markov
 }
 
@@ -1351,8 +1407,6 @@ install_head-deps() {
     # setup ruby2.3
     add_ppa ppa:brightbox/ruby-ng
     $SUDO apt-get update
-
-    _install_deb_packages
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
@@ -1384,47 +1438,55 @@ install_head-pocketsphinx() {
     local version=$(get_latest_version hansonrobotics/sphinxbase)
     local debname=head-sphinxbase_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/sphinxbase/releases/download/${version}/$debname
-    _install_deb_packages
+
+    _download_deb_package
+    _install_deb_packages ${debname}
 
     version=$(get_latest_version hansonrobotics/pocketsphinx)
     debname=head-pocketsphinx_${version#v}_amd64.deb
     url=https://github.com/hansonrobotics/pocketsphinx/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-festival-api() {
     local version=v0.1.6
     local debname=head-festival-api_${version#v}_amd64.deb
     local url=$GITHUB_STORAGE_URL/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-dynamixel-motor() {
     local version=$(get_latest_version hansonrobotics/dynamixel_motor)
     local debname=head-dynamixel-motor_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/dynamixel_motor/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-webui() {
     local version=$(get_latest_version hansonrobotics/webui)
     local debname=head-webui_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/webui/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-blender-api() {
     local version=$(get_latest_version hansonrobotics/blender_api)
     local debname=head-blender-api_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/blender_api/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 install_head-blender-api-msgs() {
     local version=$(get_latest_version hansonrobotics/blender_api_msgs)
     local debname=head-blender-api-msgs_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/blender_api_msgs/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 help_install() {
@@ -1636,7 +1698,8 @@ update_hr() {
     local version=$(get_latest_version hansonrobotics/hrtool)
     local debname=head-hr_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/hrtool/releases/download/${version}/$debname
-    _install_deb_packages
+    _download_deb_package
+    _install_deb_packages ${debname}
 }
 
 help_update() {
