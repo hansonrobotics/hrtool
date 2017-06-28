@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.3
+HRTOOL_VERSION=0.5.4
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1208,10 +1208,10 @@ _install_deb_packages() {
         return 1
     fi
     curl_cache ${url} ${debname}
-    if $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null; then
+    if $SUDO dpkg -c "${HR_CACHE}/${debname}" >/dev/null 2>&1; then
         $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
     else
-        echo "${HR_CACHE}/${debname} is not debian package"
+        error "${debname} is not debian package or broken. Please run again"
         rm ${HR_CACHE}/${debname}
     fi
 }
@@ -1285,6 +1285,22 @@ install_head-pau2motors() {
     local repo=hansonrobotics/pau2motors
     local version=$(get_latest_version $repo)
     local debname=head-pau2motors_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+install_head-perception() {
+    local repo=hansonrobotics/perception
+    local version=$(get_latest_version $repo)
+    local debname=head-perception_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _install_deb_packages
+}
+
+install_head-pi-vision() {
+    local repo=hansonrobotics/pi_vision
+    local version=$(get_latest_version $repo)
+    local debname=head-pi-vision_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _install_deb_packages
 }
@@ -1530,6 +1546,14 @@ uninstall_head-basic-head-api() {
 
 uninstall_head-pau2motors() {
     sudo apt-get remove head-pau2motors
+}
+
+uninstall_head-perception() {
+    sudo apt-get remove head-perception
+}
+
+uninstall_head-pi-vision() {
+    sudo apt-get remove head-pi-vision
 }
 
 help_uninstall() {
