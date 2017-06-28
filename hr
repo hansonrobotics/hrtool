@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.1
+HRTOOL_VERSION=0.5.2
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -408,6 +408,10 @@ set_workspace() {
     export HR_WORKSPACE=$new_hr_workspace
 }
 
+update_env_vars() {
+    HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
+}
+
 read_workspace() {
     if [[ -f $HR_ENVFILE_PATH ]]; then
         local str=$(cat $HR_ENVFILE_PATH|grep "export HR_WORKSPACE=")
@@ -416,7 +420,7 @@ read_workspace() {
             return 1
         else
             HR_WORKSPACE=${str#export HR_WORKSPACE=}
-            HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
+            update_env_vars
         fi
         if [[ ! -d $HR_WORKSPACE ]]; then
             warn "HR_WORKSPACE ${HR_WORKSPACE} doesn't exist."
