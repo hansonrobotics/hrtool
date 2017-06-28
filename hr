@@ -12,12 +12,12 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.4
+HRTOOL_VERSION=0.5.5
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1357,6 +1357,15 @@ install_head-pi-vision() {
     _install_deb_packages ${debname}
 }
 
+install_head-performances() {
+    local repo=hansonrobotics/performances
+    local version=$(get_latest_version $repo)
+    local debname=head-performances_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname}
+}
+
 install_head-python-pololu-motors() {
     local version=$(get_latest_version hansonrobotics/pololu-motors)
     local debname=head-python-pololu-motors_${version#v}_all.deb
@@ -1422,16 +1431,27 @@ install_head-deps() {
         install_head-hr-ext || true
     fi
     install_head-hr-msgs
-    install_head-sound
     install_head-saliency-tracker
     install_head-chatbot
+    install_head-motor-control
+    install_head-sound
     install_head-python-ttsserver
+    install_head-python-pololu-motors
+    install_head-marky-markov
+    install_head-deps
     install_head-pocketsphinx
     install_head-festival-api
+    install_head-dynamixel-motor
+    install_head-webui
+    install_head-blender-api
+    install_head-blender-api-msgs
     install_head-ros-pololu
     install_head-motors-safety
     install_head-basic-head-api
     install_head-pau2motors
+    install_head-perception
+    install_head-pi-vision
+    install_head-performances
 }
 
 install_head-pocketsphinx() {
@@ -1616,6 +1636,10 @@ uninstall_head-perception() {
 
 uninstall_head-pi-vision() {
     sudo apt-get remove head-pi-vision
+}
+
+uninstall_head-performances() {
+    sudo apt-get remove head-performances
 }
 
 help_uninstall() {
