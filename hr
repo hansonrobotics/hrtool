@@ -1216,7 +1216,7 @@ _install_deb_packages() {
         error "${HR_CACHE}/${debname} doesn't exist"
         return 1
     fi
-    if $SUDO dpkg -c "${HR_CACHE}/${debname}" >/dev/null 2>&1; then
+    if dpkg -c "${HR_CACHE}/${debname}" >/dev/null 2>&1; then
         local this_pkg=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Package/{print $2}')
         local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
         local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$this_pkg" 2>/dev/null)
@@ -1258,26 +1258,6 @@ install_head-hr-ext() {
         done
     done
 }
-
-#install_head-hr-ext() {
-#    local versions=$(get_release_versions hansonrobotics/hrtool-ext)
-#    local asset
-#    for ver in $versions; do
-#        asset=$(get_release_assets hansonrobotics/hrtool-ext $ver)
-#        if [[ ! -z $asset ]]; then
-#            break
-#        fi
-#    done
-#    if [[ ! -z $asset ]]; then
-#        local debname=$(basename $asset)
-#        curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/$debname
-#        $SUDO dpkg --info "${HR_CACHE}/${debname}" >/dev/null 2>&1 || fail "Can't get package" || return 1
-#        $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -f
-#        [[ -f ${HR_CACHE}/${debname} ]] && rm ${HR_CACHE}/${debname}
-#    else
-#        error "Can't get release asset"
-#    fi
-#}
 
 install_head-hr-msgs() {
     local version=$(get_latest_version hansonrobotics/hr_msgs)
