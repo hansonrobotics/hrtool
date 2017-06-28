@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.2
+HRTOOL_VERSION=0.5.3
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -1319,7 +1319,7 @@ install_head-marky-markov() {
 }
 
 install_head-deps() {
-    local version=0.1.1
+    local version=0.1.2
     local debname=head-deps-all_${version}_amd64.deb
     local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
 
