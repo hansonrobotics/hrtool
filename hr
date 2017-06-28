@@ -12,12 +12,13 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.0
+HRTOOL_VERSION=0.5.1
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
-HR_OTHER_REPOS=(robots_config launcher)
+HR_OTHER_REPOS=(launchpad)
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors)
+HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -325,8 +326,8 @@ _list_robots() {
 }
 
 list_robots() {
-    read_workspace
-    _list_robots $HR_WORKSPACE/robots_config
+    read_workspace >/dev/null
+    _list_robots $HR_LAUNCHPAD_DIR/robots_config
 }
 
 list_installed() {
@@ -415,12 +416,10 @@ read_workspace() {
             return 1
         else
             HR_WORKSPACE=${str#export HR_WORKSPACE=}
+            HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
         fi
         if [[ ! -d $HR_WORKSPACE ]]; then
-            error "HR_WORKSPACE ${HR_WORKSPACE} doesn't exist."
-            return 1
-        else
-            export HR_WORKSPACE=$HR_WORKSPACE
+            warn "HR_WORKSPACE ${HR_WORKSPACE} doesn't exist."
         fi
     else
         return 1
@@ -685,11 +684,11 @@ hr_run() {
     local role=$(read_role)
     case $role in
         user)
-            cd $HR_WORKSPACE/launcher
+            cd $HR_LAUNCHPAD_DIR
             ./main.sh --autoname --nogui $@
             ;;
         developer)
-            cd $HR_WORKSPACE/launcher
+            cd $HR_LAUNCHPAD_DIR
             ./main_dev.sh --autoname --nogui $@
             ;;
         *)
@@ -700,7 +699,7 @@ hr_run() {
 
 hr_stop() {
     read_workspace
-    cd $HR_WORKSPACE/launcher
+    cd $HR_LAUNCHPAD_DIR
     ./stop.sh
 }
 
@@ -1338,7 +1337,7 @@ install_head-deps() {
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
 
-    pip2_install numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort apiai
+    pip2_install pyyaml numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort apiai
 
     wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
     $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
