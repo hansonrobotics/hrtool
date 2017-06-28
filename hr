@@ -12,7 +12,7 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.5
+HRTOOL_VERSION=0.5.6
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -1218,15 +1218,17 @@ _install_deb_packages() {
     fi
     if dpkg -c "${HR_CACHE}/${debname}" >/dev/null 2>&1; then
         local this_pkg=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Package/{print $2}')
-        local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
         local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$this_pkg" 2>/dev/null)
         if [[ ${pkg_status:1:1} == 'i' ]]; then
             local pkg_ver=${pkg_status##*=}
+            local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
             if dpkg --compare-versions $pkg_ver lt $this_ver; then
                 $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
             else
                 info "$this_pkg is already installed, version $pkg_ver"
             fi
+        else
+            $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
         fi
     else
         error "${debname} is not debian package or broken. Please run again"
