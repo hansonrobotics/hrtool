@@ -17,7 +17,7 @@ HRTOOL_VERSION=0.5.7
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1456,6 +1456,7 @@ install_head-deps() {
     install_head-pi-vision
     install_head-performances
     install_head-ros-misc
+    install_head-ros-tts
 }
 
 install_head-pocketsphinx() {
@@ -1509,6 +1510,14 @@ install_head-blender-api-msgs() {
     local version=$(get_latest_version hansonrobotics/blender_api_msgs)
     local debname=head-blender-api-msgs_${version#v}_amd64.deb
     local url=https://github.com/hansonrobotics/blender_api_msgs/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname}
+}
+
+install_head-ros-tts() {
+    local version=$(get_latest_version hansonrobotics/ros_tts)
+    local debname=head-ros-tts_${version#v}_amd64.deb
+    local url=https://github.com/hansonrobotics/ros_tts/releases/download/${version}/$debname
     _download_deb_package
     _install_deb_packages ${debname}
 }
@@ -1647,6 +1656,10 @@ uninstall_head-performances() {
 
 uninstall_head-ros-misc() {
     sudo apt-get remove head-ros-misc
+}
+
+uninstall_head-ros-tts() {
+    sudo apt-get remove head-ros-tts
 }
 
 help_uninstall() {
