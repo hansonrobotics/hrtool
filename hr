@@ -1424,12 +1424,10 @@ install_head-deps() {
     install_head-hr-msgs
     install_head-saliency-tracker
     install_head-chatbot
-    install_head-motor-control
     install_head-sound
     install_head-python-ttsserver
     install_head-python-pololu-motors
     install_head-marky-markov
-    install_head-deps
     install_head-pocketsphinx
     install_head-festival-api
     install_head-dynamixel-motor
@@ -1516,7 +1514,6 @@ Install dependencies
     head-hr-ext             Install hr tool extension
     head-chatbot            Install chatbot
     head-saliency-tracker   Install saliency tracker
-    head-motor-control      Install motor control
     head-sound              Install sound tools
     head-python-ttsserver   Install tts server
     head-marky-markov       Install marky markov
