@@ -547,9 +547,7 @@ get_release_assets() {
     local repo=$1
     local tag=$2
     local release_file=$USER_DATA_DIR/.release/${repo//\//_}
-    if [[ ! -f $release_file ]]; then
-        _update_release_info $repo
-    fi
+    _update_release_info $repo
     if [[ -f $release_file ]]; then
         cat $release_file | jq -r ".|map(select(.tag_name == \"$tag\"))|map(select(.prerelease == false))|.[0].assets|map(.url +\"/\"+ .name)|.[]"
     else
@@ -1250,14 +1248,11 @@ _install_asset() {
 
 install_head-hr-ext() {
     local repo=hansonrobotics/hrtool-ext
-    local versions=$(get_release_versions $repo)
-    local assets
-    for ver in $versions; do
-        assets=$(get_release_assets $repo $ver)
-        for asset in ${assets[@]}; do
-            _install_asset $asset
-            return
-        done
+    local ver=$(get_latest_version $repo)
+    local assets=$(get_release_assets $repo $ver)
+    for asset in ${assets[@]}; do
+        _install_asset $asset
+        return
     done
 }
 
