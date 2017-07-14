@@ -1322,6 +1322,18 @@ _install_latest_repo_release() {
     fi
 }
 
+install_head-hr() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/hrtool
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-hr_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
 install_head-hr-ext() {
     _install_latest_repo_release hansonrobotics/hrtool-ext
 }
@@ -1877,14 +1889,6 @@ update_opencog() {
     info "Updating OpenCog source code is done"
 }
 
-update_hr() {
-    local version=$(get_latest_version hansonrobotics/hrtool)
-    local debname=head-hr_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/hrtool/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname}
-}
-
 help_update() {
 cat << EOF
 hr update <component> [<component>] ...
@@ -1893,7 +1897,6 @@ Update components
 
     head        Update HEAD source code
     opencog     Update OpenCog source code
-    hr          Update hrtool
 EOF
 }
 
