@@ -1672,7 +1672,7 @@ install_head-python-emopy() {
     _parse_install_options $@
     local repo=hansonrobotics/emopy
     local version=$(get_latest_version $repo $prerelease)
-    local debname=head-python-emopy_${version#v}_amd64.deb
+    local debname=head-python-emopy_${version#v}_all.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
     _install_deb_packages ${debname} ${force}
