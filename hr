@@ -16,7 +16,7 @@ HR_PREFIX=/opt/hansonrobotics
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1666,6 +1666,18 @@ install_head-ros-tts() {
     _install_deb_packages ${debname} ${force}
 }
 
+install_head-python-emopy() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/emopy
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-python-emopy_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -1811,6 +1823,10 @@ uninstall_head-ros-misc() {
 
 uninstall_head-ros-tts() {
     sudo apt-get remove head-ros-tts
+}
+
+uninstall_head-python-emopy() {
+    sudo apt-get remove head-python-emopy
 }
 
 help_uninstall() {
