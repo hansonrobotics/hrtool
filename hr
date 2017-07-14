@@ -12,7 +12,6 @@ BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
-HRTOOL_VERSION=0.5.7
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
@@ -532,24 +531,38 @@ update_release_infos() {
     rm /tmp/repos
 }
 
-get_release_versions() {
+_get_release_versions() {
     local repo=$1
+    local prerelease=$2
     local release_file=$USER_DATA_DIR/.release/${repo//\//_}
-    if [[ ! -f $release_file ]]; then
-        _update_release_info $repo
-    fi
+    _update_release_info $repo
     if [[ -f $release_file ]]; then
-        cat $release_file | jq -r '.[] | select(.prerelease == false) | .tag_name'
+        if [[ $prerelease == 1 ]]; then
+            cat $release_file | jq -r '.[] | .tag_name'
+        else
+            cat $release_file | jq -r '.[] | select(.prerelease == false) | .tag_name'
+        fi
     else
         error "Can't get release info"
     fi
 }
 
+get_latest_prerelease_version() {
+    local repo=$1
+    local versions=($(_get_release_versions ${repo} 1))
+    echo ${versions}
+}
+
 get_latest_version() {
     local repo=$1
-    local url=https://api.github.com/repos/$repo/releases/latest
-    if [[ ! -z ${url} ]]; then
-        gh_curl -s "${url}" | jq -r 'select(.prerelease == false) | .tag_name'
+    local prerelease=$2
+    if [[ $prerelease == 1 ]]; then
+        get_latest_prerelease_version $repo
+    else
+        local url=https://api.github.com/repos/$repo/releases/latest
+        if [[ ! -z ${url} ]]; then
+            gh_curl -s "${url}" | jq -r 'select(.prerelease == false) | .tag_name'
+        fi
     fi
 }
 
@@ -1227,8 +1240,27 @@ _download_deb_package() {
     curl_cache ${url} ${debname}
 }
 
+_parse_install_options() {
+    while [[ $# > 0 ]]; do
+        case "$1" in
+            -p)
+                prerelease=1
+                shift
+                ;;
+            -f)
+                force=1
+                shift
+                ;;
+            *)
+                warn "Unknown argument $1"
+                ;;
+        esac
+    done
+}
+
 _install_deb_packages() {
     local debname=$1
+    local force=$2
     if [[ ! -f "${HR_CACHE}/${debname}" ]]; then
         error "${HR_CACHE}/${debname} doesn't exist"
         return 1
@@ -1236,7 +1268,7 @@ _install_deb_packages() {
     if dpkg -c "${HR_CACHE}/${debname}" >/dev/null 2>&1; then
         local this_pkg=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Package/{print $2}')
         local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$this_pkg" 2>/dev/null)
-        if [[ ${pkg_status:1:1} == 'i' ]]; then
+        if [[ $force != 1 && ${pkg_status:1:1} == 'i' ]]; then
             local pkg_ver=${pkg_status##*=}
             local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
             if dpkg --compare-versions $pkg_ver lt $this_ver; then
@@ -1295,131 +1327,183 @@ install_head-hr-ext() {
 }
 
 install_head-hr-msgs() {
-    local version=$(get_latest_version hansonrobotics/hr_msgs)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/hr_msgs
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-hr_msgs_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/hr_msgs/releases/download/${version}/${debname}
+    local url=https://github.com/$repo/releases/download/${version}/${debname}
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-saliency-tracker() {
-    local version=$(get_latest_version hansonrobotics/ros_nmpt_saliency)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/ros_nmpt_saliency
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-saliency-tracker_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/ros_nmpt_saliency/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-chatbot() {
-    local version=$(get_latest_version hansonrobotics/chatbot)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/chatbot
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-chatbot_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/chatbot/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-ros-pololu() {
-   local repo=hansonrobotics/ros_pololu
-    local version=$(get_latest_version $repo)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/ros_pololu
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-ros-pololu_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-motors-safety() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/motors_safety
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-motors-safety_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-basic-head-api() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/basic_head_api
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-basic-head-api_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-pau2motors() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/pau2motors
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-pau2motors_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-perception() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/perception
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-perception_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-pi-vision() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/pi_vision
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-pi-vision_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-performances() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/performances
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-performances_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-ros-misc() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local repo=hansonrobotics/ros_misc
-    local version=$(get_latest_version $repo)
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-ros-misc_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-python-pololu-motors() {
-    local version=$(get_latest_version hansonrobotics/pololu-motors)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/pololu-motors
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-python-pololu-motors_${version#v}_all.deb
-    local url=https://github.com/hansonrobotics/pololu-motors/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-sound() {
-    local version=$(get_latest_version hansonrobotics/sound)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/sound
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-sound_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/sound/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-python-ttsserver() {
-    local version=$(get_latest_version hansonrobotics/ttsserver)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/ttsserver
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-python-ttsserver_${version#v}_all.deb
-    local url=https://github.com/hansonrobotics/ttsserver/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-marky-markov() {
-    local version=$(get_latest_version hansonrobotics/marky_markov)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/marky_markov
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-marky-markov_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/marky_markov/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
     $SUDO gem install marky_markov
 }
 
@@ -1479,66 +1563,95 @@ install_head-deps() {
 }
 
 install_head-pocketsphinx() {
-    local version=$(get_latest_version hansonrobotics/sphinxbase)
+    local prerelease
+    local force
+    _parse_install_options $@
+
+    local repo=hansonrobotics/sphinxbase
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-sphinxbase_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/sphinxbase/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
 
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 
-    version=$(get_latest_version hansonrobotics/pocketsphinx)
+    repo=hansonrobotics/pocketsphinx
+    version=$(get_latest_version $repo $prerelease)
     debname=head-pocketsphinx_${version#v}_amd64.deb
-    url=https://github.com/hansonrobotics/pocketsphinx/releases/download/${version}/$debname
+    url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-festival-api() {
+    local prerelease
+    local force
+    _parse_install_options $@
     local version=v0.1.6
     local debname=head-festival-api_${version#v}_amd64.deb
     local url=$GITHUB_STORAGE_URL/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-dynamixel-motor() {
-    local version=$(get_latest_version hansonrobotics/dynamixel_motor)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/dynamixel_motor
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-dynamixel-motor_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/dynamixel_motor/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-webui() {
-    local version=$(get_latest_version hansonrobotics/webui)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/webui
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-webui_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/webui/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-blender-api() {
-    local version=$(get_latest_version hansonrobotics/blender_api)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/blender_api
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-blender-api_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/blender_api/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-blender-api-msgs() {
-    local version=$(get_latest_version hansonrobotics/blender_api_msgs)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/blender_api_msgs
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-blender-api-msgs_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/blender_api_msgs/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 install_head-ros-tts() {
-    local version=$(get_latest_version hansonrobotics/ros_tts)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/ros_tts
+    local version=$(get_latest_version $repo $prerelease)
     local debname=head-ros-tts_${version#v}_amd64.deb
-    local url=https://github.com/hansonrobotics/ros_tts/releases/download/${version}/$debname
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
-    _install_deb_packages ${debname}
+    _install_deb_packages ${debname} ${force}
 }
 
 help_install() {
