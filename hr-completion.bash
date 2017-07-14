@@ -27,19 +27,24 @@ _hr() {
     fi
   done
 
+  local opts=$(hr cmd list_options ${command} 2> /dev/null)
+  for (( i=2 ; i < ${cword} ; i++ )) ; do
+  if [[ ${words[i]} != -* ]] ; then opts= ;fi
+  done
+
   case ${command} in
     install|build|clean|update|cmd|role)
       local args=$(hr cmd list_components ${command} 2> /dev/null)
-      COMPREPLY=($(compgen -W "${args}" -- ${cur}))
+      COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
       ;;
     uninstall)
       local args=$(hr cmd list_installed ${command} 2> /dev/null)
-      COMPREPLY=($(compgen -W "${args}" -- ${cur}))
+      COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
       ;;
     run)
       if (( ${cword} == 2 )); then
         local args=$(hr cmd list_robots 2> /dev/null)
-        COMPREPLY=($(compgen -W "${args}" -- ${cur}))
+        COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
       fi
       ;;
     *)

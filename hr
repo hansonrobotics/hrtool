@@ -348,6 +348,15 @@ list_components() {
     fi
 }
 
+list_options() {
+    if [[ $# > 0 ]]; then
+        local funcs=$(compgen -A function|grep -E "^options_${1}")
+        for f in ${funcs[@]}; do
+            eval ${f}
+        done
+    fi
+}
+
 validate_component_args() {
     if [[ $# == 1 ]]; then
         eval help_${1}
@@ -357,6 +366,7 @@ validate_component_args() {
 
     shift
     for arg in $@; do
+        if [[ ${arg} == -* ]] ; then continue; fi
         local found=0
         for f in $found_components; do
             if [[ $f == $arg ]]; then
@@ -560,14 +570,23 @@ get_release_assets() {
 ############# Entries #############
 hr_install() {
     validate_component_args install $@
+    local options
     for arg in $@; do
+        if [[ ${arg} == -* ]]; then
+            options="$options ${arg}"
+            continue;
+        fi
         local func=install_${arg}
         info "Installing ${arg}"
-        eval $func
+        eval $func $options
         if [[ $? != 0 ]]; then
             error "Install ${arg} failed return code $?"
         fi
     done
+}
+
+options_install() {
+    echo "-p -f"
 }
 
 hr_uninstall() {
@@ -1540,6 +1559,13 @@ Install dependencies
     head-sound              Install sound tools
     head-python-ttsserver   Install tts server
     head-marky-markov       Install marky markov
+    ...                     ...
+
+Options
+
+    -p      Install pre-release package
+    -f      Force install
+
 EOF
 }
 
