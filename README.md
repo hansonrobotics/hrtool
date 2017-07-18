@@ -1,10 +1,14 @@
-Install hrtool 
-============
+ - [Install hrtool](#hrtool)
+ - [Install hrtool extension (optional)](#hrtoolext)
+ - [Install HEAD](#head)
+ - [Run robot](#run)
+ - [Migrate from old hrtool](#migrate)
+
+# <a name="hrtool"></a>Install hrtool 
 
 `curl https://raw.githubusercontent.com/hansonrobotics/hrtool/master/get_hr.bash|bash`
 
-Install hrtool extension (optional)
-============
+# <a name="hrtoolext"></a>Install hrtool extension (optional)
 
 **This allows you to access private resource**
 
@@ -17,12 +21,21 @@ Install hrtool extension (optional)
 3. Install head-hr-ext
  `hr install head-hr-ext`
 
-Install HEAD
-============
+# <a name="head"></a>Install HEAD
 
 `hr install head`
 
-Run robot
-============
+# <a name="run"></a>Run robot
 
 `hr run <robot>`
+
+# <a name="migrate"></a>Migrate from old hrtool
+
+Unfortunately, the new hrtool is not compatible with old hrtool. So in order to use the new hrtool, you need to clean up your system. 
+
+- Commit all the local changes and push to GitHub
+- Delete ~/hansonrobotics
+- Delete /opt/hansonrobotics
+- Delete ~/.hr
+- Install new hrtool, following the above steps. 
+
