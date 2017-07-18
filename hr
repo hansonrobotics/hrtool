@@ -676,7 +676,6 @@ export MARKY_MARKOV_DIR=$MARKY_MARKOV_DIR
 export HR_MODELS=$HR_MODELS
 
 export ROS_LOG_DIR="$HOME/.hr/log"
-export PYTHONPATH=\$PYTHONPATH:/usr/lib/python2.7/dist-packages:$OPENFACE_DIR:$DLIB_DIR/dlib-${DLIB_VERSION}/dist:/usr/local/share/opencog/python
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export LIBRARY_PATH=$LIBRARY_PATH
@@ -691,9 +690,6 @@ if [[ -f $TORCH_DIR/install/bin/torch-activate ]]; then
   source $TORCH_DIR/install/bin/torch-activate
 fi
 
-if [[ -f $ROS_PKG_PREFIX/setup.bash ]]; then
-  source $ROS_PKG_PREFIX/setup.bash
-fi
 EOF
     git config --global credential.helper 'cache --timeout=36000'
     info HR_WORKSPACE=$HR_WORKSPACE
@@ -1520,10 +1516,6 @@ install_head-marky-markov() {
 }
 
 install_head-deps() {
-    local version=0.1.2
-    local debname=head-deps-all_${version}_amd64.deb
-    local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
-
     setup_venv
     # setup ROS repository
     $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
@@ -1536,6 +1528,12 @@ install_head-deps() {
     # setup ruby2.3
     add_ppa ppa:brightbox/ruby-ng
     $SUDO apt-get update
+
+    local version=0.1.2
+    local debname=head-deps-all_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
