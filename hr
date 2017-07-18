@@ -745,7 +745,7 @@ hr_role() {
 
 ############# Functions #############
 install_head() {
-    install_head-deps
+    install_head-deps $@
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
 }
 
@@ -1516,6 +1516,10 @@ install_head-marky-markov() {
 }
 
 install_head-deps() {
+    local prerelease
+    local force
+    _parse_install_options $@
+
     setup_venv
     # setup ROS repository
     $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
