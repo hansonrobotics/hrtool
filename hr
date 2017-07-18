@@ -573,7 +573,7 @@ get_release_assets() {
     local release_file=$USER_DATA_DIR/.release/${repo//\//_}
     _update_release_info $repo
     if [[ -f $release_file ]]; then
-        cat $release_file | jq -r ".|map(select(.tag_name == \"$tag\"))|map(select(.prerelease == false))|.[0].assets|map(.url +\"/\"+ .name)|.[]"
+        cat $release_file | jq -r ".|map(select(.tag_name == \"$tag\"))|.[0].assets|map(.url +\"/\"+ .name)|.[]"
     else
         error "Can't get release info"
     fi
@@ -1285,21 +1285,22 @@ _install_deb_packages() {
 
 _install_asset() {
     local asset=$1
+    local force=$2
     if [[ ! -z $asset ]]; then
         info "Asset: $asset"
         local debname=$(basename $asset)
         [[ -f ${HR_CACHE}/${debname} ]] || curl -H "Accept: application/octet-stream" -L $(dirname $asset)?access_token=$GITHUB_TOKEN -o ${HR_CACHE}/${debname} || rm ${HR_CACHE}/${debname}
-        _install_deb_packages ${debname}
+        _install_deb_packages ${debname} ${force}
     else
         error "No asset"
     fi
 }
 
 _install_latest_repo_release() {
-    local repo=$1
-    local asset_name=$2
-    local found_asset
-    local ver=$(get_latest_version $repo)
+    local prerelease
+    local force
+    _parse_install_options $@
+    local ver=$(get_latest_version $repo $prerelease)
     local assets=$(get_release_assets $repo $ver)
     if [[ ! -z $asset_name ]]; then
         for asset in ${assets[@]}; do
@@ -1309,13 +1310,13 @@ _install_latest_repo_release() {
             fi
         done
         if [[ ! -z $found_asset ]]; then
-            _install_asset $found_asset
+            _install_asset $found_asset $force
         else
             error "Asset ${asset_name} is not found"
         fi
     else
         for asset in ${assets[@]}; do
-            _install_asset $asset
+            _install_asset $asset $force
         done
     fi
 }
@@ -1333,7 +1334,8 @@ install_head-hr() {
 }
 
 install_head-hr-ext() {
-    _install_latest_repo_release hansonrobotics/hrtool-ext
+    local repo=hansonrobotics/hrtool-ext
+    _install_latest_repo_release $@
 }
 
 install_head-hr-msgs() {
@@ -1552,30 +1554,31 @@ install_head-deps() {
     if [[ ! -z $GITHUB_TOKEN ]]; then
         info "Installing head-hr-ext"
         _update_release_info hansonrobotics/hrtool-ext || true
-        install_head-hr-ext || true
+        install_head-hr-ext $@ || true
     fi
-    install_head-hr-msgs
-    install_head-saliency-tracker
-    install_head-chatbot
-    install_head-sound
-    install_head-python-ttsserver
-    install_head-python-pololu-motors
-    install_head-marky-markov
-    install_head-pocketsphinx
-    install_head-festival-api
-    install_head-dynamixel-motor
-    install_head-webui
-    install_head-blender-api
-    install_head-blender-api-msgs
-    install_head-ros-pololu
-    install_head-motors-safety
-    install_head-basic-head-api
-    install_head-pau2motors
-    install_head-perception
-    install_head-pi-vision
-    install_head-performances
-    install_head-ros-misc
-    install_head-ros-tts
+
+    install_head-hr-msgs $@
+    install_head-saliency-tracker $@
+    install_head-chatbot $@
+    install_head-sound $@
+    install_head-python-ttsserver $@
+    install_head-python-pololu-motors $@
+    install_head-marky-markov $@
+    install_head-pocketsphinx $@
+    install_head-festival-api $@
+    install_head-dynamixel-motor $@
+    install_head-webui $@
+    install_head-blender-api $@
+    install_head-blender-api-msgs $@
+    install_head-ros-pololu $@
+    install_head-motors-safety $@
+    install_head-basic-head-api $@
+    install_head-pau2motors $@
+    install_head-perception $@
+    install_head-pi-vision $@
+    install_head-performances $@
+    install_head-ros-misc $@
+    install_head-ros-tts $@
 }
 
 install_head-pocketsphinx() {
