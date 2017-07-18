@@ -15,7 +15,8 @@ HR_PREFIX=/opt/hansonrobotics
 
 OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
-HR_OTHER_REPOS=(launchpad)
+HR_OTHER_REPOS=()
+HR_LAUNCHPAD_REPOS=(launchpad)
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
@@ -747,6 +748,7 @@ hr_role() {
 install_head() {
     install_head-deps $@
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
+    get_head
 }
 
 _install_basic() {
@@ -1930,17 +1932,24 @@ get_opencog() {
 
 get_head() {
     read_workspace || hr_init
-    info "Cloning HR source code"
-    for repo in ${HR_REPOS[*]}
-    do
-        clone hansonrobotics $repo $HR_WORKSPACE/HEAD/src
-    done
-    for repo in ${HR_OTHER_REPOS[*]}
+    local role=$(read_role)
+    if [[ $role  == "developer" ]]; then
+        info "Cloning HR source code"
+        for repo in ${HR_REPOS[*]}
+        do
+            clone hansonrobotics $repo $HR_WORKSPACE/HEAD/src
+        done
+        for repo in ${HR_OTHER_REPOS[*]}
+        do
+            clone hansonrobotics $repo $HR_WORKSPACE
+            git -C $HR_WORKSPACE/$repo submodule update --init --recursive
+        done
+        info "Cloning HR source code is done"
+    fi
+    for repo in ${HR_LAUNCHPAD_REPOS[*]}
     do
         clone hansonrobotics $repo $HR_WORKSPACE
-        git -C $HR_WORKSPACE/$repo submodule update --init --recursive
     done
-    info "Cloning HR source code is done"
 }
 
 get_models() {
