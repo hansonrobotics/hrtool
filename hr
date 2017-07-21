@@ -184,7 +184,6 @@ check_apt_installed() {
 }
 
 apt_get_install() {
-    echo $@ >> ~/.hr/apt-get-requirements.txt
     if ! check_apt_installed "$@"; then
         $SUDO apt-get ${APT_GET_OPTS} install "$@" || (
             $SUDO apt-get ${APT_GET_OPTS} update &&
@@ -193,7 +192,6 @@ apt_get_install() {
 }
 
 pip2_install() {
-    echo $@ >> ~/.hr/pip2_requirements.txt
     $SUDO $PIP2 install $@
 }
 
@@ -202,7 +200,6 @@ pip2_uninstall() {
 }
 
 pip3_install() {
-    echo $@ >> ~/.hr/pip3_requirements.txt
     $SUDO $PIP3 install $@
 }
 
