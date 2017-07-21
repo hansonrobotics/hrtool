@@ -2213,7 +2213,6 @@ role_developer() {
     else
         echo "export HR_ROLE=developer" >> ${HR_ENVFILE_PATH}
     fi
-    get_head
 }
 
 help_role() {
