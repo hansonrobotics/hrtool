@@ -1254,6 +1254,29 @@ _parse_install_options() {
     done
 }
 
+_dpkg_install() {
+    local debname=$1
+    local output
+    local name=$(basename $debname)
+    if [[ ! -f $debname ]]; then
+        error "Debian package $debname is not found"
+        return 1
+    fi
+    if ! $SUDO dpkg -i "${debname}"; then
+        set +e
+        output=$(sudo apt-get install -yf --force-yes 2>&1 1>/dev/null)
+        local ret=$?
+        set -e
+        if [[ $ret != 0 ]]; then
+            error "${debname} is not installed. "
+            error "${output}"
+            return $ret
+        else
+            info "${name} is successfully installed."
+        fi
+    fi
+}
+
 _install_deb_packages() {
     local debname=$1
     local force=$2
@@ -1268,12 +1291,12 @@ _install_deb_packages() {
             local pkg_ver=${pkg_status##*=}
             local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
             if dpkg --compare-versions $pkg_ver lt $this_ver; then
-                $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf --force-yes
+                _dpkg_install "${HR_CACHE}/${debname}"
             else
                 info "$this_pkg is already installed, version $pkg_ver"
             fi
         else
-            $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf --force-yes
+            _dpkg_install "${HR_CACHE}/${debname}"
         fi
     else
         error "${debname} is not debian package or broken. Please run again"
