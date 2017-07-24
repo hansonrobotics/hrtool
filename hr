@@ -2268,6 +2268,11 @@ execute() {
     esac
 }
 
+if [[ ! $(lsb_release --codename --short) == "trusty" ]]; then
+    error "Error: Only Ubuntu 14.04 (trusty) is supported" >&2
+    exit 1
+fi
+
 if [[ ! $(readlink -f ${BASH_SOURCE[0]}) == $(readlink -f $0) ]]; then return; fi
 if [[ $# == 0 ]]; then show_help; exit 0; fi
 execute $@
