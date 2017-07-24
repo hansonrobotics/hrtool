@@ -1267,12 +1267,12 @@ _install_deb_packages() {
             local pkg_ver=${pkg_status##*=}
             local this_ver=$(dpkg --info "${HR_CACHE}/${debname}"| awk '/Version/{print $2}')
             if dpkg --compare-versions $pkg_ver lt $this_ver; then
-                $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
+                $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf --force-yes
             else
                 info "$this_pkg is already installed, version $pkg_ver"
             fi
         else
-            $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf
+            $SUDO dpkg -i "${HR_CACHE}/${debname}" || $SUDO apt-get install -yf --force-yes
         fi
     else
         error "${debname} is not debian package or broken. Please run again"
