@@ -17,7 +17,7 @@ OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-
 HR_REPOS=(blender_api_msgs blender_api chatbot motor_control webui perception pi_vision performances ros_tts)
 HR_OTHER_REPOS=()
 HR_LAUNCHPAD_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1601,6 +1601,7 @@ install_head-deps() {
     install_head-ros-misc $@
     install_head-ros-tts $@
     install_head-data $@
+    install_head-ros-emotion $@
 }
 
 install_head-pocketsphinx() {
@@ -1714,6 +1715,18 @@ install_head-data() {
     local version=0.1.0
     local debname=head-data_${version}_amd64.deb
     local url=${GITHUB_STORAGE_URL}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
+install_head-ros-emotion() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/ros_emotion
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-ros-emotion_${version#v}_all.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
     _install_deb_packages ${debname} ${force}
 }
@@ -1867,6 +1880,14 @@ uninstall_head-ros-tts() {
 
 uninstall_head-python-emopy() {
     sudo apt-get remove head-python-emopy
+}
+
+uninstall_head-data() {
+    sudo apt-get remove head-data
+}
+
+uninstall_head-ros-emotion() {
+    sudo apt-get remove head-ros-emotion
 }
 
 help_uninstall() {
