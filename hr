@@ -1274,6 +1274,8 @@ _dpkg_install() {
         else
             info "${name} is successfully installed."
         fi
+    else
+        info "${name} is successfully installed."
     fi
 }
 
@@ -1336,9 +1338,13 @@ _install_latest_repo_release() {
             error "Asset ${asset_name} is not found"
         fi
     else
-        for asset in ${assets[@]}; do
-            _install_asset $asset $force
-        done
+        if [[ -z $assets ]]; then
+            error "No asset is found for version $ver"
+        else
+            for asset in ${assets[@]}; do
+                _install_asset $asset $force
+            done
+        fi
     fi
 }
 
