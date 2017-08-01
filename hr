@@ -192,15 +192,24 @@ apt_get_install() {
 }
 
 pip2_install() {
+    [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
     $SUDO $PIP2 install $@
 }
 
 pip2_uninstall() {
+    [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
     $SUDO $PIP2 uninstall $@
 }
 
 pip3_install() {
+    [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
     $SUDO $PIP3 install $@
+}
+
+
+pip3_uninstall() {
+    [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
+    $SUDO $PIP3 uninstall $@
 }
 
 add_ppa() {
