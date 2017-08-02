@@ -34,8 +34,8 @@
 Unfortunately, the new hrtool is not compatible with old hrtool. So in order to use the new hrtool, you need to clean up your system. 
 
 - Commit all the local changes and push to GitHub
+- Uninstall rospkg and catkin_pkg: `pip3 uninstall rospkg catkin_pkg`
 - Delete ~/hansonrobotics
 - Delete /opt/hansonrobotics
 - Delete ~/.hr
 - Install new hrtool, following the above steps. 
-
