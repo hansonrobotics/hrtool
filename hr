@@ -2131,7 +2131,9 @@ build_opencog() {
     read_workspace
     for repo in ${OPENCOG_REPOS[*]}
     do
-        if [[ $repo != 'relex' && $repo != 'external-tools' ]]; then
+        if [[ $repo != 'relex' && \
+              $repo != 'external-tools' && \
+              $repo != 'ros-behavior-scripting' ]]; then
             if [[ ! -d $HR_WORKSPACE/opencog/$repo/build ]]; then
                 mkdir $HR_WORKSPACE/opencog/$repo/build
             fi
@@ -2139,6 +2141,14 @@ build_opencog() {
         fi
         if [[ $repo == 'relex' ]]; then
             cd $HR_WORKSPACE/opencog/$repo && JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 ant build && $SUDO ant install
+        fi
+        if [[ $repo == 'ros-behavior-scripting' ]]; then
+            if [[ ! -d $HR_WORKSPACE/opencog/$repo/build ]]; then
+                mkdir $HR_WORKSPACE/opencog/$repo/build
+            fi
+            cd $HR_WORKSPACE/opencog/$repo/build && \
+            source /opt/hansonrobotics/ros/setup.bash && \
+            cmake ..  && make -j$(nproc) && $SUDO make install
         fi
     done
 }
