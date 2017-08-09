@@ -17,7 +17,7 @@ OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-
 HR_REPOS=(blender_api_msgs blender_api chatbot basic_head_api motors_safety pau2motors ros_pololu webui perception pi_vision performances ros_tts ttsserver)
 HR_OTHER_REPOS=()
 HR_LAUNCHPAD_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1582,7 +1582,10 @@ install_head-deps() {
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
 
-    pip2_install rospkg catkin_pkg pyyaml numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort apiai numexpr
+    pip2_install \
+        rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
+        pinyin==0.2.5 pyparsing transitions flask EasyProcess \
+        psutil natsort apiai numexpr
 
     wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
     $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
@@ -1746,6 +1749,44 @@ install_head-ros-emotion() {
     _install_deb_packages ${debname} ${force}
 }
 
+install_head-torch() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/distro
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-torch_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
+install_head-python-openface() {
+    install_head-torch $@
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/openface
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-python-openface_${version#v}_all.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
+install_head-ros-face-recognition() {
+    install_head-python-openface $@
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/ros_face_recognition
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-ros-face-recognition_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -1903,6 +1944,18 @@ uninstall_head-data() {
 
 uninstall_head-ros-emotion() {
     sudo apt-get remove head-ros-emotion
+}
+
+uninstall_head-torch() {
+    sudo apt-get remove head-torch
+}
+
+uninstall_head-python-openface() {
+    sudo apt-get remove head-python-openface
+}
+
+uninstall_head-ros-face-recognition() {
+    sudo apt-get remove head-ros-face-recognition
 }
 
 help_uninstall() {
