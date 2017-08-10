@@ -1353,19 +1353,22 @@ install_head-deps() {
     install_head-ros-emotion $@
 }
 
-install_head-pocketsphinx() {
+install_head-sphinxbase() {
     local prerelease
     local force
     _parse_install_options $@
-
     local repo=hansonrobotics/sphinxbase
     local version=$(get_latest_version $repo $prerelease)
     local debname=head-sphinxbase_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
-
     _download_deb_package
     _install_deb_packages ${debname} ${force}
+}
 
+install_head-pocketsphinx() {
+    local prerelease
+    local force
+    _parse_install_options $@
     repo=hansonrobotics/pocketsphinx
     version=$(get_latest_version $repo $prerelease)
     debname=head-pocketsphinx_${version#v}_amd64.deb
@@ -1605,8 +1608,13 @@ uninstall_head-deps() {
     pip2_uninstall numpy pandas scipy num2words pinyin==0.2.5 pyparsing transitions flask EasyProcess psutil natsort
 }
 
+uninstall_head-sphinxbase() {
+    sudo apt-get remove head-sphinxbase
+}
+
 uninstall_head-pocketsphinx() {
-    sudo apt-get remove head-sphinxbase head-pocketsphinx
+    uninstall_head-sphinxbase
+    sudo apt-get remove head-pocketsphinx
 }
 
 uninstall_head-festival-api() {
