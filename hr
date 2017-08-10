@@ -17,7 +17,7 @@ OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-
 HR_REPOS=(blender_api_msgs blender_api chatbot basic_head_api motors_safety pau2motors ros_pololu webui perception pi_vision performances ros_tts ttsserver)
 HR_OTHER_REPOS=()
 HR_LAUNCHPAD_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-sound head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
@@ -1329,7 +1329,7 @@ install_head-deps() {
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
     install_head-chatbot $@
-    install_head-sound $@
+    install_head-ros-audio-stream $@
     install_head-python-ttsserver $@
     install_head-python-pololu-motors $@
     install_head-marky-markov $@
