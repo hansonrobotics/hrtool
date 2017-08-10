@@ -1003,19 +1003,18 @@ _dpkg_install() {
         return 1
     fi
     if ! $SUDO dpkg -i "${debname}"; then
-        set +e
-        output=$(sudo apt-get install -yf --force-yes 2>&1 1>/dev/null)
-        local ret=$?
-        set -e
-        if [[ $ret != 0 ]]; then
-            error "${debname} is not installed. "
-            error "${output}"
-            return $ret
-        else
-            info "${name} is successfully installed."
-        fi
+        sudo apt-get install -yf --force-yes
+    fi
+
+    # Check package version
+    local this_pkg=$(dpkg --info "$debname"| awk '/Package/{print $2}')
+    local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$this_pkg" 2>/dev/null)
+    if [[ ${pkg_status:1:1} == 'i' ]]; then
+        local pkg_ver=${pkg_status##*=}
+        info "${name} is successfully installed, version $pkg_ver"
     else
-        info "${name} is successfully installed."
+        error "${name} is not installed."
+        return 1
     fi
 }
 
