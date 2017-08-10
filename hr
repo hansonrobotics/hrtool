@@ -1366,6 +1366,7 @@ install_head-sphinxbase() {
 }
 
 install_head-pocketsphinx() {
+    install_head-sphinxbase $@
     local prerelease
     local force
     _parse_install_options $@
