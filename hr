@@ -1329,12 +1329,6 @@ install_head-deps() {
     wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
     $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
 
-    if [[ ! -z $GITHUB_TOKEN ]]; then
-        info "Installing head-hr-ext"
-        _update_release_info hansonrobotics/hrtool-ext || true
-        install_head-hr-ext $@ || true
-    fi
-
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
     install_head-chatbot $@
@@ -1481,6 +1475,7 @@ install_head-data() {
 }
 
 install_head-ros-emotion() {
+    install_head-python-emopy $@
     local prerelease
     local force
     _parse_install_options $@
@@ -1531,6 +1526,7 @@ install_head-ros-face-recognition() {
 }
 
 install_head-ros-audio-stream() {
+    uninstall_head-sound || true
     local prerelease
     local force
     _parse_install_options $@
@@ -1695,6 +1691,7 @@ uninstall_head-ros-tts() {
 }
 
 uninstall_head-python-emopy() {
+    uninstall_head-ros-emotion
     sudo apt-get remove head-python-emopy
 }
 
