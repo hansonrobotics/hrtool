@@ -16,10 +16,15 @@
 
 2. Add a system environment variable GITHUB_TOKEN
 
-> For example, add "export GITHUB_TOKEN=<**token**>" to ~/.bashrc
+    For example, add "export GITHUB_TOKEN=<**token**>" to ~/.bashrc
 
-3. Install head-hr-ext
- `hr install head-hr-ext`
+3. Test the token. You will see it prints out the latest version of hrtool-ext, for example, `v0.6.1`
+
+    `source ~/.bashrc && hr cmd get_latest_version hansonrobotics/hrtool-ext`
+
+4. Install head-hr-ext
+
+    `hr install head-hr-ext`
 
 # <a name="head"></a>Install HEAD
 
