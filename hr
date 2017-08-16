@@ -1011,7 +1011,7 @@ _dpkg_install() {
     fi
 
     # Check package version
-    local this_pkg=$(dpkg --info "$debname"| awk '/Package/{print $2}')
+    local this_pkg=$(dpkg --info "$debname"| awk '/^ Package:/{print $2}')
     local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}=${Version}' "$this_pkg" 2>/dev/null)
     if [[ ${pkg_status:1:1} == 'i' ]]; then
         local pkg_ver=${pkg_status##*=}
