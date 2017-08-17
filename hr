@@ -39,10 +39,6 @@ if [[ -z $ROS_PKG_PREFIX ]]; then
     ROS_PKG_PREFIX=$HR_PREFIX/ros
 fi
 
-# vision tools
-HR_TOOLS_PREFIX=$HR_PREFIX/tools
-MARKY_MARKOV_DIR=$HR_TOOLS_PREFIX/marky_markov
-
 export PKG_CONFIG_PATH=${HR_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HR_PREFIX/lib
 export PATH=/usr/lib/ccache:$PATH
@@ -51,7 +47,7 @@ if [[ -z $ASSUME_YES ]]; then
     ASSUME_YES=0
 fi
 
-folder_to_create=($USER_DATA_DIR $HR_CACHE $HR_MODELS $HR_PREFIX $HOME/.ros $HR_TOOLS_PREFIX)
+folder_to_create=($USER_DATA_DIR $HR_CACHE $HR_MODELS $HR_PREFIX $HOME/.ros)
 for d in ${folder_to_create[@]}; do
     if [[ ! -d $d ]]; then
         mkdir -p $d
@@ -656,17 +652,12 @@ export HR_CACHE=$HR_CACHE
 export HR_ROLE=user
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
-export DLIB_DIR=$DLIB_DIR
-
-export MARKY_MARKOV_DIR=$MARKY_MARKOV_DIR
-export HR_MODELS=$HR_MODELS
 export ROS_LOG_DIR="$HOME/.hr/log"
 
 export PATH=$HR_PREFIX/bin:$HR_PY2_VIRTUALENV/bin:\$PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
 EOF
-    git config --global credential.helper 'cache --timeout=36000'
     info HR_WORKSPACE=$HR_WORKSPACE
 }
 
@@ -1818,6 +1809,7 @@ get_opencog() {
 
 get_head() {
     read_workspace || hr_init
+    git config --global credential.helper 'cache --timeout=36000'
     local role=$(read_role)
     if [[ $role  == "developer" ]]; then
         info "Cloning HR source code"
