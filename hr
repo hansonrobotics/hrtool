@@ -1804,7 +1804,7 @@ get_opencog() {
     info "Cloning OpenCog source code"
     for repo in ${OPENCOG_REPOS[*]}
     do
-        clone hansonrobotics $repo $HR_WORKSPACE/opencog
+        clone opencog $repo $HR_WORKSPACE/opencog
     done
     info "Cloning OpenCog source code is done"
 }
