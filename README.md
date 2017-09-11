@@ -1,5 +1,6 @@
  - [Install hrtool](#hrtool)
  - [Install hrtool extension (optional)](#hrtoolext)
+ - [Initialize Workspace](#init)
  - [Install HEAD](#head)
  - [Run robot](#run)
  - [Migrate from old hrtool](#migrate)
@@ -29,6 +30,10 @@ Run this single command to install hrtool.
 4. Install head-hr-ext
 
     `hr install head-hr-ext`
+
+# <a name="init"></a>Initialize Workspace
+
+`hr init [workspace]`
 
 # <a name="head"></a>Install HEAD
 
