@@ -798,7 +798,7 @@ _install_link_grammar() {
     tar -zxf ${HR_CACHE}/link-grammar-5.3.13.tar.gz -C /tmp
     mkdir -p /tmp/link-grammar-5.3.13/build
     cd /tmp/link-grammar-5.3.13/build
-    JAVA_HOME=/usr/lib/jvm/default-java
+    JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/default-java}
     ../configure
     make -j$(nproc)
     $SUDO make install
