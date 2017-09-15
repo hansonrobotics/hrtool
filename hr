@@ -1842,6 +1842,35 @@ get_head() {
     #parallel _get_repo ::: ${repos[@]}
 }
 
+_get_openface_models() {
+    MD5SUMS["nn4.small2.v1.t7"]=c95bfd8cc1adf05210e979ff623013b6
+    MD5SUMS["celeb-classifier.nn4.small2.v1.pkl"]=199a2c0d32fd0f22f14ad2d248280475
+    MD5SUMS["shape_predictor_68_face_landmarks.dat.bz2"]=677a91476056de0507f1915adc7ef86a
+    wget_cache $GITHUB_STORAGE_URL/models/nn4.small2.v1.t7
+    wget_cache $GITHUB_STORAGE_URL/models/celeb-classifier.nn4.small2.v1.pkl
+    if [[ ! -f ${HR_CACHE}/shape_predictor_68_face_landmarks.dat ]]; then
+        wget_cache $GITHUB_STORAGE_URL/models/shape_predictor_68_face_landmarks.dat.bz2
+        bunzip2 -f ${HR_CACHE}/shape_predictor_68_face_landmarks.dat.bz2
+    else
+        info "shape_predictor_68_face_landmarks.dat already exists"
+    fi
+    cp ${HR_CACHE}/shape_predictor_68_face_landmarks.dat ${HR_MODELS}
+    cp ${HR_CACHE}/nn4.small2.v1.t7 ${HR_MODELS}
+    cp ${HR_CACHE}/celeb-classifier.nn4.small2.v1.pkl ${HR_MODELS}
+}
+
+_get_marky_markov_models() {
+    wget_cache https://github.com/opencog/test-datasets/releases/download/current/markov_modeling.tar.gz
+    checkmd5 ${HR_CACHE}/markov_modeling.tar.gz 7d51bbcd4df89b2633bd9520fb99b2b7
+    mkdir -p $HR_MODELS/markov_modeling
+    tar zxf ${HR_CACHE}/markov_modeling.tar.gz -C $HR_MODELS/markov_modeling
+}
+
+get_models() {
+    _get_openface_models
+    _get_marky_markov_models
+}
+
 help_get() {
 cat << EOF
 hr get <component> [<component>] ...
@@ -1850,6 +1879,7 @@ Download components
 
     head        Download HEAD repositories
     opencog     Download OpenCog repositories
+    models      Download models for dlib landmarks, markov text generator, etc.
     voices      Download TTS voices
 EOF
 }
