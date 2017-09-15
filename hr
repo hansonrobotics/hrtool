@@ -1948,24 +1948,35 @@ _build_full-head() {
 
 build_opencog() {
     read_workspace
-    for repo in ${OPENCOG_REPOS[*]}
+
+    local ore owner repo dest workdir
+    for item in ${OPENCOG_DEV_REPOS[*]}
     do
+        if [[ ! $item == *:* ]]; then
+            error "Invalid repository string format: $item"
+            return 1
+        fi
+        ore=${item%:*}
+        owner=${ore%/*}
+        repo=${ore#*/}
+        dest=$HR_WORKSPACE/${item#*:}
+        workdir=${dest%/}/$repo
         if [[ $repo != 'relex' && \
               $repo != 'external-tools' && \
               $repo != 'ros-behavior-scripting' ]]; then
-            if [[ ! -d $HR_WORKSPACE/opencog/$repo/build ]]; then
-                mkdir $HR_WORKSPACE/opencog/$repo/build
+            if [[ ! -d $workdir/build ]]; then
+                mkdir $workdir/build
             fi
-            cd $HR_WORKSPACE/opencog/$repo/build && cmake ..  && make -j$(nproc) && $SUDO make install
+            cd $workdir/build && cmake ..  && make -j$(nproc) && $SUDO make install
         fi
         if [[ $repo == 'relex' ]]; then
-            cd $HR_WORKSPACE/opencog/$repo && JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 ant build && $SUDO ant install
+            cd $workdir && JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 ant build && $SUDO ant install
         fi
         if [[ $repo == 'ros-behavior-scripting' ]]; then
-            if [[ ! -d $HR_WORKSPACE/opencog/$repo/build ]]; then
-                mkdir $HR_WORKSPACE/opencog/$repo/build
+            if [[ ! -d $workdir/build ]]; then
+                mkdir $workdir/build
             fi
-            cd $HR_WORKSPACE/opencog/$repo/build && \
+            cd $workdir/build && \
             source /opt/hansonrobotics/ros/setup.bash && \
             cmake ..  && make -j$(nproc) && $SUDO make install
         fi
