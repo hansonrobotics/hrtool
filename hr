@@ -13,12 +13,12 @@ DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
 
-OPENCOG_REPOS=(cogutils atomspace opencog ros-behavior-scripting relex external-tools)
-HR_REPOS=(blender_api_msgs blender_api chatbot basic_head_api motors_safety pau2motors ros_pololu webui perception pi_vision performances ros_tts ttsserver)
-HR_OTHER_REPOS=()
-HR_LAUNCHPAD_REPOS=(launchpad)
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream)
+HR_DEV_REPOS=(hansonrobotics/blender_api_msgs:HEAD/src hansonrobotics/blender_api:HEAD/src hansonrobotics/chatbot:HEAD/src hansonrobotics/basic_head_api:HEAD/src hansonrobotics/motors_safety:HEAD/src hansonrobotics/pau2motors:HEAD/src hansonrobotics/ros_pololu:HEAD/src hansonrobotics/webui:HEAD/src hansonrobotics/perception:HEAD/src hansonrobotics/pi_vision:HEAD/src hansonrobotics/performances:HEAD/src hansonrobotics/ros_tts:HEAD/src hansonrobotics/ttsserver:HEAD/src)
+HR_LAUNCHPAD_REPOS=(hansonrobotics/launchpad:)
+OPENCOG_DEV_REPOS=(opencog/cogutils:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/ros-behavior-scripting:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
+
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -39,6 +39,7 @@ if [[ -z $ROS_PKG_PREFIX ]]; then
     ROS_PKG_PREFIX=$HR_PREFIX/ros
 fi
 
+export HR_WORKSPACE
 export PKG_CONFIG_PATH=${HR_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HR_PREFIX/lib
 export PATH=/usr/lib/ccache:$PATH
@@ -297,6 +298,31 @@ clone() {
         git clone git@github.com:$owner/$repo.git $dest || git clone https://github.com/$owner/$repo.git $dest
         info "Cloning $repo is done"
     fi
+}
+
+_get_repo() {
+    local item=$1
+    local ore owner repo dest
+    if [[ ! $item == *:* ]]; then
+        error "Invalid repository string format: $item"
+        return 1
+    fi
+    ore=${item%:*}
+    owner=${ore%/*}
+    repo=${ore#*/}
+    dest=$HR_WORKSPACE/${item#*:}
+    clone $owner $repo ${dest%/}
+    if [[ -f ${dest%/}/$repo/.gitmodules ]]; then
+        git -C ${dest%/}/$repo submodule update --init --recursive
+    fi
+}
+
+_get_repos() {
+    local repos=$@
+    for item in ${repos[@]}
+    do
+        _get_repo ${item}
+    done
 }
 
 _list_robots() {
@@ -1802,64 +1828,21 @@ EOF
 
 get_opencog() {
     read_workspace || hr_init
-    info "Cloning OpenCog source code"
-    for repo in ${OPENCOG_REPOS[*]}
-    do
-        clone opencog $repo $HR_WORKSPACE/opencog
-    done
-    info "Cloning OpenCog source code is done"
+    git config --global credential.helper 'cache --timeout=36000'
+     _get_repos ${OPENCOG_DEV_REPOS[@]}
+    #parallel _get_repo ::: ${OPENCOG_DEV_REPOS[@]}
 }
 
 get_head() {
     read_workspace || hr_init
     git config --global credential.helper 'cache --timeout=36000'
     local role=$(read_role)
+    local repos=(${HR_LAUNCHPAD_REPOS[@]})
     if [[ $role  == "developer" ]]; then
-        info "Cloning HR source code"
-        for repo in ${HR_REPOS[*]}
-        do
-            clone hansonrobotics $repo $HR_WORKSPACE/HEAD/src
-        done
-        for repo in ${HR_OTHER_REPOS[*]}
-        do
-            clone hansonrobotics $repo $HR_WORKSPACE
-            git -C $HR_WORKSPACE/$repo submodule update --init --recursive
-        done
-        info "Cloning HR source code is done"
+        repos=(${repos[@]} ${HR_DEV_REPOS[@]})
     fi
-    for repo in ${HR_LAUNCHPAD_REPOS[*]}
-    do
-        clone hansonrobotics $repo $HR_WORKSPACE
-    done
-}
-
-_get_openface_models() {
-    MD5SUMS["nn4.small2.v1.t7"]=c95bfd8cc1adf05210e979ff623013b6
-    MD5SUMS["celeb-classifier.nn4.small2.v1.pkl"]=199a2c0d32fd0f22f14ad2d248280475
-    MD5SUMS["shape_predictor_68_face_landmarks.dat.bz2"]=677a91476056de0507f1915adc7ef86a
-    wget_cache $GITHUB_STORAGE_URL/models/nn4.small2.v1.t7
-    wget_cache $GITHUB_STORAGE_URL/models/celeb-classifier.nn4.small2.v1.pkl
-    if [[ ! -f ${HR_CACHE}/shape_predictor_68_face_landmarks.dat ]]; then
-        wget_cache $GITHUB_STORAGE_URL/models/shape_predictor_68_face_landmarks.dat.bz2
-        bunzip2 -f ${HR_CACHE}/shape_predictor_68_face_landmarks.dat.bz2
-    else
-        info "shape_predictor_68_face_landmarks.dat already exists"
-    fi
-    cp ${HR_CACHE}/shape_predictor_68_face_landmarks.dat ${HR_MODELS}
-    cp ${HR_CACHE}/nn4.small2.v1.t7 ${HR_MODELS}
-    cp ${HR_CACHE}/celeb-classifier.nn4.small2.v1.pkl ${HR_MODELS}
-}
-
-_get_marky_markov_models() {
-    wget_cache https://github.com/opencog/test-datasets/releases/download/current/markov_modeling.tar.gz
-    checkmd5 ${HR_CACHE}/markov_modeling.tar.gz 7d51bbcd4df89b2633bd9520fb99b2b7
-    mkdir -p $HR_MODELS/markov_modeling
-    tar zxf ${HR_CACHE}/markov_modeling.tar.gz -C $HR_MODELS/markov_modeling
-}
-
-get_models() {
-    _get_openface_models
-    _get_marky_markov_models
+    _get_repos ${repos[@]}
+    #parallel _get_repo ::: ${repos[@]}
 }
 
 help_get() {
@@ -1870,7 +1853,6 @@ Download components
 
     head        Download HEAD repositories
     opencog     Download OpenCog repositories
-    models      Download models for dlib landmarks, markov text generator, etc.
     voices      Download TTS voices
 EOF
 }
@@ -2159,5 +2141,6 @@ fi
 
 if [[ ! $(readlink -f ${BASH_SOURCE[0]}) == $(readlink -f $0) ]]; then return; fi
 if [[ $# == 0 ]]; then show_help; exit 0; fi
+export -f _get_repo clone info warn error
 execute $@
 ############# End of Main #############
