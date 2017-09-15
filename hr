@@ -936,66 +936,11 @@ _install_marytts() {
     unzip -qod ~/.hr/tts/marytts ${HR_CACHE}/marytts-5.1.2.zip
 }
 
-_install_misc() {
-    local pkgs=()
-
-    # For rosbridge_server
-    pkgs+=(python-bson)
-
-    # For pololu-motors
-    # DO NOT UPGRADE WITH PIP
-    pkgs+=(python-serial)
-
-    # For Blender
-    pkgs+=(python3-numpy)
-
-    # For running scripts
-    pkgs+=(tmux)
-
-    # For tts playing audio
-    pkgs+=(python-pyglet)
-
-    # For chatbot
-    pkgs+=(python-yaml)
-
-    # Swig for iflytek SDK
-    pkgs+=(swig)
-
-    # For rospy to run with python3
-    pkgs+=(python3-yaml)
-
-    # For telnet automation
-    pkgs+=(expect)
-
-    # For audio recording
-    pkgs+=(pulseaudio python-pyaudio)
-
-    # For window layout
-    pkgs+=(xdotool)
-
-    apt_get_install "${pkgs[@]}"
-
-    # For chatbot
-    pip2_install num2words
-
-    # For Chinese tts
-    pip2_install pinyin==0.2.5
-
-    # For speech2command
-    pip2_install pyparsing
-
-    # For performances
-    pip2_install transitions
-
-    # For webui
-    pip2_install flask EasyProcess psutil natsort
-}
-
 _install_test_deps() {
     apt_get_install socat
 
     # WebUI compatable webserver
-    $SUDO npm install xmlhttprequest --prefix $HR_WORKSPACE/$PROJECT/src/chatbot/scripts
+    $SUDO npm install xmlhttprequest --prefix $HR_WORKSPACE/HEAD/src/chatbot/scripts
 
     # for python test coverage
     $SUDO pip install coverage
@@ -1390,8 +1335,6 @@ install_head-deps() {
         || $SUDO apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
         || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
 
-    _install_webui_deps
-
     # setup python2.6 repository
     add_ppa ppa:fkrull/deadsnakes
     # setup ruby2.3
@@ -1404,6 +1347,8 @@ install_head-deps() {
     local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
     _download_deb_package
     _install_deb_packages ${debname} ${force}
+
+    _install_webui_deps
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
