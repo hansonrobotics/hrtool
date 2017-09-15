@@ -300,7 +300,7 @@ clone() {
     fi
 }
 
-_get_repo() {
+_parse_repo_string() {
     local item=$1
     local ore owner repo dest workdir
     if [[ ! $item == *:* ]]; then
@@ -312,25 +312,30 @@ _get_repo() {
     repo=${ore#*/}
     dest=$HR_WORKSPACE/${item#*:}
     workdir=${dest%/}/$repo
-    clone $owner $repo ${dest%/}
+    echo $owner
+    echo $repo
+    echo $workdir
+}
+
+_get_repo() {
+    local args
+    mapfile -t args <<<"$(_parse_repo_string $1)"
+    local owner=${args[0]}
+    local repo=${args[1]}
+    local workdir=${args[2]}
+    clone $owner $repo $(dirname $workdir)
     if [[ -f $workdir/.gitmodules ]]; then
         git -C $workdir submodule update --init --recursive
     fi
 }
 
 _update_repo() {
-    local item=$1
     local DEFAULT_BRANCH="master"
-    local ore owner repo dest workdir
-    if [[ ! $item == *:* ]]; then
-        error "Invalid repository string format: $item"
-        return 1
-    fi
-    ore=${item%:*}
-    owner=${ore%/*}
-    repo=${ore#*/}
-    dest=$HR_WORKSPACE/${item#*:}
-    workdir=${dest%/}/$repo
+    local args
+    mapfile -t args <<<"$(_parse_repo_string $1)"
+    local owner=${args[0]}
+    local repo=${args[1]}
+    local workdir=${args[2]}
     if [[ ! -d $workdir ]]; then
         error "Can't find repo $ore"
         return
@@ -503,21 +508,14 @@ print_repo_info() {
     local lg='git log -1 --no-merges --abbrev-commit --decorate --date=relative'
     local commit='--format=format:"%C(bold blue)%h%C(reset) %C(white)%<(50,trunc)%s%C(reset) %C(dim white)- %<(20,trunc)%an%C(reset) %C(bold green)%<(20,trunc)%ar%C(reset)"'
     local format="%-32s %-15s %s"
-
     local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
-    local ore owner repo dest workdir
+    local owner repo workdir
     printf "${format}\n" "Repository" "Branch" "Commit"
     for item in ${repos[@]}
     do
-        if [[ ! $item == *:* ]]; then
-            error "Invalid repository string format: $item"
-            return 1
-        fi
-        ore=${item%:*}
-        owner=${ore%/*}
-        repo=${ore#*/}
-        dest=$HR_WORKSPACE/${item#*:}
-        workdir=${dest%/}/$repo
+        mapfile -t args <<<"$(_parse_repo_string $item)"
+        repo=${args[1]}
+        workdir=${args[2]}
         if [[ -d $workdir ]]; then
             cd $workdir
             branch=$(git rev-parse --abbrev-ref HEAD)
@@ -1948,19 +1946,12 @@ _build_full-head() {
 
 build_opencog() {
     read_workspace
-
-    local ore owner repo dest workdir
+    local args repo workdir
     for item in ${OPENCOG_DEV_REPOS[*]}
     do
-        if [[ ! $item == *:* ]]; then
-            error "Invalid repository string format: $item"
-            return 1
-        fi
-        ore=${item%:*}
-        owner=${ore%/*}
-        repo=${ore#*/}
-        dest=$HR_WORKSPACE/${item#*:}
-        workdir=${dest%/}/$repo
+        mapfile -t args <<<"$(_parse_repo_string $item)"
+        repo=${args[1]}
+        workdir=${args[2]}
         if [[ $repo != 'relex' && \
               $repo != 'external-tools' && \
               $repo != 'ros-behavior-scripting' ]]; then
