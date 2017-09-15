@@ -15,6 +15,7 @@ HR_PREFIX=/opt/hansonrobotics
 
 HR_DEV_REPOS=(hansonrobotics/blender_api_msgs:HEAD/src hansonrobotics/blender_api:HEAD/src hansonrobotics/chatbot:HEAD/src hansonrobotics/basic_head_api:HEAD/src hansonrobotics/motors_safety:HEAD/src hansonrobotics/pau2motors:HEAD/src hansonrobotics/ros_pololu:HEAD/src hansonrobotics/webui:HEAD/src hansonrobotics/perception:HEAD/src hansonrobotics/pi_vision:HEAD/src hansonrobotics/performances:HEAD/src hansonrobotics/ros_tts:HEAD/src hansonrobotics/ttsserver:HEAD/src)
 HR_LAUNCHPAD_REPOS=(hansonrobotics/launchpad:)
+HR_OPENCOG_DEV_REPOS=(hansonrobotics/cogutils:HROpenCog hansonrobotics/atomspace:HROpenCog hansonrobotics/opencog:HROpenCog hansonrobotics/ros-behavior-scripting:HROpenCog hansonrobotics/relex:HROpenCog hansonrobotics/external-tools:HROpenCog)
 OPENCOG_DEV_REPOS=(opencog/cogutils:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/ros-behavior-scripting:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
@@ -353,6 +354,30 @@ _update_repo() {
     info "Updating [${repo}] is done"
 }
 
+_check_repo_changes() {
+    local args repo workdir branch
+    mapfile -t args <<<"$(_parse_repo_string $1)"
+    repo=${args[1]}
+    workdir=${args[2]}
+    if [[ -d $workdir ]]; then
+        branch=$(git -C $workdir rev-parse --abbrev-ref HEAD)
+        if [[ $branch != 'master' ]]; then
+            warn "HEAD branch is not master $(pwd)" 1>&2
+            return 1
+        fi
+        if [[ $(git -C $workdir status -uno --porcelain|wc -c) != 0 ]]; then
+            warn "Plese commit the change(s) $(pwd)" 1>&2
+            warn $(git -C $workdir status --porcelain) 1>&2
+            return 1
+        fi
+        if [[ $(git -C $workdir diff --name-only master origin/master|wc -c) != 0 ]]; then
+            warn "Master branch is not synchronized with origin $(pwd)" 1>&2
+            return 1
+        fi
+        info "Check $repo"
+    fi
+}
+
 _get_repos() {
     local repos=$@
     for item in ${repos[@]}
@@ -366,6 +391,14 @@ _update_repos() {
     for item in ${repos[@]}
     do
         _update_repo ${item}
+    done
+}
+
+_check_repos_changes() {
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
+    for item in ${repos[@]}
+    do
+        _check_repo_changes $item
     done
 }
 
@@ -509,7 +542,7 @@ print_repo_info() {
     local commit='--format=format:"%C(bold blue)%h%C(reset) %C(white)%<(50,trunc)%s%C(reset) %C(dim white)- %<(20,trunc)%an%C(reset) %C(bold green)%<(20,trunc)%ar%C(reset)"'
     local format="%-32s %-15s %s"
     local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
-    local owner repo workdir
+    local item args owner repo workdir
     printf "${format}\n" "Repository" "Branch" "Commit"
     for item in ${repos[@]}
     do
@@ -1840,6 +1873,12 @@ get_head() {
     #parallel _get_repo ::: ${repos[@]}
 }
 
+get_hropencog() {
+    read_workspace || hr_init
+    git config --global credential.helper 'cache --timeout=36000'
+     _get_repos ${HR_OPENCOG_DEV_REPOS[@]}
+}
+
 _get_openface_models() {
     MD5SUMS["nn4.small2.v1.t7"]=c95bfd8cc1adf05210e979ff623013b6
     MD5SUMS["celeb-classifier.nn4.small2.v1.pkl"]=199a2c0d32fd0f22f14ad2d248280475
@@ -2029,71 +2068,9 @@ Clean up components
 EOF
 }
 
-check_local_changes() {
-    read_workspace
-    for repo in ${OPENCOG_REPOS[*]}
-    do
-        if [[ -d $HR_WORKSPACE/opencog/$repo ]]; then
-            cd $HR_WORKSPACE/opencog/$repo
-            branch=$(git rev-parse --abbrev-ref HEAD)
-            if [[ $branch != 'master' ]]; then
-                warn "HEAD branch is not master $(pwd)" 1>&2
-                return 1
-            fi
-            if [[ $(git status -uno --porcelain|wc -c) != 0 ]]; then
-                warn "Plese commit the change(s) $(pwd)" 1>&2
-                warn $(git status --porcelain) 1>&2
-                return 1
-            fi
-            if [[ $(git diff --name-only master origin/master|wc -c) != 0 ]]; then
-                warn "Master branch is not synchronized with origin $(pwd)" 1>&2
-                return 1
-            fi
-        fi
-    done
-    cd $HR_WORKSPACE
-}
-
-switch_opencog_repo() {
-    read_workspace
-    DOMAIN=${1}
-    [[ -z $DOMAIN ]] && error "Wrong arguments, either hansonrobotics or opencog" && exit
-    check_local_changes || exit 1
-    warn "Switching to $DOMAIN repositories"
-    for repo in ${OPENCOG_REPOS[*]}
-    do
-        cd $HR_WORKSPACE
-        if [[ -d $HR_WORKSPACE/opencog/$repo ]]; then
-            info "Set [$repo] origin to https://github.com/$DOMAIN/$repo"
-            cd opencog/$repo
-            git remote remove old || true
-            git remote rename origin old
-            git remote add -f origin https://github.com/$DOMAIN/$repo
-            git branch master -u origin/master
-            git reset --hard origin/master
-        else
-            clone $DOMAIN $repo opencog
-        fi
-    done
-}
-
-set_normal_opencog() {
-    switch_opencog_repo hansonrobotics
-    update_opencog
-}
-
-set_dev_opencog() {
-    switch_opencog_repo opencog
-    update_opencog
-}
-
 help_cmd() {
 cat << EOF
 hr cmd <command> [args]
-
-Some useful commands:
-
-    switch_opencog_repo <hansonrobotics|opencog>        Set the upstream of OpenCog repositories
 
 EOF
 }
