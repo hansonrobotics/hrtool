@@ -302,7 +302,7 @@ clone() {
 
 _get_repo() {
     local item=$1
-    local ore owner repo dest
+    local ore owner repo dest workdir
     if [[ ! $item == *:* ]]; then
         error "Invalid repository string format: $item"
         return 1
@@ -311,10 +311,41 @@ _get_repo() {
     owner=${ore%/*}
     repo=${ore#*/}
     dest=$HR_WORKSPACE/${item#*:}
+    workdir=${dest%/}/$repo
     clone $owner $repo ${dest%/}
-    if [[ -f ${dest%/}/$repo/.gitmodules ]]; then
-        git -C ${dest%/}/$repo submodule update --init --recursive
+    if [[ -f $workdir/.gitmodules ]]; then
+        git -C $workdir submodule update --init --recursive
     fi
+}
+
+_update_repo() {
+    local item=$1
+    local DEFAULT_BRANCH="master"
+    local ore owner repo dest workdir
+    if [[ ! $item == *:* ]]; then
+        error "Invalid repository string format: $item"
+        return 1
+    fi
+    ore=${item%:*}
+    owner=${ore%/*}
+    repo=${ore#*/}
+    dest=$HR_WORKSPACE/${item#*:}
+    workdir=${dest%/}/$repo
+    if [[ ! -d $workdir ]]; then
+        error "Can't find repo $ore"
+        return
+    fi
+    branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
+    if [[ $branch != $DEFAULT_BRANCH ]]; then
+        warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
+        return
+    fi
+    info "Updating [${repo}]"
+    git -C ${workdir} pull origin $DEFAULT_BRANCH
+    if [[ -f ${workdir}/.gitmodules ]]; then
+        git -C ${workdir} submodule update --init --recursive
+    fi
+    info "Updating [${repo}] is done"
 }
 
 _get_repos() {
@@ -322,6 +353,14 @@ _get_repos() {
     for item in ${repos[@]}
     do
         _get_repo ${item}
+    done
+}
+
+_update_repos() {
+    local repos=$@
+    for item in ${repos[@]}
+    do
+        _update_repo ${item}
     done
 }
 
@@ -464,29 +503,25 @@ print_repo_info() {
     local lg='git log -1 --no-merges --abbrev-commit --decorate --date=relative'
     local commit='--format=format:"%C(bold blue)%h%C(reset) %C(white)%<(50,trunc)%s%C(reset) %C(dim white)- %<(20,trunc)%an%C(reset) %C(bold green)%<(20,trunc)%ar%C(reset)"'
     local format="%-32s %-15s %s"
+
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
+    local ore owner repo dest workdir
     printf "${format}\n" "Repository" "Branch" "Commit"
-    for repo in ${HR_REPOS[*]}
+    for item in ${repos[@]}
     do
-        if [[ -d $HR_WORKSPACE/HEAD/src/$repo ]]; then
-            cd $HR_WORKSPACE/HEAD/src/$repo
+        if [[ ! $item == *:* ]]; then
+            error "Invalid repository string format: $item"
+            return 1
+        fi
+        ore=${item%:*}
+        owner=${ore%/*}
+        repo=${ore#*/}
+        dest=$HR_WORKSPACE/${item#*:}
+        workdir=${dest%/}/$repo
+        if [[ -d $workdir ]]; then
+            cd $workdir
             branch=$(git rev-parse --abbrev-ref HEAD)
             printf "${format}\n" "$repo" "$branch" "$(eval $lg $commit)"
-        fi
-    done
-    for repo in ${HR_OTHER_REPOS[*]}
-    do
-        if [[ -d $HR_WORKSPACE/$repo ]]; then
-            cd $HR_WORKSPACE/$repo
-            branch=$(git rev-parse --abbrev-ref HEAD)
-            printf "${format}\n" "$repo" "$branch" "$(eval $lg $commit)"
-        fi
-    done
-    for repo in ${OPENCOG_REPOS[*]}
-    do
-        if [[ -d $HR_WORKSPACE/opencog/$repo ]]; then
-            cd $HR_WORKSPACE/opencog/$repo
-            branch=$(git rev-parse --abbrev-ref HEAD)
-            printf "${format}\n" "opencog/$repo" "$branch" "$(eval $lg $commit)"
         fi
     done
     echo ''
@@ -1760,58 +1795,19 @@ EOF
 update_head() {
     read_workspace
     info "Updating HEAD source code"
-    local DEFAULT_BRANCH="master"
-    for repo in ${HR_REPOS[*]}
-    do
-        if [[ ! -d $HR_WORKSPACE/HEAD/src/$repo ]]; then
-            clone hansonrobotics $repo $HR_WORKSPACE/HEAD/src
-        fi
-        cd $HR_WORKSPACE/HEAD/src/$repo
-        branch=$(git rev-parse --abbrev-ref HEAD)
-        if [[ $branch != $DEFAULT_BRANCH ]]; then
-            warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
-            continue
-        fi
-        info "Updating [${repo}]"
-        git pull origin $DEFAULT_BRANCH
-        info "Updating [${repo}] is done"
-    done
-    for repo in ${HR_OTHER_REPOS[*]}
-    do
-        if [[ ! -d $HR_WORKSPACE/$repo ]]; then
-            clone hansonrobotics $repo $HR_WORKSPACE
-            git -C $HR_WORKSPACE/$repo submodule update --init --recursive
-        fi
-        cd $HR_WORKSPACE/$repo
-        branch=$(git rev-parse --abbrev-ref HEAD)
-        if [[ $branch != $DEFAULT_BRANCH ]]; then
-            warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
-            continue
-        fi
-        info "Updating [${repo}]"
-        git pull origin $DEFAULT_BRANCH
-        git -C $HR_WORKSPACE/$repo submodule update --recursive --remote
-        info "Updating [${repo}] is done"
-    done
+    local role=$(read_role)
+    local repos=(${HR_LAUNCHPAD_REPOS[@]})
+    if [[ $role  == "developer" ]]; then
+        repos=(${repos[@]} ${HR_DEV_REPOS[@]})
+    fi
+    _update_repos ${repos[@]}
     info "Updating HEAD source code is done"
 }
 
 update_opencog() {
     read_workspace
     info "Updating OpenCog source code"
-    local DEFAULT_BRANCH="master"
-    for repo in ${OPENCOG_REPOS[*]}
-    do
-        cd $HR_WORKSPACE/opencog/$repo
-        branch=$(git rev-parse --abbrev-ref HEAD)
-        if [[ $branch != $DEFAULT_BRANCH ]]; then
-            warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
-            continue
-        fi
-        info "Updating [${repo}]"
-        git pull origin $DEFAULT_BRANCH
-        info "Updating [${repo}] is done"
-    done
+    _update_repos ${OPENCOG_DEV_REPOS[@]}
     info "Updating OpenCog source code is done"
 }
 
