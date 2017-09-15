@@ -1995,13 +1995,17 @@ clean_head() {
 
 clean_opencog() {
     read_workspace
+    local item args repo workdir
     rm -rf ~/.cache/guile
     rm -rf ~/.hr/cache/oc_aiml
     if [[ ! -z $HR_WORKSPACE ]]; then
-        for repo in ${OPENCOG_REPOS[*]}
+        for item in ${OPENCOG_DEV_REPOS[*]}
         do
+            mapfile -t args <<<"$(_parse_repo_string $item)"
+            repo=${args[1]}
+            workdir=${args[2]}
             if [[ $repo != 'relex' && $repo != 'external-tools' ]]; then
-                $SUDO rm -rf $HR_WORKSPACE/opencog/$repo/build
+                $SUDO rm -rf $workdir/build
             fi
         done
     fi
