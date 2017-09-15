@@ -4,6 +4,7 @@
    - [Initialize Workspace](#init)
    - [Install HEAD](#head)
  - [Run robot](#run)
+ - [Update hrtool](#update)
  - [Usage](#usage)
  - [Migrate from old hrtool](#migrate)
 
@@ -45,6 +46,10 @@ Run this single command to install hrtool.
 # <a name="run"></a>Run robot
 
 `hr run <robot>`
+
+# <a name="update"></a>Update hrtool
+
+`hr install head-hr`
 
 # <a name="usage"></a>Usage
 
