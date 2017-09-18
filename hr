@@ -19,7 +19,7 @@ HR_OPENCOG_DEV_REPOS=(hansonrobotics/cogutils:HROpenCog hansonrobotics/atomspace
 OPENCOG_DEV_REPOS=(opencog/cogutils:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/ros-behavior-scripting:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv)
 
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
@@ -966,23 +966,6 @@ _install_webui_deps() {
     fi
 }
 
-_install_opencv() {
-    if [[ ! -f ${HR_PREFIX}/lib/libopencv_core.so ]]; then
-        MD5SUMS["opencv-2.4.11.zip"]=32f498451bff1817a60e1aabc2939575
-        wget_cache https://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.11/opencv-2.4.11.zip
-        $SUDO rm -rf /tmp/opencv-2.4.11
-        unzip ${HR_CACHE}/opencv-2.4.11.zip -d /tmp
-        cd /tmp/opencv-2.4.11
-        mkdir build
-        cd build
-        cmake -DWITH_FFMPEG=OFF -DWITH_CUDA=OFF -DWITH_OPENCL=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${HR_PREFIX} .. && make -j4
-        $SUDO make install
-        cp install_manifest.txt  ~/.hr/opencv_installed.txt
-        $SUDO rm -rf /tmp/opencv-2.4.11
-        cd ${HR_WORKSPACE}
-    fi
-}
-
 install_calib_tools() {
     MD5SUMS["maestro-linux-150116.tar.gz"]=84feed740c0695bb0eea13ccf7988b97
     wget_cache $GITHUB_STORAGE_URL/maestro-linux-150116.tar.gz
@@ -1570,6 +1553,17 @@ install_head-ros-audio-stream() {
     _install_deb_packages ${debname} ${force}
 }
 
+install_head-opencv() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local version=2.4.13
+    local debname=head-opencv_${version}_amd64.deb
+    local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -1604,11 +1598,6 @@ uninstall_head-hr() {
 
 uninstall_head-hr-ext() {
     sudo apt-get remove head-hr-ext
-}
-
-uninstall_opencv() {
-    remove_installed_files $HOME/.hr/opencv_installed.txt
-    _remove_version opencv
 }
 
 uninstall_head-hr-msgs() {
@@ -1749,6 +1738,10 @@ uninstall_head-ros-face-recognition() {
 
 uninstall_head-ros-audio-stream() {
     sudo apt-get remove head-ros-audio-stream
+}
+
+uninstall_head-opencv() {
+    sudo apt-get remove head-opencv
 }
 
 help_uninstall() {
