@@ -950,9 +950,16 @@ _install_webui_deps() {
     # Remove npm and nodejs if needed
     # sudo npm uninstall -g npm
     # sudo apt-get remove nodejs
-
-    # See https://github.com/nodesource/distributions#debinstall
-    if ! hash nodejs; then
+    if hash nodejs; then
+        local ver=$(nodejs -v)
+        local major=$(echo ${ver#v} | cut -d. -f1)
+        if (( $major != 6 )); then
+            error "You need to remove nodejs and run again. Run these commands to remove it."
+            error "\"sudo npm uninstall -g npm; sudo apt-get remove nodejs\""
+            return 1
+        fi
+    else
+        # See https://github.com/nodesource/distributions#debinstall
         info "Installing nodejs"
         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
         apt_get_install nodejs
