@@ -741,7 +741,7 @@ hr_init() {
 cat <<EOF >>$HR_ENVFILE_PATH
 export HR_PREFIX=$HR_PREFIX
 export HR_CACHE=$HR_CACHE
-export HR_ROLE=user
+export HR_ROLE=developer
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export ROS_LOG_DIR="$HOME/.hr/log"
