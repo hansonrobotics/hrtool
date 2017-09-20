@@ -956,7 +956,7 @@ _install_webui_deps() {
         if (( $major != 6 )); then
             error "You need to remove nodejs and run again. Run these commands to remove it."
             error "\"sudo npm uninstall -g npm; sudo apt-get remove nodejs\""
-            return 1
+            exit 1
         fi
     else
         # See https://github.com/nodesource/distributions#debinstall
