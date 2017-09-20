@@ -69,3 +69,20 @@ Unfortunately, the new hrtool is not compatible with old hrtool. So in order to 
 - Delete /opt/hansonrobotics
 - Delete ~/.hr
 - Install new hrtool, following the above steps. 
+
+# <a name="troubleshooting"></a>Troubleshooting
+
+## Hash Sum mismatch
+
+If you see such errors when you do `sudo apt-get update`
+```
+W: Failed to fetch http://hk.archive.ubuntu.com/ubuntu/dists/trusty-updates/universe/source/Sources  Hash Sum mismatch
+W: Failed to fetch http://hk.archive.ubuntu.com/ubuntu/dists/trusty-updates/universe/binary-amd64/Packages  Hash Sum mismatch
+W: Failed to fetch http://hk.archive.ubuntu.com/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash Sum mismatch
+E: Some index files failed to download. They have been ignored, or old ones used instead.
+```
+Go to "System Settings" -> "Software & Updates" -> "Ubuntu Software". Then choose the "Download from" drop down menu, select "Main Server"
+
+## head-deps is not installed
+
+Uninstall nodejs if it's of version 0.10.x or older. HEAD requires nodejs to be 6.6.x or newer.
