@@ -34,6 +34,10 @@ Run this single command to install hrtool.
 4. Install head-hr-ext
 
     `hr install head-hr-ext`
+    
+5. Clean up hash
+
+    `hash -r`
 
 ## <a name="init"></a>Initialize Workspace
 
