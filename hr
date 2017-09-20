@@ -1230,6 +1230,7 @@ install_head-perception() {
 }
 
 install_head-pi-vision() {
+    install_head-opencv $@
     local prerelease
     local force
     _parse_install_options $@
