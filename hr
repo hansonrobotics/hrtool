@@ -42,7 +42,6 @@ fi
 
 export HR_WORKSPACE
 export PKG_CONFIG_PATH=${HR_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HR_PREFIX/lib
 export PATH=/usr/lib/ccache:$PATH
 
 if [[ -z $ASSUME_YES ]]; then
@@ -746,10 +745,8 @@ export HR_ROLE=developer
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export ROS_LOG_DIR="$HOME/.hr/log"
-
 export PATH=$HR_PREFIX/bin:$HR_PY2_VIRTUALENV/bin:\$PATH
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-
+export LD_LIBRARY_PATH=$HR_PREFIX/lib:\$LD_LIBRARY_PATH
 EOF
     info HR_WORKSPACE=$HR_WORKSPACE
 }
