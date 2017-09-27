@@ -21,6 +21,7 @@ HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv)
 
+DEFAULT_ROLE=developer
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
 declare -A MD5SUMS
@@ -531,7 +532,7 @@ read_role() {
         role=$(cat $HR_ENVFILE_PATH|grep "export HR_ROLE="|cut -d= -f2)
     fi
     if [[ -z $role ]]; then
-        role='user'
+        role=$DEFAULT_ROLE
     fi
     echo $role
 }
@@ -736,12 +737,13 @@ hr_cmd() {
 }
 
 hr_init() {
+    local role=$(read_role)
     set_workspace $@
     echo export HR_WORKSPACE=$HR_WORKSPACE > $HR_ENVFILE_PATH
 cat <<EOF >>$HR_ENVFILE_PATH
 export HR_PREFIX=$HR_PREFIX
 export HR_CACHE=$HR_CACHE
-export HR_ROLE=developer
+export HR_ROLE=$role
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export ROS_LOG_DIR="$HOME/.hr/log"
