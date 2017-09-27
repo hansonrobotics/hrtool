@@ -356,9 +356,9 @@ _update_repo() {
     if [[ $branch != "master" ]]; then
         warn "[${repo}] Branch is \"${branch}\""
     fi
-    if [[ $(git -C $workdir status -uno --porcelain|wc -c) != 0 ]]; then
+    if [[ $(git -C $workdir status -uno --porcelain --ignore-submodules|wc -c) != 0 ]]; then
         warn "Plese commit the change(s) $workdir" 1>&2
-        echo $(git -C $workdir status -uno --porcelain) 1>&2
+        echo $(git -C $workdir status -uno --porcelain --ignore-submodules) 1>&2
         return
     fi
     git -C ${workdir} rebase origin/$branch >/dev/null || (warn "Update [${repo}] failed. Abort" && git -C ${workdir} rebase --abort && return)
