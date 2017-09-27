@@ -331,7 +331,6 @@ _get_repo() {
 }
 
 _update_repo() {
-    local DEFAULT_BRANCH="master"
     local args
     mapfile -t args <<<"$(_parse_repo_string $1)"
     local owner=${args[0]}
@@ -343,12 +342,12 @@ _update_repo() {
         return
     fi
     branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
-    if [[ $branch != $DEFAULT_BRANCH ]]; then
-        warn "[${repo}] Branch is not (${DEFAULT_BRANCH}) branch (${branch}). Skip."
+    if [[ $branch != "master" ]]; then
+        warn "[${repo}] Branch is \"${branch}\""
         return
     fi
     info "Updating [${repo}]"
-    git -C ${workdir} pull origin $DEFAULT_BRANCH
+    git -C ${workdir} pull origin $branch
     if [[ -f ${workdir}/.gitmodules ]]; then
         git -C ${workdir} submodule update --init --recursive
     fi
