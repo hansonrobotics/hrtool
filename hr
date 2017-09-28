@@ -296,9 +296,32 @@ clone() {
         info "$dest already exists"
     else
         info "Cloning $repo"
-        git clone git@github.com:$owner/$repo.git $dest || git clone https://github.com/$owner/$repo.git $dest
+        git clone https://github.com/$owner/$repo.git $dest
         info "Cloning $repo is done"
     fi
+}
+
+_set_git_protocal() {
+    local protocal=$1
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
+    local args owner repo workdir branch
+    for item in ${repos[@]}; do
+        mapfile -t args <<<"$(_parse_repo_string $item)"
+        owner=${args[0]}
+        repo=${args[1]}
+        workdir=${args[2]}
+        if [[ -d $workdir ]]; then
+            git -C $workdir remote set-url origin $protocal${owner}/${repo}
+        fi
+    done
+}
+
+use_git_ssh() {
+    _set_git_protocal "git@github.com:"
+}
+
+use_git_https() {
+    _set_git_protocal "https://github.com/"
 }
 
 _parse_repo_string() {
