@@ -842,6 +842,7 @@ install_head() {
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
     get_models
     get_head
+    use_git_https
     if [[ $role  == "developer" ]]; then
         build_head
     fi
