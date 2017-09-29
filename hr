@@ -989,8 +989,8 @@ _install_webui_deps() {
     # Remove npm and nodejs if needed
     # sudo npm uninstall -g npm
     # sudo apt-get remove nodejs
-    if hash nodejs; then
-        local ver=$(nodejs -v)
+    if hash node; then
+        local ver=$(node -v)
         local major=$(echo ${ver#v} | cut -d. -f1)
         if (( $major != 6 )); then
             error "You need to remove nodejs and run again. Run these commands to remove it."
