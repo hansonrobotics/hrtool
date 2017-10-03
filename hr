@@ -1193,6 +1193,7 @@ install_head-saliency-tracker() {
 }
 
 install_head-chatbot() {
+    install_head-data $@
     local prerelease
     local force
     _parse_install_options $@
@@ -1410,7 +1411,6 @@ install_head-deps() {
     install_head-performances $@
     install_head-ros-misc $@
     install_head-ros-tts $@
-    install_head-data $@
     install_head-ros-emotion $@
 }
 
