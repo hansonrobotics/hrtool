@@ -575,7 +575,7 @@ print_repo_info() {
     local commit='--format=format:"%C(bold blue)%h%C(reset) %C(white)%<(50,trunc)%s%C(reset) %C(dim white)- %<(20,trunc)%an%C(reset) %C(bold green)%<(20,trunc)%ar%C(reset)"'
     local format="%-32s %-15s %s"
     local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
-    local item args owner repo workdir
+    local item args owner repo workdir branch
     printf "${format}\n" "Repository" "Branch" "Commit"
     for item in ${repos[@]}
     do
@@ -585,6 +585,9 @@ print_repo_info() {
         if [[ -d $workdir ]]; then
             cd $workdir
             branch=$(git rev-parse --abbrev-ref HEAD)
+            if [[ $(git status -uno --porcelain --ignore-submodules|wc -c) != 0 ]]; then
+                branch="* $branch"
+            fi
             printf "${format}\n" "$repo" "$branch" "$(eval $lg $commit)"
         fi
     done
