@@ -876,6 +876,13 @@ install_head() {
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
     get_models
     get_head
+    local protocal=$(read_git_protocal)
+    if [[ $protocal == 'ssh' ]]; then
+        use_git_ssh
+    else
+        use_git_https
+    fi
+    local role=$(read_role)
     if [[ $role  == "developer" ]]; then
         build_head
     fi
