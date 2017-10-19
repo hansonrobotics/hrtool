@@ -360,7 +360,7 @@ _fetch_repo() {
     local owner=${args[0]}
     local repo=${args[1]}
     local workdir=${args[2]}
-    info "Fetching [$owner/$repo]" && git -C ${workdir} fetch
+    echo "Fetching [$owner/$repo]" && git -C ${workdir} fetch
 }
 
 _update_repo() {
@@ -1813,11 +1813,13 @@ update_head() {
     read_workspace
     info "Updating HEAD source code"
     local role=$(read_role)
-    local repos=(${HR_LAUNCHPAD_REPOS[@]})
+    for repo in ${HR_LAUNCHPAD_REPOS[@]}; do
+        _fetch_repo $repo
+    done
     if [[ $role  == "developer" ]]; then
-        repos=(${repos[@]} ${HR_DEV_REPOS[@]})
+        parallel -j$(nproc) _fetch_repo ::: ${HR_DEV_REPOS[@]}
     fi
-    parallel -j$(nproc) _fetch_repo ::: ${repos[@]}
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
     _update_repos ${repos[@]}
     info "Updating HEAD source code is done"
 }
