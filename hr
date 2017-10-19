@@ -22,6 +22,7 @@ HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv)
 
 DEFAULT_ROLE=developer
+DEFAULT_GIT_PROTOCAL=https
 GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
 GITHUB_STORAGE2_URL=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
 declare -A MD5SUMS
@@ -296,7 +297,12 @@ clone() {
         info "$dest already exists"
     else
         info "Cloning $repo"
-        git clone https://github.com/$owner/$repo.git $dest
+        local protocal=$(read_git_protocal)
+        if [[ $protocal == 'ssh' ]]; then
+            git clone git@github.com:$owner/$repo.git $dest
+        else
+            git clone https://github.com/$owner/$repo.git $dest
+        fi
         info "Cloning $repo is done"
     fi
 }
@@ -318,10 +324,20 @@ _set_git_protocal() {
 
 use_git_ssh() {
     _set_git_protocal "git@github.com:"
+    if grep "export GIT_PROTOCAL" ${HR_ENVFILE_PATH} 1>/dev/null 2>&1; then
+        sed -i "s#export GIT_PROTOCAL=.*#export GIT_PROTOCAL=ssh#" ${HR_ENVFILE_PATH}
+    else
+        echo "export GIT_PROTOCAL=ssh" >> ${HR_ENVFILE_PATH}
+    fi
 }
 
 use_git_https() {
     _set_git_protocal "https://github.com/"
+    if grep "export GIT_PROTOCAL" ${HR_ENVFILE_PATH} 1>/dev/null 2>&1; then
+        sed -i "s#export GIT_PROTOCAL=.*#export GIT_PROTOCAL=https#" ${HR_ENVFILE_PATH}
+    else
+        echo "export GIT_PROTOCAL=https" >> ${HR_ENVFILE_PATH}
+    fi
 }
 
 _parse_repo_string() {
@@ -569,6 +585,22 @@ read_role() {
     echo $role
 }
 
+read_git_protocal() {
+    local protocal
+    if [[ -f $HR_ENVFILE_PATH ]]; then
+        protocal=$(cat $HR_ENVFILE_PATH|grep "export GIT_PROTOCAL="|cut -d= -f2)
+    fi
+    if [[ -z $protocal ]]; then
+        protocal=$DEFAULT_GIT_PROTOCAL
+        if [[ $protocal == 'ssh' ]]; then
+            use_git_ssh
+        else
+            use_git_https
+        fi
+    fi
+    echo $protocal
+}
+
 print_repo_info() {
     read_workspace >/dev/null
     local lg='git log -1 --no-merges --abbrev-commit --decorate --date=relative'
@@ -773,12 +805,14 @@ hr_cmd() {
 
 hr_init() {
     local role=$(read_role)
+    local protocal=$(read_git_protocal)
     set_workspace $@
     echo export HR_WORKSPACE=$HR_WORKSPACE > $HR_ENVFILE_PATH
 cat <<EOF >>$HR_ENVFILE_PATH
 export HR_PREFIX=$HR_PREFIX
 export HR_CACHE=$HR_CACHE
 export HR_ROLE=$role
+export GIT_PROTOCAL=$protocal
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export ROS_LOG_DIR="$HOME/.hr/log"
@@ -842,7 +876,6 @@ install_head() {
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
     get_models
     get_head
-    use_git_https
     if [[ $role  == "developer" ]]; then
         build_head
     fi
@@ -1813,13 +1846,20 @@ update_head() {
     read_workspace
     info "Updating HEAD source code"
     local role=$(read_role)
-    for repo in ${HR_LAUNCHPAD_REPOS[@]}; do
-        _fetch_repo $repo
-    done
+    local protocal=$(read_git_protocal)
+    local repos=(${HR_LAUNCHPAD_REPOS[@]})
     if [[ $role  == "developer" ]]; then
-        parallel -j$(nproc) _fetch_repo ::: ${HR_DEV_REPOS[@]}
+        local repos=(${repos[@]} ${HR_DEV_REPOS[@]})
     fi
-    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
+    if [[ $protocal == 'ssh' ]]; then
+        parallel -j$(nproc) _fetch_repo ::: ${repos[@]}
+    else
+        echo "Hint: Add github ssh key 'https://help.github.com/articles/connecting-to-github-with-ssh/'"
+        echo "Hint: and then run 'hr cmd use_git_ssh' to speed up"
+        for repo in ${repos[@]}; do
+            _fetch_repo $repo
+        done
+    fi
     _update_repos ${repos[@]}
     info "Updating HEAD source code is done"
 }
