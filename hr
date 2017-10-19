@@ -1845,14 +1845,14 @@ EOF
 
 get_opencog() {
     read_workspace || hr_init
-    git config --global credential.helper 'cache --timeout=36000'
+    git config --global credential.helper 'cache --timeout=86400'
      _get_repos ${OPENCOG_DEV_REPOS[@]}
     #parallel _get_repo ::: ${OPENCOG_DEV_REPOS[@]}
 }
 
 get_head() {
     read_workspace || hr_init
-    git config --global credential.helper 'cache --timeout=36000'
+    git config --global credential.helper 'cache --timeout=86400'
     local role=$(read_role)
     local repos=(${HR_LAUNCHPAD_REPOS[@]})
     if [[ $role  == "developer" ]]; then
@@ -1864,7 +1864,7 @@ get_head() {
 
 get_hropencog() {
     read_workspace || hr_init
-    git config --global credential.helper 'cache --timeout=36000'
+    git config --global credential.helper 'cache --timeout=86400'
      _get_repos ${HR_OPENCOG_DEV_REPOS[@]}
 }
 
