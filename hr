@@ -1406,6 +1406,10 @@ install_head-deps() {
         || $SUDO apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
         || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
 
+    # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+    echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+
     # setup python2.6 repository
     add_ppa ppa:fkrull/deadsnakes
     # setup ruby2.3
@@ -1420,6 +1424,8 @@ install_head-deps() {
     _install_deb_packages ${debname} ${force}
 
     _install_webui_deps
+
+    apt_get_install mongodb-org
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
