@@ -393,7 +393,7 @@ _update_repo() {
     branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
     info "Updating [${owner}/${repo}:${branch}]"
     if [[ $(git -C $workdir status -uno --porcelain --ignore-submodules|wc -c) != 0 ]]; then
-        warn "Plese commit the change(s) $workdir" 1>&2
+        warn "Abort updating. You have unstaged change(s) $workdir" 1>&2
         echo $(git -C $workdir status -uno --porcelain --ignore-submodules) 1>&2
         return
     fi
