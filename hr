@@ -1032,7 +1032,7 @@ _install_webui_deps() {
     if hash node; then
         local ver=$(node -v)
         local major=$(echo ${ver#v} | cut -d. -f1)
-        if (( $major != 6 )); then
+        if (( $major < 6 )); then
             error "You need to remove nodejs and run again. Run these commands to remove it."
             error "\"sudo npm uninstall -g npm; sudo apt-get remove nodejs\""
             exit 1
@@ -1309,7 +1309,7 @@ install_head-perception() {
 }
 
 install_head-pi-vision() {
-    #install_head-opencv $@
+    install_head-opencv $@
     local prerelease
     local force
     _parse_install_options $@
@@ -1426,6 +1426,7 @@ install_head-deps() {
     _install_webui_deps
 
     apt_get_install mongodb-org
+    apt_get_install openexr # For fixing opencv missing libIlmImf* issue
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
