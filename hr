@@ -962,19 +962,19 @@ _install_nltk() {
 }
 
 _install_link_grammar() {
-    MD5SUMS["link-grammar-5.3.13.tar.gz"]=d519ff9f404bbda5bfe229839272d91c
-    wget_cache $GITHUB_STORAGE_URL/link-grammar-5.3.13.tar.gz
-
-    $SUDO rm -rf /tmp/link-grammar-5.3.13
-    tar -zxf ${HR_CACHE}/link-grammar-5.3.13.tar.gz -C /tmp
-    mkdir -p /tmp/link-grammar-5.3.13/build
-    cd /tmp/link-grammar-5.3.13/build
+    MD5SUMS["link-grammar-5.4.2.tar.gz"]=4b9151522e12b800470c800cdf08853b
+    wget_cache $GITHUB_STORAGE_URL/link-grammar-5.4.2.tar.gz
+`
+    $SUDO rm -rf /tmp/link-grammar-5.4.2
+    tar -zxf ${HR_CACHE}/link-grammar-5.4.2.tar.gz -C /tmp
+    mkdir -p /tmp/link-grammar-5.4.2/build
+    cd /tmp/link-grammar-5.4.2/build
     JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/default-java}
     ../configure
     make -j$(nproc)
     $SUDO make install
     $SUDO ldconfig
-    $SUDO rm -rf /tmp/link-grammar-5.3.13
+    $SUDO rm -rf /tmp/link-grammar-5.4.2
     cd $BASEDIR
 }
 
