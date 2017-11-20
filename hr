@@ -867,6 +867,8 @@ hr_role() {
     for arg in $@; do
         local func=role_${arg}
         eval $func
+        role=$(read_role)
+        info "The new role is \"${role}\""
     done
 }
 
