@@ -861,6 +861,8 @@ hr_stop() {
 }
 
 hr_role() {
+    local role=$(read_role)
+    info "The current role is \"${role}\""
     validate_component_args role $@
     for arg in $@; do
         local func=role_${arg}
