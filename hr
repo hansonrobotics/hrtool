@@ -1041,6 +1041,11 @@ _install_webui_deps() {
         # See https://github.com/nodesource/distributions#debinstall
         info "Installing nodejs"
         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+        local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}' nodejs 2>/dev/null)
+        if [[ ${pkg_status:1:1} == 'i' ]]; then
+            info "Removing old nodejs"
+            $SUDO apt-get remove -y nodejs
+        fi
         apt_get_install nodejs
         info "Installing nodejs done"
     fi
