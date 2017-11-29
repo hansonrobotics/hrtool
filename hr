@@ -968,7 +968,6 @@ _install_nltk() {
 _install_link_grammar() {
     MD5SUMS["link-grammar-5.4.2.tar.gz"]=4b9151522e12b800470c800cdf08853b
     wget_cache $GITHUB_STORAGE_URL/link-grammar-5.4.2.tar.gz
-`
     $SUDO rm -rf /tmp/link-grammar-5.4.2
     tar -zxf ${HR_CACHE}/link-grammar-5.4.2.tar.gz -C /tmp
     mkdir -p /tmp/link-grammar-5.4.2/build
