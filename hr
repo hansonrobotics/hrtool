@@ -452,16 +452,14 @@ _check_repos_changes() {
 }
 
 _list_robots() {
-    for f in $(find $1 -name config.yaml); do
-        if grep "botname" $f>/dev/null; then
-            echo $f | awk -F/ '{print $(NF-1)}'
-        fi
+    for f in $(find $1 -name assembly.launch); do
+        echo $f | awk -F/ '/heads/{print $(NF-1)}'
     done
 }
 
 list_robots() {
     read_workspace >/dev/null
-    _list_robots $HR_LAUNCHPAD_DIR/robots_config
+    _list_robots $HR_LAUNCHPAD_DIR/configs
 }
 
 list_installed() {
