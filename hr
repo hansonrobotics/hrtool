@@ -1420,7 +1420,8 @@ install_head-deps() {
     add_ppa ppa:fkrull/deadsnakes
     # setup ruby2.3
     add_ppa ppa:brightbox/ruby-ng
-    add_ppa ppa:irie/blender
+    remove_ppa ppa:irie/blender
+    add_ppa ppa:thomas-schiex/blender
     $SUDO apt-get update
 
     local version=0.1.2
