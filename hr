@@ -209,7 +209,7 @@ add_ppa() {
 }
 
 remove_ppa() {
-    $SUDO add-apt-repository -yr $1
+    $SUDO add-apt-repository -y --remove $1
 }
 
 curl_cache() {
