@@ -829,7 +829,7 @@ hr_env() {
 }
 
 hr_version() {
-    dpkg-query -W -f='${Package} ${Status} ${Version}\n' head-*|grep "installed"|awk '{print $1 "=" $NF}'|sort
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' ${HEAD_PACKAGES[*]} 2>/dev/null |grep "installed"|awk '{print $1 "=" $NF}'|sort
     echo ''
     print_repo_info
 }
