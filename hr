@@ -427,6 +427,34 @@ _check_repo_changes() {
     fi
 }
 
+_check_deps() {
+    filename="$1"
+    local dir commit workdir branches curr_branch
+    if [[ ! -f $filename ]]; then
+        error "The filename \"$filename\" doesn't exist"
+        exit 1
+    fi
+    read_workspace >/dev/null
+    if [[ -z $HR_WORKSPACE ]]; then
+        error "No HR_WORKSPACE"
+        exit 1
+    fi
+    while read -r line
+    do
+        dir=$(echo $line|cut -d: -f1)
+        commit=$(echo $line|cut -d: -f2)
+        workdir=$HR_WORKSPACE/$dir
+        curr_branch=$(git -C $workdir rev-parse --abbrev-ref HEAD)
+        echo git -C $workdir branch --contains $commit 2>/dev/null
+        branches=$(git -C $workdir branch --contains $commit 2>/dev/null || true)
+        echo "$branches"
+        #if [[ "$curr_branch" != "$branches" ]]; then
+        #    error "The repo \"$workdir\" needs to update"
+        #    exit 1
+        #fi
+    done < "$filename"
+}
+
 _get_repos() {
     local repos=$@
     for item in ${repos[@]}
