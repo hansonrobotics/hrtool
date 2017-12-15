@@ -450,12 +450,19 @@ _check_deps() {
         fi
         dir=$(echo $line|cut -d: -f1)
         commit=$(echo $line|cut -d: -f2)
+        workdir=$HR_WORKSPACE/$dir
+        if [[ ! -d $workdir ]]; then
+            error "Repo \"$workdir\" doesn't exist"
+            return 1
+        fi
+        curr_branch=$(git -C $workdir rev-parse --abbrev-ref HEAD || true)
+        if [[ -z $curr_branch ]]; then
+            error "Can't find branch for repo $dir"
+            return 1
+        fi
         if [[ -z $commit ]]; then
-            warn "Empty commit for $dir"
             continue
         fi
-        workdir=$HR_WORKSPACE/$dir
-        curr_branch=$(git -C $workdir rev-parse --abbrev-ref HEAD)
         branches=$(git -C $workdir branch --contains $commit 2>/dev/null | grep $curr_branch |sed 's/* //' || true)
         if [[ "$curr_branch" != "$branches" ]]; then
             error "The repo in \"$workdir\" requires $commit"
