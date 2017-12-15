@@ -2202,6 +2202,43 @@ Some useful commands:
 EOF
 }
 
+create_depends() {
+    local branch_name=$1
+    if [[ -z $branch_name ]]; then
+        error "Please provide branch name"
+        return 1
+    fi
+    read_workspace
+    local role=$(read_role)
+    if [[ $role != 'developer' ]]; then
+        error "Should be in developer mode"
+        return 1
+    fi
+    local dep_file=/tmp/${branch_name}.deps
+    >$dep_file
+    local repos=(${HR_DEV_REPOS[@]})
+    local args owner repo workdir branch tag
+    for item in ${repos[@]}; do
+        mapfile -t args <<<"$(_parse_repo_string $item)"
+        owner=${args[0]}
+        repo=${args[1]}
+        workdir=${args[2]}
+        tag=${item#*:}/$repo
+        if [[ -d $workdir ]]; then
+            branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
+            if [[ $branch == $branch_name ]]; then
+                echo ${tag}:$(git -C $workdir rev-parse HEAD) >>${dep_file}
+            fi
+        fi
+    done
+    if [[ -s ${dep_file} ]]; then
+        info "Depends file is created ${dep_file}"
+    else
+        rm ${dep_file}
+        warn "No depends file is created"
+    fi
+}
+
 ############# End of Functions #############
 
 ############# Main #############
