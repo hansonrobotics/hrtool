@@ -2223,7 +2223,7 @@ create_depends() {
     fi
     local dep_file=/tmp/${branch_name}.deps
     >$dep_file
-    local repos=(${HR_DEV_REPOS[@]})
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
     local args owner repo workdir branch tag
     for item in ${repos[@]}; do
         mapfile -t args <<<"$(_parse_repo_string $item)"
@@ -2258,7 +2258,7 @@ push_repos() {
         error "Should be in developer mode"
         return 1
     fi
-    local repos=(${HR_DEV_REPOS[@]})
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
     local args owner repo workdir branch
     local push=0
     for item in ${repos[@]}; do
