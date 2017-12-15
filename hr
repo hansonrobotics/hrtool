@@ -66,16 +66,16 @@ COLOR_WARN='\033[33m'
 COLOR_ERROR='\033[31m'
 COLOR_RESET='\033[0m'
 info() {
-    printf "${COLOR_INFO}[INFO] ${1}${COLOR_RESET}\n"
+    printf "${COLOR_INFO}${1}${COLOR_RESET}\n"
 }
 warn() {
-    printf "${COLOR_WARN}[WARN] ${1}${COLOR_RESET}\n"
+    printf "${COLOR_WARN}${1}${COLOR_RESET}\n" 1>&2
 }
 error() {
-    printf "${COLOR_ERROR}[ERROR] ${1}${COLOR_RESET}\n"
+    printf "${COLOR_ERROR}${1}${COLOR_RESET}\n" 1>&2
 }
 fail() {
-    printf "${COLOR_ERROR}[ERROR] ${1}${COLOR_RESET}\n" && return 1
+    printf "${COLOR_ERROR}${1}${COLOR_RESET}\n" 1>&2 && return 1
 }
 
 SUDO=""
@@ -2223,7 +2223,7 @@ create_depends() {
     fi
     local dep_file=/tmp/${branch_name}.deps
     >$dep_file
-    local repos=(${HR_DEV_REPOS[@]})
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
     local args owner repo workdir branch tag
     for item in ${repos[@]}; do
         mapfile -t args <<<"$(_parse_repo_string $item)"
@@ -2239,11 +2239,11 @@ create_depends() {
         fi
     done
     if [[ -s ${dep_file} ]]; then
-        info "Depends file is created ${dep_file}"
+        cat ${dep_file}
     else
-        rm ${dep_file}
-        warn "No depends file is created"
+        warn "No depends are found"
     fi
+    rm ${dep_file}
 }
 
 push_repos() {
@@ -2258,7 +2258,7 @@ push_repos() {
         error "Should be in developer mode"
         return 1
     fi
-    local repos=(${HR_DEV_REPOS[@]})
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
     local args owner repo workdir branch
     local push=0
     for item in ${repos[@]}; do
