@@ -448,8 +448,8 @@ _check_deps() {
         if [[ -z $line ]]; then
             continue
         fi
-        dir=$(echo $line|cut -d: -f1)
-        commit=$(echo $line|cut -d: -f2)
+        dir=$(echo $line|awk -F: '{print $1}')
+        commit=$(echo $line|awk -F: '{print $2}')
         workdir=$HR_WORKSPACE/$dir
         if [[ ! -d $workdir ]]; then
             error "Repo \"$workdir\" doesn't exist"
