@@ -2239,11 +2239,11 @@ create_depends() {
         fi
     done
     if [[ -s ${dep_file} ]]; then
-        info "Depends file is created ${dep_file}"
+        cat ${dep_file}
     else
-        rm ${dep_file}
-        warn "No depends file is created"
+        warn "No depends are found"
     fi
+    rm ${dep_file}
 }
 
 push_repos() {
