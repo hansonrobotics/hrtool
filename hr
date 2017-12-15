@@ -66,16 +66,16 @@ COLOR_WARN='\033[33m'
 COLOR_ERROR='\033[31m'
 COLOR_RESET='\033[0m'
 info() {
-    printf "${COLOR_INFO}[INFO] ${1}${COLOR_RESET}\n"
+    printf "${COLOR_INFO}${1}${COLOR_RESET}\n"
 }
 warn() {
-    printf "${COLOR_WARN}[WARN] ${1}${COLOR_RESET}\n"
+    printf "${COLOR_WARN}${1}${COLOR_RESET}\n" 1>&2
 }
 error() {
-    printf "${COLOR_ERROR}[ERROR] ${1}${COLOR_RESET}\n"
+    printf "${COLOR_ERROR}${1}${COLOR_RESET}\n" 1>&2
 }
 fail() {
-    printf "${COLOR_ERROR}[ERROR] ${1}${COLOR_RESET}\n" && return 1
+    printf "${COLOR_ERROR}${1}${COLOR_RESET}\n" 1>&2 && return 1
 }
 
 SUDO=""
