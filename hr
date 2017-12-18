@@ -376,7 +376,9 @@ _fetch_repo() {
     local owner=${args[0]}
     local repo=${args[1]}
     local workdir=${args[2]}
-    echo "Fetching [$owner/$repo]" && git -C ${workdir} fetch
+    if [[ -d $workdir ]]; then
+        echo "Fetching [$owner/$repo]" && git -C ${workdir} fetch
+    fi
 }
 
 _update_repo() {
