@@ -4,6 +4,8 @@ log() {
     printf "$(date +'%Y-%m-%d %H:%M:%S') ${1}\n"
 }
 
+export GITHUB_TOKEN=fdaa6c9ef8a0208f5722ed415d231d486c487741
+log "Starting"
 while true; do
     sleep 1
     ping -c 1 google.com>/dev/null || continue
@@ -18,7 +20,7 @@ while true; do
             log "Update head-hr from \"${curr_ver}\" to \"${newest_ver#v}\""
             hr install head-hr
         else
-            log "Update declined. Sleep one day"
+            log "Update failed. Sleep one day"
             sleep 86400
         fi
     else
@@ -38,7 +40,7 @@ while true; do
                 log "Update head-hr-ext from \"${curr_ext_ver}\" to \"${newest_ext_ver#v}\""
                 hr install head-hr-ext
             else
-                log "Update declined. Sleep one day"
+                log "Update failed. Sleep one day"
                 sleep 86400
             fi
         else
