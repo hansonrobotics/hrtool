@@ -4,8 +4,11 @@ log() {
     printf "$(date +'%Y-%m-%d %H:%M:%S') ${1}\n"
 }
 
-export GITHUB_TOKEN=fdaa6c9ef8a0208f5722ed415d231d486c487741
 log "Starting"
+log "HOME=$HOME"
+if [[ -z $GITHUB_TOKEN && -e $HOME/.bashrc ]]; then
+    export GITHUB_TOKEN=$(cat $HOME/.bashrc|grep "GITHUB_TOKEN="|cut -d= -f2)
+fi
 while true; do
     sleep 1
     ping -c 1 google.com>/dev/null || continue
