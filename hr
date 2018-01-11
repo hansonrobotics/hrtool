@@ -474,7 +474,15 @@ _check_deps() {
     info "Checking dependency pass"
 }
 
+_get_git() {
+    if ! hash git; then
+        apt_get_install git
+    fi
+}
+
 _get_repos() {
+    _get_git
+    git config --global credential.helper 'cache --timeout=86400'
     local repos=$@
     for item in ${repos[@]}
     do
