@@ -7,6 +7,7 @@
 set -e
 
 BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+OS_VERSION=$(lsb_release --codename --short)
 
 ############# Configurations #############
 DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
@@ -964,7 +965,7 @@ setup_venv() {
     $SUDO virtualenv -p /usr/bin/python3 $HR_PY3_VIRTUALENV
 }
 
-_install_ros() {
+_install_ros_indigo() {
     $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
     $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net --recv-key 0xB01FA116
     local pkgs=(
@@ -994,6 +995,42 @@ _install_ros() {
     if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
         $SUDO rosdep init -q
         rosdep update -q
+    fi
+}
+
+_install_ros_kinetic() {
+    $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+    $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+    local pkgs=(
+        ros-kinetic-desktop
+        ros-kinetic-openni-camera
+        ros-kinetic-usb-cam
+        ros-kinetic-dynamixel-motor
+        ros-kinetic-rosbridge-server
+        python-catkin-tools
+    )
+
+    # for camera calibration
+    pkgs+=(ros-kinetic-image-proc)
+
+    apt_get_install "${pkgs[@]}"
+
+    # for blender to find ros packages
+    pip3_install rospkg catkin_pkg
+
+    if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
+        $SUDO rosdep init -q
+        rosdep update -q
+    fi
+}
+
+_install_ros() {
+    if [[ $OS_VERSION == 'trusty' ]]; then
+        _install_ros_indigo
+    else
+        if [[ $OS_VERSION == 'xenial' ]]; then
+            _install_ros_kinetic
+        fi
     fi
 }
 
@@ -1979,7 +2016,6 @@ get_opencog() {
 
 get_head() {
     read_workspace || hr_init
-    git config --global credential.helper 'cache --timeout=86400'
     local role=$(read_role)
     local repos=(${HR_LAUNCHPAD_REPOS[@]})
     if [[ $role  == "developer" ]]; then
@@ -2332,8 +2368,8 @@ execute() {
     esac
 }
 
-if [[ ! $(lsb_release --codename --short) == "trusty" ]]; then
-    error "Error: Only Ubuntu 14.04 (trusty) is supported" >&2
+if [[ ! ${OS_VERSION} == "trusty" && ! ${OS_VERSION} == "xenial" ]]; then
+    error "Error: Only Ubuntu 14.04 (trusty) and Ubuntu 16.04 (xenial) are supported" >&2
     exit 1
 fi
 
