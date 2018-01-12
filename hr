@@ -1573,6 +1573,57 @@ install_head-deps() {
         install_head-ros-misc $@
         install_head-ros-tts $@
         install_head-ros-emotion $@
+    else if [[ $OS_VERSION == 'xenial' ]]; then
+        # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+        echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+        # setup python2.6 repository for cereproc
+        add_ppa ppa:fkrull/deadsnakes
+        add_ppa ppa:thomas-schiex/blender
+
+        $SUDO apt-get update
+
+        local version=0.1.0
+        local debname=head-deps-xenial-all_${version}_amd64.deb
+        local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
+        _download_deb_package
+        _install_deb_packages ${debname} ${force}
+
+        _install_webui_deps
+        apt_get_install mongodb-org
+
+        # for blender to find ros packages
+        pip3_install rospkg catkin_pkg
+
+        pip2_install \
+            rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
+            pinyin==0.2.5 pyparsing transitions flask EasyProcess \
+            psutil natsort apiai numexpr
+
+        install_head-hr-msgs $@
+        install_head-saliency-tracker $@
+        install_head-chatbot $@
+        install_head-ros-audio-stream $@
+        install_head-python-ttsserver $@
+        install_head-python-pololu-motors $@
+        install_head-marky-markov $@
+        install_head-pocketsphinx $@
+        install_head-festival-api $@
+        install_head-dynamixel-motor $@
+        install_head-webui $@
+        install_head-blender-api $@
+        install_head-blender-api-msgs $@
+        install_head-ros-pololu $@
+        install_head-motors-safety $@
+        install_head-basic-head-api $@
+        install_head-pau2motors $@
+        install_head-perception $@
+        install_head-pi-vision $@
+        install_head-performances $@
+        install_head-ros-misc $@
+        install_head-ros-tts $@
+        install_head-ros-emotion $@
+    fi
     fi
 
 }
