@@ -2156,11 +2156,11 @@ _build_head() {
     TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
     rm -rf $TARGET/roscom*
     info "Installing blender roscom"
-    pip3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
+    $PIP3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
 
     rm -rf $TARGET/ttsserver*
     info "Installing ttsserver"
-    pip install -t $TARGET $HR_WORKSPACE/HEAD/src/ttsserver --no-deps
+    $PIP2 install -t $TARGET $HR_WORKSPACE/HEAD/src/ttsserver --no-deps
 }
 
 build_head() {
