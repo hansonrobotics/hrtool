@@ -1625,7 +1625,6 @@ install_head-deps() {
         install_head-basic-head-api $@
         install_head-pau2motors $@
         install_head-perception $@
-        install_head-pi-vision $@
         install_head-performances $@
         install_head-ros-misc $@
         install_head-ros-tts $@
@@ -2179,6 +2178,9 @@ build_head() {
         rt_audio_ros
         speech2command
         icog_face_tracker
+        faceshift_puppeteering
+        pi_vision
+        pi_face_tracker_gui
     )
     _build_head ${blacklist[@]}
     _build_webui-js
