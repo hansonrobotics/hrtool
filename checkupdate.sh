@@ -16,6 +16,7 @@ while true; do
     newest_ver=$(hr cmd get_latest_version hansonrobotics/hrtool)
     if [[ -z $newest_ver ]]; then
         log "Can't find newest hrtool version"
+        sleep 600
         continue
     fi
     if dpkg --compare-versions $curr_ver lt ${newest_ver#v}; then
@@ -29,7 +30,7 @@ while true; do
     else
         log "No update for head-hr available"
         curr_ext_ver=$(dpkg-query -W -f='${Version}\n' head-hr-ext)
-        if [[ -z curr_ext_ver ]]; then
+        if [[ -z $curr_ext_ver ]]; then
             log "hrtool-ext is not installed"
             continue
         fi
