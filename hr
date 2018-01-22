@@ -1559,11 +1559,11 @@ install_head-deps() {
         install_head-hr-msgs $@
         install_head-saliency-tracker $@
         install_head-chatbot $@
-        install_head-ros-audio-stream $@
+        install_head-pocketsphinx $@
+        install_head-ros-audio-stream $@ # depends on head-pocketsphinx
         install_head-python-ttsserver $@
         install_head-python-pololu-motors $@
         install_head-marky-markov $@
-        install_head-pocketsphinx $@
         install_head-festival-api $@
         install_head-dynamixel-motor $@
         install_head-webui $@
@@ -1610,11 +1610,11 @@ install_head-deps() {
         install_head-hr-msgs $@
         install_head-saliency-tracker $@
         install_head-chatbot $@
-        install_head-ros-audio-stream $@
+        install_head-pocketsphinx $@
+        install_head-ros-audio-stream $@ # depends on head-pocketsphinx
         install_head-python-ttsserver $@
         install_head-python-pololu-motors $@
         install_head-marky-markov $@
-        install_head-pocketsphinx $@
         install_head-festival-api $@
         install_head-dynamixel-motor $@
         install_head-webui $@
@@ -2137,9 +2137,11 @@ _build_head() {
     read_workspace
     cd $HR_WORKSPACE/HEAD
     if [[ $OS_VERSION == 'trusty' ]]; then
+        info "Using trusty"
         source /opt/ros/indigo/setup.bash
     else
         if [[ $OS_VERSION == 'xenial' ]]; then
+            info "Using xenial"
             source /opt/ros/kinetic/setup.bash
         fi
     fi
