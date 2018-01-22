@@ -1214,7 +1214,13 @@ _dpkg_install() {
         return 1
     fi
     if ! $SUDO dpkg -i "${debname}"; then
-        sudo apt-get install -yf --force-yes
+        if [[ $OS_VERSION == 'trusty' ]]; then
+            sudo apt-get install -yf --force-yes
+        else
+            if [[ $OS_VERSION == 'xenial' ]]; then
+                sudo apt-get install -yf --allow-unauthenticated
+            fi
+        fi
     fi
 
     # Check package version
