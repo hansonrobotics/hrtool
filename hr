@@ -1545,6 +1545,7 @@ install_head-deps() {
         apt_get_install mongodb-org
         apt_get_install openexr # For fixing opencv missing libIlmImf* issue
 
+        apt_get_install git-lfs
         # for blender to find ros packages
         pip3_install rospkg catkin_pkg
 
@@ -1583,7 +1584,10 @@ install_head-deps() {
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
         echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-        # add_ppa ppa:fkrull/deadsnakes # python2.6 repository for cereproc
+        # git-lfs repo
+        git_lfs_gpg_key_url="https://packagecloud.io/github/git-lfs/gpgkey"
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "${git_lfs_gpg_key_url}" 2> /dev/null | sudo apt-key add - &>/dev/null
         remove_ppa ppa:fkrull/deadsnakes
         remove_ppa ppa:irie/blender
         add_ppa ppa:thomas-schiex/blender
@@ -1598,7 +1602,7 @@ install_head-deps() {
 
         _install_webui_deps
         apt_get_install mongodb-org
-
+        apt_get_install git-lfs
         # for blender to find ros packages
         pip3_install rospkg catkin_pkg
 
