@@ -19,6 +19,7 @@ HR_LAUNCHPAD_REPOS=(hansonrobotics/launchpad:)
 HR_OPENCOG_DEV_REPOS=(hansonrobotics/cogutils:HROpenCog hansonrobotics/atomspace:HROpenCog hansonrobotics/opencog:HROpenCog hansonrobotics/ros-behavior-scripting:HROpenCog hansonrobotics/relex:HROpenCog hansonrobotics/external-tools:HROpenCog)
 OPENCOG_DEV_REPOS=(opencog/cogutil:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/ros-behavior-scripting:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
+HR_CONFIGS_DIR=$HR_LAUNCHPAD_DIR/configs
 
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv)
 
@@ -513,9 +514,20 @@ _list_robots() {
     done
 }
 
+_list_bodies() {
+    for f in $(find $1 -name assembly.launch); do
+        echo $f | awk -F/ '/bodies/{print $(NF-1)}'
+    done
+}
+
 list_robots() {
-    read_workspace >/dev/null
-    _list_robots $HR_LAUNCHPAD_DIR/configs
+    read_workspace > /dev/null
+    _list_robots $HR_CONFIGS_DIR
+}
+
+list_bodies() {
+    read_workspace > /dev/null
+    _list_bodies $HR_CONFIGS_DIR
 }
 
 list_installed() {
@@ -617,7 +629,7 @@ read_workspace() {
             error "HR_WORKSPACE is not found in ${HR_ENVFILE_PATH}. Please re-run \"hr init\""
             return 1
         else
-            HR_WORKSPACE=${str#export HR_WORKSPACE=}
+            export HR_WORKSPACE=${str#export HR_WORKSPACE=}
             update_env_vars
         fi
         if [[ ! -d $HR_WORKSPACE ]]; then
