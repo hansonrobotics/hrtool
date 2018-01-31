@@ -34,6 +34,10 @@ Run this single command to install hrtool.
 4. Install head-hr-ext
 
     `hr install head-hr-ext`
+    
+4a. To install pre-release versions of hrtool and hrtool-ext (for testing and development) purposes
+    
+    `hr install -p head-hr`
 
 5. Clean up hash
 
