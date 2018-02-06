@@ -2101,11 +2101,9 @@ _build_head() {
     read_workspace
     cd $HR_WORKSPACE/HEAD
     if [[ $OS_VERSION == 'trusty' ]]; then
-        info "Using trusty"
         source /opt/ros/indigo/setup.bash
     else
         if [[ $OS_VERSION == 'xenial' ]]; then
-            info "Using xenial"
             source /opt/ros/kinetic/setup.bash
         fi
     fi
@@ -2148,6 +2146,10 @@ build_head() {
         pi_vision
         pi_face_tracker_gui
     )
+
+    if [[ ${OS_VERSION} == "trusty" ]]; then
+        blacklist+=(cv_bridge)
+    fi
     _build_head ${blacklist[@]}
     _build_webui-js
 }
