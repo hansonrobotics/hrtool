@@ -472,7 +472,6 @@ _check_deps() {
             return 1
         fi
     done < "$filename"
-    info "Checking dependency pass"
 }
 
 _get_git() {
@@ -904,7 +903,6 @@ hr_run() {
                 local file
                 find depends -type f -print0 | while read -d $'\0' file
                 do
-                    info "Checking $file"
                     if [[ -f $file ]]; then
                         _check_deps $file
                     fi
@@ -1526,6 +1524,9 @@ install_head-deps() {
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
         echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+        # https://packagecloud.io/github/git-lfs/install git-lfs repo
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
         # setup python2.6 repository
         # add_ppa ppa:fkrull/deadsnakes
         # setup ruby2.3
@@ -1539,55 +1540,16 @@ install_head-deps() {
         local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
         _download_deb_package
         _install_deb_packages ${debname} ${force}
-
-        _install_webui_deps
-
-        apt_get_install mongodb-org
-        apt_get_install openexr # For fixing opencv missing libIlmImf* issue
-
-        apt_get_install git-lfs
-        # for blender to find ros packages
-        pip3_install rospkg catkin_pkg
-
-        pip2_install \
-            rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
-            pinyin==0.2.5 pyparsing transitions flask EasyProcess \
-            psutil natsort apiai numexpr
-
         wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
         $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
 
-        install_head-hr-msgs $@
-        install_head-saliency-tracker $@
-        install_head-chatbot $@
-        install_head-pocketsphinx $@
-        install_head-ros-audio-stream $@ # depends on head-pocketsphinx
-        install_head-python-ttsserver $@
-        install_head-python-pololu-motors $@
-        install_head-marky-markov $@
-        install_head-festival-api $@
-        install_head-dynamixel-motor $@
-        install_head-webui $@
-        install_head-blender-api $@
-        install_head-blender-api-msgs $@
-        install_head-ros-pololu $@
-        install_head-motors-safety $@
-        install_head-basic-head-api $@
-        install_head-pau2motors $@
-        install_head-perception $@
-        install_head-pi-vision $@
-        install_head-performances $@
-        install_head-ros-misc $@
-        install_head-ros-tts $@
-        install_head-ros-emotion $@
-    else if [[ $OS_VERSION == 'xenial' ]]; then
+    elif [[ $OS_VERSION == 'xenial' ]]; then
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-        echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-        # git-lfs repo
-        git_lfs_gpg_key_url="https://packagecloud.io/github/git-lfs/gpgkey"
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+        echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+        # https://packagecloud.io/github/git-lfs/install git-lfs repo
         echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
-        curl -L "${git_lfs_gpg_key_url}" 2> /dev/null | sudo apt-key add - &>/dev/null
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
         remove_ppa ppa:fkrull/deadsnakes
         remove_ppa ppa:irie/blender
         add_ppa ppa:thomas-schiex/blender
@@ -1600,42 +1562,40 @@ install_head-deps() {
         _download_deb_package
         _install_deb_packages ${debname} ${force}
 
-        _install_webui_deps
-        apt_get_install mongodb-org
-        apt_get_install git-lfs
-        # for blender to find ros packages
-        pip3_install rospkg catkin_pkg
-
-        pip2_install \
-            rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
-            pinyin==0.2.5 pyparsing transitions flask EasyProcess \
-            psutil natsort apiai numexpr
-
-        install_head-hr-msgs $@
-        install_head-saliency-tracker $@
-        install_head-chatbot $@
-        install_head-pocketsphinx $@
-        install_head-ros-audio-stream $@ # depends on head-pocketsphinx
-        install_head-python-ttsserver $@
-        install_head-python-pololu-motors $@
-        install_head-marky-markov $@
-        install_head-festival-api $@
-        install_head-dynamixel-motor $@
-        install_head-webui $@
-        install_head-blender-api $@
-        install_head-blender-api-msgs $@
-        install_head-ros-pololu $@
-        install_head-motors-safety $@
-        install_head-basic-head-api $@
-        install_head-pau2motors $@
-        install_head-perception $@
-        install_head-performances $@
-        install_head-ros-misc $@
-        install_head-ros-tts $@
-        install_head-ros-emotion $@
     fi
-    fi
+    _install_webui_deps
+    apt_get_install mongodb-org git-lfs openssh-server
 
+    # for blender to find ros packages
+    pip3_install rospkg catkin_pkg
+    pip2_install \
+        rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
+        pinyin==0.2.5 pyparsing transitions flask EasyProcess \
+        psutil natsort apiai numexpr
+
+    install_head-hr-msgs $@
+    install_head-saliency-tracker $@
+    install_head-chatbot $@
+    install_head-pocketsphinx $@
+    install_head-ros-audio-stream $@ # depends on head-pocketsphinx
+    install_head-python-ttsserver $@
+    install_head-python-pololu-motors $@
+    install_head-marky-markov $@
+    install_head-festival-api $@
+    install_head-dynamixel-motor $@
+    install_head-webui $@
+    install_head-blender-api $@
+    install_head-blender-api-msgs $@
+    install_head-ros-pololu $@
+    install_head-motors-safety $@
+    install_head-basic-head-api $@
+    install_head-pau2motors $@
+    install_head-perception $@
+    install_head-pi-vision $@
+    install_head-performances $@
+    install_head-ros-misc $@
+    install_head-ros-tts $@
+    install_head-ros-emotion $@
 }
 
 install_head-sphinxbase() {
