@@ -46,6 +46,10 @@ _hr() {
         local args=$(hr cmd list_robots 2> /dev/null)
         COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
       fi
+      if (( ${cword} == 3 )); then
+        local args=$(hr cmd list_bodies 2> /dev/null)
+        COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
+      fi
       ;;
     *)
       if (( ${cword} >= 2 )); then
