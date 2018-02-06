@@ -620,6 +620,7 @@ set_workspace() {
 
 update_env_vars() {
     HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
+    HR_CONFIGS_DIR=$HR_WORKSPACE/launchpad/robots_config
 }
 
 read_workspace() {
@@ -629,7 +630,7 @@ read_workspace() {
             error "HR_WORKSPACE is not found in ${HR_ENVFILE_PATH}. Please re-run \"hr init\""
             return 1
         else
-            export HR_WORKSPACE=${str#export HR_WORKSPACE=}
+            HR_WORKSPACE=${str#export HR_WORKSPACE=}
             update_env_vars
         fi
         if [[ ! -d $HR_WORKSPACE ]]; then
