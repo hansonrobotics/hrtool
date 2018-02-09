@@ -1604,7 +1604,7 @@ install_head-deps() {
     install_head-basic-head-api $@
     install_head-pau2motors $@
     install_head-perception $@
-    install_head-pi-vision $@
+    #install_head-pi-vision $@
     install_head-performances $@
     install_head-ros-misc $@
     install_head-ros-tts $@
