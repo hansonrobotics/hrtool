@@ -1584,7 +1584,8 @@ install_head-deps() {
     pip2_install \
         rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
         pinyin==0.2.5 pyparsing transitions flask EasyProcess \
-        psutil natsort apiai numexpr
+        psutil natsort apiai numexpr \
+        future six
 
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
