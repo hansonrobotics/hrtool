@@ -2130,7 +2130,11 @@ _build_head() {
         catkin config --blacklist $@
     fi
     catkin build --force-cmake -j$(nproc) --no-status --make-args install
+    build_head_python
+}
 
+build_head_python() {
+    read_workspace
     TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
     rm -rf $TARGET/roscom*
     info "Installing blender roscom"
