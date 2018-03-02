@@ -1166,7 +1166,7 @@ _install_webui_deps() {
         info "Installing nodejs done"
     fi
     if ! npm ls -g webpack >/dev/null; then
-        $SUDO npm install -g webpack
+        $SUDO npm install -g webpack@3.X
     fi
     if ! npm ls -g nodemon >/dev/null; then
         $SUDO npm install -g nodemon
