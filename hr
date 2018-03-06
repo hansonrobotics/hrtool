@@ -187,6 +187,17 @@ pip3_install() {
     $SUDO $PIP3 install $@
 }
 
+pip36_install() {
+    [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
+    $SUDO python3.6 -m pip install $@
+}
+
+pip36_uninstall() {
+    [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
+    $SUDO $PIP3 install $@
+}
+
+
 
 pip3_uninstall() {
     [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
@@ -1568,7 +1579,8 @@ install_head-deps() {
         add_ppa ppa:thomas-schiex/blender
 
         $SUDO apt-get update
-
+        apt_get_install python3.6
+        pip36_install numpy
         local version=0.1.0
         local debname=head-deps-xenial-all_${version}_amd64.deb
         local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
@@ -1578,7 +1590,7 @@ install_head-deps() {
     fi
     _install_webui_deps
     apt_get_install mongodb-org git-lfs openssh-server
-
+    pkgs+=(ros-indigo-image-proc)
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
     pip2_install \
