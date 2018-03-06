@@ -194,7 +194,7 @@ pip36_install() {
 
 pip36_uninstall() {
     [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
-    $SUDO $PIP3 install $@
+    $SUDO python3.6 -m pip uninstall $@
 }
 
 
@@ -1590,7 +1590,7 @@ install_head-deps() {
     fi
     _install_webui_deps
     apt_get_install mongodb-org git-lfs openssh-server
-    pkgs+=(ros-indigo-image-proc)
+
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg
     pip2_install \
