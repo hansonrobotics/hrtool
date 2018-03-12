@@ -1534,7 +1534,8 @@ install_head-deps() {
         || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
 
     # setup HEAD repository
-    $SUDO sh -c 'echo "deb https://s3-ap-northeast-2.amazonaws.com/dl.hansonrobotics.com stable $(lsb_release -sc)" > /etc/apt/sources.list.d/head-latest.list'
+    $SUDO sh -c 'echo "deb https://s3.ap-northeast-2.amazonaws.com/dl.hansonrobotics.com stable main" >/etc/apt/sources.list.d/head-latest.list'
+    $SUDO sh -c 'echo "deb https://s3.ap-northeast-2.amazonaws.com/dl.hansonrobotics.com stable $(lsb_release -sc)" >>/etc/apt/sources.list.d/head-latest.list'
     $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AADAAD53
 
     if [[ $OS_VERSION == 'trusty' ]]; then
