@@ -1611,6 +1611,7 @@ install_head-deps() {
     install_head-ros-misc $@
     install_head-ros-tts $@
     install_head-ros-emotion $@
+    install_head-python-dynamixel-lib $@
 }
 
 install_head-sphinxbase() {
@@ -1791,6 +1792,18 @@ install_head-ros-audio-stream() {
     local repo=hansonrobotics/audio_stream
     local version=$(get_latest_version $repo $prerelease)
     local debname=head-ros-audio-stream_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
+install_head-python-dynamixel-lib() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/DynamixelSDK
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-python-dynamixel-lib_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
     _install_deb_packages ${debname} ${force}
