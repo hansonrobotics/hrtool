@@ -530,7 +530,7 @@ list_bodies() {
 }
 
 list_installed() {
-    dpkg-query -W -f='${Package} ${Status}\n' head-*|grep "installed"|awk '{print $1}'|sort
+    dpkg-query -W -f='${Package} ${Status}\n' ${HEAD_PACKAGES[*]}|grep "installed"|awk '{print $1}'|sort
 }
 
 list_components() {
