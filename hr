@@ -969,13 +969,6 @@ install_head() {
     fi
 }
 
-setup_venv() {
-    apt_get_install python-pip
-    $SUDO pip2 install virtualenv
-    $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-    $SUDO virtualenv -p /usr/bin/python3 $HR_PY3_VIRTUALENV
-}
-
 _install_ros_indigo() {
     $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
     $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net --recv-key 0xB01FA116
@@ -1526,7 +1519,6 @@ install_head-deps() {
     local force
     _parse_install_options $@
 
-    setup_venv
     # setup ROS repository
     $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
     $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
@@ -1547,6 +1539,11 @@ install_head-deps() {
         add_ppa ppa:irie/blender
 
         $SUDO apt-get update
+
+        apt_get_install python-pip
+        $SUDO pip2 install virtualenv
+        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
+        $SUDO virtualenv -p /usr/bin/python3 $HR_PY3_VIRTUALENV
 
         local version=0.1.2
         local debname=head-deps-all_${version}_amd64.deb
@@ -1569,6 +1566,11 @@ install_head-deps() {
 
         $SUDO apt-get update
 
+        apt_get_install python-pip python3.6
+        $SUDO pip2 install virtualenv
+        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
+        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
+
         local version=0.1.0
         local debname=head-deps-xenial-all_${version}_amd64.deb
         local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
@@ -1576,11 +1578,12 @@ install_head-deps() {
         _install_deb_packages ${debname} ${force}
 
     fi
+
     _install_webui_deps
     apt_get_install mongodb-org git-lfs openssh-server
 
     # for blender to find ros packages
-    pip3_install rospkg catkin_pkg
+    pip3_install rospkg catkin_pkg numpy
     pip2_install \
         rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
         pinyin==0.2.5 pyparsing transitions flask EasyProcess \
