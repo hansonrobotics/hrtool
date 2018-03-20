@@ -1589,7 +1589,8 @@ install_head-deps() {
         pinyin==0.2.5 pyparsing transitions flask EasyProcess \
         psutil natsort apiai numexpr \
         future six \
-        MySQL-python SQLAlchemy
+        MySQL-python SQLAlchemy \
+        bs4
 
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
