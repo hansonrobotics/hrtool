@@ -949,6 +949,14 @@ hr_role() {
     done
 }
 
+hr_python() {
+    $HR_PY2_VIRTUALENV/bin/python $@
+}
+
+hr_python3() {
+    $HR_PY3_VIRTUALENV/bin/python $@
+}
+
 ############# End of Entries #############
 
 ############# Functions #############
@@ -2423,12 +2431,15 @@ Usage: hr <command> [<args>]
     env                                     Show HR environment variables
     role                                    Set HR role
     version                                 Show version
+    python                                  Run HEAD Python interpreter
+    python3                                 Run HEAD Python3 interpreter
+
 EOF
 }
 
 execute() {
     case "$1" in
-        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role)
+        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role|python|python3)
             command=$1
             shift
             hr_${command} $@
