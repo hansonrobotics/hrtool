@@ -51,6 +51,11 @@ _hr() {
         COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
       fi
       ;;
+    python|python3)
+      if (( ${cword} >= 2 )); then
+        _filedir '@(py)'
+      fi
+      ;;
     *)
       if (( ${cword} >= 2 )); then
         COMPREPLY=()
