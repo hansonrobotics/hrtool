@@ -469,7 +469,7 @@ _check_deps() {
         fi
         branches=$(git -C $workdir branch --contains $commit 2>/dev/null | grep $curr_branch |sed 's/* //' || true)
         if [[ "$curr_branch" != "$branches" ]]; then
-            error "The repo in \"$workdir\" requires $commit"
+            error "The repo in \"$workdir\" requires $commit. Please update the repo."
             return 1
         fi
     done < "$filename"
@@ -2358,6 +2358,7 @@ create_depends() {
         repo=${args[1]}
         workdir=${args[2]}
         tag=${item#*:}/$repo
+        tag=${tag#/}
         if [[ -d $workdir ]]; then
             branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
             if [[ $branch == $branch_name ]]; then
