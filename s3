@@ -30,12 +30,6 @@ import socket
 import ssl
 from configobj import ConfigObj
 
-RETRIES = 3
-
-
-def wait_time(c):
-    return pow(2, c) - 1
-
 RETRIES = 5
 
 
@@ -49,8 +43,9 @@ class AWSCredentials(object):
     on to deal with boto/aws config provided keys
     """
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None, region_file=None):
         self.conf_file = config_file
+        self.region_file = region_file
         host = 'http://169.254.169.254'
         path = '/latest/meta-data/iam/security-credentials/'
         self.meta_data_uri = urlparse.urljoin(host, path)
@@ -93,13 +88,15 @@ class AWSCredentials(object):
             SecretAccessKey = mysecretkey
             Token = '' # this can/have to be empty
         """
-
         # Checking if 'file' exists, if it does read it
-        if os.path.isfile(os.path.expanduser(self.conf_file)):
-            config = ConfigObj(os.path.expanduser(self.conf_file))
-            return config
+        if os.path.isfile(os.path.expanduser(self.region_file)):
+            config = ConfigObj(os.path.expanduser(self.region_file))
         else:
-            raise Exception("Config file: %s doesn't exist" % self.conf_file)
+            raise Exception("Region file: %s doesn't exist" % self.region_file)
+        if os.path.isfile(os.path.expanduser(self.conf_file)):
+            config.merge(ConfigObj(os.path.expanduser(self.conf_file)))
+
+        return config
 
     def get_credentials(self):
         """
@@ -117,7 +114,6 @@ class AWSCredentials(object):
         self.region = data.get('Region', 'us-east-1')
         if self.region is None or self.region == '':
             raise Exception("Region required")
-        sys.stderr.write("Region: {}\n".format(self.region))
 
         if data.get("AccessKeyId") is not None:
             sys.stderr.write("Using config file for credentials\n")
@@ -129,46 +125,9 @@ class AWSCredentials(object):
             if data.get("AccessKeyId") is not None:
                 sys.stderr.write("Using environment variables for credentials\n")
 
-        if data.get("AccessKeyId") is None:
-            self.__get_role()
-            request = urllib2.Request(
-                urlparse.urljoin(self.meta_data_uri, self.iamrole)
-            )
-
-            response = None
-
-            for i in range(0, RETRIES):
-                try:
-                    response = urllib2.urlopen(request, None, 30)
-                    data = json.loads(response.read())
-                    break
-                except ssl.SSLError as e:
-                    if 'timed out' in e.message:
-                        time.sleep(wait_time(i + 1))
-                    else:
-                        raise e
-                except socket.timeout:
-                    time.sleep(wait_time(i + 1))
-                except urllib2.URLError as e:
-                    if hasattr(e, 'reason'):
-                        raise Exception("URL error reason: %s" % e.reason)
-                    elif hasattr(e, 'code'):
-                        raise Exception("Server error code: %s" % e.code)
-                finally:
-                    if response:
-                        response.close()
-            else:
-                raise Exception("GetCredentials request timed out")
-
-        self.access_key = data['AccessKeyId']
-        if self.access_key is None or self.access_key == '':
-            raise Exception("AccessKeyId required")
-
-        self.secret_key = data['SecretAccessKey']
-        if self.secret_key is None or self.secret_key == '':
-            raise Exception("SecretAccessKey required")
-
-        self.token = data['Token']
+        self.access_key = data.get('AccessKeyId')
+        self.secret_key = data.get('SecretAccessKey')
+        self.token = data.get('Token')
 
     def v4Sign(self, key, msg):
         return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
@@ -243,9 +202,9 @@ class AWSCredentials(object):
 
         canonical_request = self._canonical_request(request, host, amzdate)
 
-        authorization_header = self._authorization_header(canonical_request, amzdate)
-
-        request.add_header('Authorization', authorization_header)
+        if self.access_key and self.secret_key:
+            authorization_header = self._authorization_header(canonical_request, amzdate)
+            request.add_header('Authorization', authorization_header)
 
         return request
 
@@ -359,8 +318,9 @@ class APTMessage(object):
 class S3_method(object):
     __eof = False
 
-    def __init__(self, config_file='/etc/apt/s3auth.conf'):
-        self.iam = AWSCredentials(config_file)
+    def __init__(self, config_file='/etc/apt/s3auth.conf',
+            region_file='/etc/apt/s3region.conf'):
+        self.iam = AWSCredentials(config_file, region_file)
         self.iam.get_credentials()
         self.send_capabilities()
 
@@ -552,4 +512,4 @@ if __name__ == '__main__':
         ret = method.run()
         sys.exit(ret)
     except KeyboardInterrupt:
-        pass
+        sys.exit()
