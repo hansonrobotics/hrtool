@@ -1544,14 +1544,15 @@ install_head-deps() {
         # add_ppa ppa:fkrull/deadsnakes
         # setup ruby2.3
         add_ppa ppa:brightbox/ruby-ng
-        add_ppa ppa:irie/blender
+        remove_ppa ppa:irie/blender
+        add_ppa ppa:thomas-schiex/blender
 
         $SUDO apt-get update
 
-        apt_get_install python-pip
+        apt_get_install python-pip python3.6
         $SUDO pip2 install virtualenv
         $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-        $SUDO virtualenv -p /usr/bin/python3 $HR_PY3_VIRTUALENV
+        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
 
         local version=0.1.2
         local debname=head-deps-all_${version}_amd64.deb
