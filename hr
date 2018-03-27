@@ -1549,12 +1549,68 @@ install_head-deps() {
 
         $SUDO apt-get update
 
-        apt_get_install python-pip python3.6
+        local pkgs=(
+            blender
+            build-essential
+            expect
+            festival
+            festival-dev
+            gfortran
+            git
+            libatlas-base-dev
+            libblas-dev
+            liblapack-dev
+            libopencv-dev
+            openvpn
+            portaudio19-dev
+            pulseaudio
+            python-bson
+            python-catkin-pkg
+            python-catkin-tools
+            python-flask
+            python-opencv
+            python-pip
+            python-pyaudio
+            python-pyglet
+            python-rospkg
+            python-serial
+            python-yaml
+            python3-pip
+            ros-indigo-cv-bridge
+            ros-indigo-desktop
+            ros-indigo-driver-common
+            ros-indigo-dynamixel-motor
+            ros-indigo-geometry-msgs
+            ros-indigo-image-proc
+            ros-indigo-image-transport
+            ros-indigo-joint-state-publisher
+            ros-indigo-message-runtime
+            ros-indigo-mjpeg-server
+            ros-indigo-openni-camera
+            ros-indigo-robot-state-publisher
+            ros-indigo-rosbridge-server
+            ros-indigo-roscpp
+            ros-indigo-rospy
+            ros-indigo-sensor-msgs
+            ros-indigo-std-msgs
+            ros-indigo-tf
+            ros-indigo-usb-cam
+            ruby2.3
+            ruby2.3-dev
+            software-properties-common
+            swig
+            telnet
+            tmux
+            wget
+            xdotool
+        )
+
+        apt_get_install "${pkgs[@]}"
         $SUDO pip2 install virtualenv
         $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
         $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
 
-        local version=0.1.2
+        local version=0.2.0
         local debname=head-deps-all_${version}_amd64.deb
         local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
         _download_deb_package
@@ -1575,24 +1631,68 @@ install_head-deps() {
 
         $SUDO apt-get update
 
-        apt_get_install python-pip python3.6
+        local pkgs=(
+            bc
+            blender
+            build-essential
+            expect
+            festival
+            festival-dev
+            gfortran
+            git
+            libatlas-base-dev
+            libblas-dev
+            liblapack-dev
+            libopencv-dev
+            openvpn
+            portaudio19-dev
+            pulseaudio
+            python-bson
+            python-catkin-pkg
+            python-catkin-tools
+            python-flask
+            python-opencv
+            python-pip
+            python-pyaudio
+            python-pyglet
+            python-rospkg
+            python-serial
+            python3-pip
+            python3.6
+            ros-kinetic-desktop
+            ros-kinetic-dynamixel-motor
+            ros-kinetic-image-proc
+            ros-kinetic-opencv-apps
+            ros-kinetic-openni-camera
+            ros-kinetic-rosbridge-server
+            ros-kinetic-usb-cam
+            ruby2.3
+            ruby2.3-dev
+            software-properties-common
+            swig
+            telnet
+            tmux
+            wget
+            xdotool
+        )
+        apt_get_install "${pkgs[@]}"
+
         $SUDO pip2 install virtualenv
         $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
         $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
 
-        local version=0.1.0
+        local version=0.2.0
         local debname=head-deps-xenial-all_${version}_amd64.deb
         local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
         _download_deb_package
         _install_deb_packages ${debname} ${force}
-
     fi
 
     _install_webui_deps
     apt_get_install mongodb-org git-lfs openssh-server
 
     # for blender to find ros packages
-    pip3_install rospkg catkin_pkg numpy
+    pip3_install rospkg catkin_pkg numpy pyyaml
     pip2_install \
         rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
         pinyin==0.2.5 pyparsing transitions flask EasyProcess \
