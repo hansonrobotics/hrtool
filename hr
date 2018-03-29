@@ -394,16 +394,22 @@ _update_repo() {
         _get_repo $1
         return
     fi
+    local prev_commit=$(git -C ${workdir} rev-parse --short HEAD)
     branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
-    info "Updating [${owner}/${repo}:${branch}]"
     if [[ $(git -C $workdir status -uno --porcelain --ignore-submodules|wc -c) != 0 ]]; then
-        warn "Abort updating. You have unstaged change(s) $workdir" 1>&2
+        warn "Updating [${owner}/${repo}] branch [${branch}] aborted."
+        warn "You have unstaged change(s) $workdir" 1>&2
         echo $(git -C $workdir status -uno --porcelain --ignore-submodules) 1>&2
         return
     fi
     git -C ${workdir} rebase origin/$branch >/dev/null || (warn "Update [${repo}] failed. Abort" && git -C ${workdir} rebase --abort && return)
     if [[ -f ${workdir}/.gitmodules ]]; then
         git -C ${workdir} submodule update --init --recursive
+    fi
+
+    local commit=$(git -C ${workdir} rev-parse --short HEAD)
+    if [[ $commit != $prev_commit ]]; then
+        info "Updated [${owner}/${repo}] branch [${branch}] from $prev_commit to $commit"
     fi
 }
 
