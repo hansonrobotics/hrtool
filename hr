@@ -368,7 +368,8 @@ _get_repo() {
     local workdir=${args[2]}
     clone $owner $repo $(dirname $workdir)
     if [[ -f $workdir/.gitmodules ]]; then
-        git -C $workdir submodule update --init --recursive
+        git -C ${workdir} submodule sync
+        git -C ${workdir} submodule update --init --recursive
     fi
 }
 
@@ -404,6 +405,7 @@ _update_repo() {
     fi
     git -C ${workdir} rebase origin/$branch >/dev/null || (warn "Update [${repo}] failed. Abort" && git -C ${workdir} rebase --abort && return)
     if [[ -f ${workdir}/.gitmodules ]]; then
+        git -C ${workdir} submodule sync
         git -C ${workdir} submodule update --init --recursive
     fi
 
