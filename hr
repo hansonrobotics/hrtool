@@ -1584,6 +1584,7 @@ install_head-deps() {
             python-serial
             python-yaml
             python3-pip
+            python3.6
             ros-indigo-cv-bridge
             ros-indigo-desktop
             ros-indigo-driver-common
