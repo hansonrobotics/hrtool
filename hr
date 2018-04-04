@@ -443,11 +443,11 @@ _check_deps() {
     filename="$1"
     local dir commit workdir branches curr_branch
     if [[ -z $filename ]]; then
-        return
+        return 1
     fi
     if [[ ! -f $filename ]]; then
         error "The filename \"$filename\" doesn't exist"
-        return
+        return 1
     fi
     read_workspace >/dev/null
     if [[ -z $HR_WORKSPACE ]]; then
@@ -456,10 +456,50 @@ _check_deps() {
     fi
     while read -r line
     do
-        line=$(echo $line|sed -e 's/^[[:space:]]*$//')
-        if [[ -z $line ]]; then
+        line=$(echo $line|sed -e 's/[[:space:]]*$//g;s/^[[:space:]]*//g')
+        [[ -z $line ]] && continue
+        [[ ${line} == \#* ]] && continue
+
+        # check python packages
+        if [[ ${line} == python* ]]; then
+            local pip curr_ver package package_name required_ver satisfied
+            [[ ${line} == python:* ]] && pip=$PIP2
+            [[ ${line} == python2:* ]] && pip=$PIP2
+            [[ ${line} == python3:* ]] && pip=$PIP3
+            [[ -z $pip ]] && continue
+            package=$(echo $line|cut -d: -f2)
+            if [[ $package == *=* ]]; then
+                if [[ $package == *\>=* ]]; then
+                    package_name=${package%\>=*}
+                    required_ver=${package#*\>=}
+                elif [[ $package == *==* ]]; then
+                    package_name=${package%==*}
+                    required_ver=${package#*==}
+                fi
+                if ! $pip show $package_name &>/dev/null; then
+                    error "Python package \"$package_name\" is required"
+                    return 1
+                fi
+                curr_ver=$($pip show $package_name|grep Version|cut -d" " -f2)
+                if [[ $package == *\>=* ]]; then
+                    satisfied=$(python -c "from pkg_resources import parse_version; print parse_version('$curr_ver') >= parse_version('$required_ver')")
+                elif [[ $package == *==* ]]; then
+                    satisfied=$(python -c "from pkg_resources import parse_version; print parse_version('$curr_ver') == parse_version('$required_ver')")
+                fi
+                if [[ $satisfied != "True" ]]; then
+                    error "The version of Python package \"$package_name\" is not satisfied"
+                    error "Current version \"$curr_ver\". Required version \"$required_ver\""
+                    return 1
+                fi
+            else
+                if ! $pip show $package &>/dev/null; then
+                    error "Python package \"$package\" is required but not found"
+                    return 1
+                fi
+            fi
             continue
         fi
+
         dir=$(echo $line|awk -F: '{print $1}')
         commit=$(echo $line|awk -F: '{print $2}')
         workdir=$HR_WORKSPACE/$dir
@@ -919,18 +959,23 @@ hr_run() {
             ./main.sh --autoname --nogui $@
             ;;
         developer)
+            local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
+            local args owner repo workdir branch
+            for item in ${repos[@]}; do
+                mapfile -t args <<<"$(_parse_repo_string $item)"
+                owner=${args[0]}
+                repo=${args[1]}
+                workdir=${args[2]}
+                if [[ -d ${workdir}/depends ]]; then
+                    find ${workdir}/depends -type f -print0 | while read -d $'\0' file
+                    do
+                        if [[ -f $file ]]; then
+                            _check_deps $file
+                        fi
+                    done
+                fi
+            done
             cd $HR_LAUNCHPAD_DIR
-            if [[ -d depends ]]; then
-                local file
-                find depends -type f -print0 | while read -d $'\0' file
-                do
-                    if [[ -f $file ]]; then
-                        _check_deps $file
-                    fi
-                done
-            else
-                warn "No depends"
-            fi
             ./main_dev.sh --autoname --nogui $@
             ;;
         *)
