@@ -980,6 +980,8 @@ hr_run() {
                     done
                 fi
             done
+            [[ -f /tmp/hr_pip_freeze ]] && rm /tmp/hr_pip_freeze
+            [[ -f /tmp/hr_pip_freeze3 ]] && rm /tmp/hr_pip_freeze3
             cd $HR_LAUNCHPAD_DIR
             ./main_dev.sh --autoname --nogui $@
             ;;
