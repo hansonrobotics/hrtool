@@ -441,7 +441,7 @@ _check_repo_changes() {
 
 _check_deps() {
     filename="$1"
-    local dir commit workdir branches curr_branch
+    local dir commit workdir branches curr_branch freeze freeze3
     if [[ -z $filename ]]; then
         return 1
     fi
@@ -467,6 +467,10 @@ _check_deps() {
             [[ ${line} == python2:* ]] && pip=$PIP2
             [[ ${line} == python3:* ]] && pip=$PIP3
             [[ -z $pip ]] && continue
+            [[ ! -f /tmp/hr_pip_freeze ]] && $PIP2 freeze >/tmp/hr_pip_freeze
+            [[ ! -f /tmp/hr_pip_freeze3 ]] && $PIP3 freeze >/tmp/hr_pip_freeze3
+            [[ -z $freeze ]] && freeze=$(</tmp/hr_pip_freeze)
+            [[ -z $freeze3 ]] && freeze3=$(</tmp/hr_pip_freeze3)
             package=$(echo $line|cut -d: -f2)
             if [[ $package == *=* ]]; then
                 if [[ $package == *\>=* ]]; then
@@ -476,11 +480,11 @@ _check_deps() {
                     package_name=${package%==*}
                     required_ver=${package#*==}
                 fi
-                if ! $pip show $package_name &>/dev/null; then
+                if ! echo "${freeze[@]}" | grep -e "^$package_name==" &>/dev/null; then
                     error "Python package \"$package_name\" is required"
                     return 1
                 fi
-                curr_ver=$($pip show $package_name|grep Version|cut -d" " -f2)
+                curr_ver=$(echo "${freeze[@]}"|grep -e "^$package_name=="|cut -d"=" -f3)
                 if [[ $package == *\>=* ]]; then
                     satisfied=$(python -c "from pkg_resources import parse_version; print parse_version('$curr_ver') >= parse_version('$required_ver')")
                 elif [[ $package == *==* ]]; then
@@ -492,7 +496,7 @@ _check_deps() {
                     return 1
                 fi
             else
-                if ! $pip show $package &>/dev/null; then
+                if ! echo "${freeze[@]}" | grep -e "^$package==" &>/dev/null; then
                     error "Python package \"$package\" is required but not found"
                     return 1
                 fi
@@ -959,6 +963,7 @@ hr_run() {
             ./main.sh --autoname --nogui $@
             ;;
         developer)
+            info "Starting"
             local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
             local args owner repo workdir branch
             for item in ${repos[@]}; do
