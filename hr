@@ -1605,6 +1605,8 @@ install_head-deps() {
         || $SUDO apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
         || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
 
+    local pkgs=( bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool)
+
     if [[ $OS_VERSION == 'trusty' ]]; then
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
@@ -1621,34 +1623,7 @@ install_head-deps() {
 
         $SUDO apt-get update
 
-        local pkgs=(
-            blender
-            build-essential
-            expect
-            festival
-            festival-dev
-            gfortran
-            git
-            libatlas-base-dev
-            libblas-dev
-            liblapack-dev
-            libopencv-dev
-            openvpn
-            portaudio19-dev
-            pulseaudio
-            python-bson
-            python-catkin-pkg
-            python-catkin-tools
-            python-flask
-            python-opencv
-            python-pip
-            python-pyaudio
-            python-pyglet
-            python-rospkg
-            python-serial
-            python-yaml
-            python3-pip
-            python3.6
+        pkgs+=(
             ros-indigo-cv-bridge
             ros-indigo-desktop
             ros-indigo-driver-common
@@ -1668,14 +1643,6 @@ install_head-deps() {
             ros-indigo-std-msgs
             ros-indigo-tf
             ros-indigo-usb-cam
-            ruby2.3
-            ruby2.3-dev
-            software-properties-common
-            swig
-            telnet
-            tmux
-            wget
-            xdotool
         )
 
         apt_get_install "${pkgs[@]}"
@@ -1704,34 +1671,7 @@ install_head-deps() {
 
         $SUDO apt-get update
 
-        local pkgs=(
-            bc
-            blender
-            build-essential
-            expect
-            festival
-            festival-dev
-            gfortran
-            git
-            libatlas-base-dev
-            libblas-dev
-            liblapack-dev
-            libopencv-dev
-            openvpn
-            portaudio19-dev
-            pulseaudio
-            python-bson
-            python-catkin-pkg
-            python-catkin-tools
-            python-flask
-            python-opencv
-            python-pip
-            python-pyaudio
-            python-pyglet
-            python-rospkg
-            python-serial
-            python3-pip
-            python3.6
+        pkgs+=(
             ros-kinetic-desktop
             ros-kinetic-dynamixel-motor
             ros-kinetic-image-proc
@@ -1739,14 +1679,6 @@ install_head-deps() {
             ros-kinetic-openni-camera
             ros-kinetic-rosbridge-server
             ros-kinetic-usb-cam
-            ruby2.3
-            ruby2.3-dev
-            software-properties-common
-            swig
-            telnet
-            tmux
-            wget
-            xdotool
         )
         apt_get_install "${pkgs[@]}"
 
@@ -1764,8 +1696,9 @@ install_head-deps() {
         _install_deb_packages ${debname} ${force}
     fi
 
-    _install_webui_deps
     apt_get_install mongodb-org git-lfs openssh-server
+    _install_webui_deps
+
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg numpy pyyaml
