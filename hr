@@ -1042,6 +1042,7 @@ _install_hr_service() {
     if [[ -f ${HR_PREFIX}/hrtool/hrstop.service ]]; then
         mkdir -p $HOME/.config/systemd/user
         ln -sf -T ${HR_PREFIX}/hrtool/hrstop.service $HOME/.config/systemd/user/hrstop.service
+        systemctl --user daemon-reload
     else
         rm -f $HOME/.config/systemd/user/hrstop.service
     fi
@@ -1682,9 +1683,6 @@ install_head-deps() {
         )
         apt_get_install "${pkgs[@]}"
 
-        $SUDO service mongod start
-        $SUDO systemctl enable mongod
-
         $SUDO pip2 install virtualenv
         $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
         $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
@@ -1699,6 +1697,8 @@ install_head-deps() {
     apt_get_install mongodb-org git-lfs openssh-server
     _install_webui_deps
 
+    $SUDO service mongod start
+    $SUDO systemctl enable mongod
 
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg numpy pyyaml
