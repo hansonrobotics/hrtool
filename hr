@@ -1021,6 +1021,7 @@ hr_python3() {
 
 ############# Functions #############
 install_head() {
+    _install_hr_service
     install_head-deps $@
     ssh -o StrictHostKeyChecking=no github.com 1>/dev/null 2>&1 || true
     get_models
@@ -1034,6 +1035,15 @@ install_head() {
     local role=$(read_role)
     if [[ $role  == "developer" ]]; then
         build_head
+    fi
+}
+
+_install_hr_service() {
+    if [[ -f ${HR_PREFIX}/hrtool/hrstop.service ]]; then
+        mkdir -p $HOME/.config/systemd/user
+        ln -sf -T ${HR_PREFIX}/hrtool/hrstop.service $HOME/.config/systemd/user/hrstop.service
+    else
+        rm -f $HOME/.config/systemd/user/hrstop.service
     fi
 }
 
