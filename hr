@@ -1606,6 +1606,10 @@ install_head-deps() {
         || $SUDO apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
         || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
 
+    # setup HEAD repository
+    #$SUDO sh -c 'echo "deb s3://dl.hansonrobotics.com stable main" > /etc/apt/sources.list.d/head-latest.list'
+    $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AADAAD53
+
     local pkgs=( bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool)
 
     if [[ $OS_VERSION == 'trusty' ]]; then
