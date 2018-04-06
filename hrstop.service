@@ -1,0 +1,12 @@
+[Unit]
+Description=Stop HEAD stack on session exits
+Requires=default.target
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStop=/usr/bin/hr stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
