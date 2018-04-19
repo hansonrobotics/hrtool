@@ -2040,6 +2040,13 @@ update_head() {
     info "Updating HEAD source code is done"
 }
 
+update_full_head() {
+    install_head-hr
+    install_head
+    update_head
+    build_head
+}
+
 update_opencog() {
     read_workspace
     info "Updating OpenCog source code"
