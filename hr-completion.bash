@@ -9,7 +9,7 @@
 
 _hr() {
   local command cur prev words cword
-  local hr_commands="init install uninstall build clean cmd env update run stop version role"
+  local hr_commands="init install uninstall build clean cmd env update run stop version role python python3"
 
   if type -t _init_completion >/dev/null; then
     _init_completion || return
@@ -49,6 +49,11 @@ _hr() {
       if (( ${cword} == 3 )); then
         local args=$(hr cmd list_bodies 2> /dev/null)
         COMPREPLY=($(compgen -W "${opts} ${args}" -- ${cur}))
+      fi
+      ;;
+    python|python3)
+      if (( ${cword} >= 2 )); then
+        _filedir '@(py)'
       fi
       ;;
     *)
