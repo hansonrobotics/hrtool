@@ -2167,10 +2167,8 @@ update_head() {
 }
 
 update_full_head() {
-    install_head-hr
-    install_head
-    update_head
-    build_head
+    # Experimental
+    [[ -f ${HR_PREFIX}/hrtool/update.sh ]] && source ${HR_PREFIX}/hrtool/update.sh && _update_full_head
 }
 
 update_opencog() {
