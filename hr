@@ -1888,7 +1888,7 @@ install_head-torch-rnn() {
     local prerelease
     local force
     _parse_install_options $@
-    local repo=wenwei-dev/torch-rnn
+    local repo=hansonrobotics/torch-rnn
     local version=$(get_latest_version $repo $prerelease)
     local debname=head-torch-rnn_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
