@@ -994,7 +994,7 @@ hr_run() {
 hr_stop() {
     read_workspace
     cd $HR_LAUNCHPAD_DIR
-    ./stop.sh
+    ./stop.sh $@
 }
 
 hr_role() {
