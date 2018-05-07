@@ -1699,6 +1699,9 @@ install_head-deps() {
     fi
 
     apt_get_install mongodb-org git-lfs openssh-server
+    #$SUDO debconf-set-selections <<< 'mysql-server mysql-server/root_password password 2045'
+    #$SUDO debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password 2045'
+    #apt_get_install mysql-server
     _install_webui_deps
 
     $SUDO service mongod start
@@ -2398,6 +2401,20 @@ clean_head() {
     if [[ -d .catkin_tools ]]; then
         catkin clean -y || catkin clean -a
     fi
+
+    # Check if there is unnecessary packages at HEAD/src
+    local workdirs=()
+    for item in ${HR_DEV_REPOS[*]}
+    do
+        mapfile -t args <<<"$(_parse_repo_string $item)"
+        workdirs=(${workdirs[*]} ${args[2]})
+    done
+    for d in $(find /home/hr/hansonrobotics/HEAD/src -maxdepth 1 -mindepth 1 -type d ); do
+        if [[ ! " ${workdirs[@]} " =~ " ${d} " ]]; then
+            warn "Found package that is unused. Remove it?" $d
+            rm -ir $d
+        fi
+    done
 }
 
 clean_opencog() {
