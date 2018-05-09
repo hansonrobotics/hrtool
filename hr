@@ -1343,7 +1343,7 @@ _install_deb_packages() {
         fi
     else
         error "${debname} is not debian package or broken. Please run again"
-        rm ${HR_CACHE}/${debname}
+        mv "${HR_CACHE}/${debname}" "${HR_CACHE}/${debname}.bak"
         return 1
     fi
 }
