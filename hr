@@ -2403,8 +2403,12 @@ clean_head() {
     done
     for d in $(find /home/hr/hansonrobotics/HEAD/src -maxdepth 1 -mindepth 1 -type d ); do
         if [[ ! " ${workdirs[@]} " =~ " ${d} " ]]; then
-            warn "Found package that is unused. Remove it?" $d
-            rm -ir $d
+            local confirm
+            _get_confirm "${COLOR_WARN}Found package \"${d}\" that is unused. Do you want to remove it? [y/N]${COLOR_RESET}"
+            if [[ ${confirm} == 1 ]]; then
+                chmod -R +w ${d}
+                rm -r $d
+            fi
         fi
     done
 }
