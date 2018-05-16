@@ -1664,6 +1664,10 @@ install_head-deps() {
         $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
 
     elif [[ $OS_VERSION == 'xenial' ]]; then
+        # https://github.com/hansonrobotics/librealsense/blob/master/doc/distribution_linux.md
+        $SUDO sh -c 'echo "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" > /etc/apt/sources.list.d/realsense-public.list'
+        $SUDO apt-key adv --keyserver keys.gnupg.net --recv-key 6F3EFCDE
+
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
         echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
@@ -1684,6 +1688,10 @@ install_head-deps() {
             ros-kinetic-openni-camera
             ros-kinetic-rosbridge-server
             ros-kinetic-usb-cam
+            librealsense2-dkms
+            librealsense2-utils
+            librealsense2-dev
+            librealsense2-dbg
         )
         apt_get_install "${pkgs[@]}"
 
