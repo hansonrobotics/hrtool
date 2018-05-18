@@ -1957,6 +1957,13 @@ install_head-opencv() {
     _install_deb_packages ${debname} ${force}
 }
 
+install_obs() {
+  $SUDO apt-get install ffmpeg
+  $SUDO add-apt-repository ppa:obsproject/obs-studio
+  $SUDO apt-get update
+  $SUDO apt-get install obs-studio
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
