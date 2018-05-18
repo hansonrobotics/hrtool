@@ -21,7 +21,7 @@ OPENCOG_DEV_REPOS=(opencog/cogutil:OpenCog opencog/atomspace:OpenCog opencog/ope
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 HR_CONFIGS_DIR=$HR_LAUNCHPAD_DIR/configs
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv head-librealsense)
 
 DEFAULT_ROLE=developer
 DEFAULT_GIT_PROTOCAL=https
@@ -1953,6 +1953,18 @@ install_head-opencv() {
     local version=2.4.13
     local debname=head-opencv_${version}_amd64.deb
     local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
+install_head-librealsense() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local repo=hansonrobotics/librealsense
+    local version=$(get_latest_version $repo $prerelease)
+    local debname=head-libreansense_${version#v}_amd64.deb
+    local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
     _install_deb_packages ${debname} ${force}
 }
