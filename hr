@@ -20,6 +20,7 @@ HR_OPENCOG_DEV_REPOS=(hansonrobotics/cogutils:HROpenCog hansonrobotics/atomspace
 OPENCOG_DEV_REPOS=(opencog/cogutil:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/ros-behavior-scripting:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
 HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 HR_CONFIGS_DIR=$HR_LAUNCHPAD_DIR/configs
+HR_APT_SOURCE=/etc/apt/sources.list.d/head-latest.list
 
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv head-librealsense)
 
@@ -1958,6 +1959,7 @@ install_head-opencv() {
 }
 
 install_head-librealsense() {
+    [[ -e ${HR_APT_SOURCE} ]] && apt_get_install head-librealsense && return
     local prerelease
     local force
     _parse_install_options $@
@@ -2154,6 +2156,10 @@ uninstall_head-ros-audio-stream() {
 
 uninstall_head-opencv() {
     sudo apt-get remove head-opencv
+}
+
+uninstall_head-librealsense() {
+    sudo apt-get remove head-librealsense
 }
 
 help_uninstall() {
