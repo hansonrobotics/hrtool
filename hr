@@ -483,6 +483,7 @@ _check_deps() {
                 fi
                 if ! echo "${freeze[@]}" | grep -e "^$package_name==" &>/dev/null; then
                     error "Python package \"$package_name\" is required"
+                    error "See dependency spec file $filename"
                     return 1
                 fi
                 curr_ver=$(echo "${freeze[@]}"|grep -e "^$package_name=="|cut -d"=" -f3)
@@ -494,6 +495,7 @@ _check_deps() {
                 if [[ $satisfied != "True" ]]; then
                     error "The version of Python package \"$package_name\" is not satisfied"
                     error "Current version \"$curr_ver\". Required version \"$required_ver\""
+                    error "See dependency spec file $filename"
                     return 1
                 fi
             else
@@ -511,11 +513,13 @@ _check_deps() {
         workdir=$HR_WORKSPACE/$dir
         if [[ ! -d $workdir ]]; then
             error "Repo \"$workdir\" doesn't exist"
+            error "See dependency spec file $filename"
             return 1
         fi
         curr_branch=$(git -C $workdir rev-parse --abbrev-ref HEAD || true)
         if [[ -z $curr_branch ]]; then
             error "Can't find branch for repo $dir"
+            error "See dependency spec file $filename"
             return 1
         fi
         if [[ -z $commit ]]; then
@@ -524,6 +528,7 @@ _check_deps() {
         branches=$(git -C $workdir branch --contains $commit 2>/dev/null | grep $curr_branch |sed 's/* //' || true)
         if [[ "$curr_branch" != "$branches" ]]; then
             error "The repo in \"$workdir\" requires $commit. Please update the repo."
+            error "See dependency spec file $filename"
             return 1
         fi
     done < "$filename"
