@@ -9,7 +9,7 @@
 
 _hr() {
   local command cur prev words cword
-  local hr_commands="init install uninstall build clean cmd env update run stop version role python python3"
+  local hr_commands="init install uninstall build clean cmd env update run stop version role python python3 fetch"
 
   if type -t _init_completion >/dev/null; then
     _init_completion || return

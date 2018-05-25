@@ -886,6 +886,27 @@ hr_uninstall() {
     done
 }
 
+hr_fetch() {
+    read_workspace
+    info "Fetching source code"
+    local role=$(read_role)
+    local protocal=$(read_git_protocal)
+    local repos=(${HR_LAUNCHPAD_REPOS[@]})
+    if [[ $role  == "developer" ]]; then
+        local repos=(${repos[@]} ${HR_DEV_REPOS[@]} ${HR_OPENCOG_DEV_REPOS[@]})
+    fi
+    if [[ $protocal == 'ssh' ]]; then
+        parallel --no-notice -j$(nproc) _fetch_repo ::: ${repos[@]}
+    else
+        echo "Hint: Add github ssh key 'https://help.github.com/articles/connecting-to-github-with-ssh/'"
+        echo "Hint: and then run 'hr cmd use_git_ssh' to speed up"
+        for repo in ${repos[@]}; do
+            _fetch_repo $repo
+        done
+    fi
+    info "Fetching source code is done"
+}
+
 hr_update() {
     validate_component_args update $@
     for arg in $@; do
@@ -2634,13 +2655,14 @@ Usage: hr <command> [<args>]
     version                                 Show version
     python                                  Run HEAD Python interpreter
     python3                                 Run HEAD Python3 interpreter
+    fetch                                   Fetch source code (without updating repository)
 
 EOF
 }
 
 execute() {
     case "$1" in
-        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role|python|python3)
+        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role|python|python3|fetch)
             command=$1
             shift
             hr_${command} $@
