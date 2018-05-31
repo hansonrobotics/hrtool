@@ -2458,7 +2458,7 @@ clean_head() {
         mapfile -t args <<<"$(_parse_repo_string $item)"
         workdirs=(${workdirs[*]} ${args[2]})
     done
-    for d in $(find /home/hr/hansonrobotics/HEAD/src -maxdepth 1 -mindepth 1 -type d ); do
+    for d in $(find $HR_WORKSPACE/HEAD/src -maxdepth 1 -mindepth 1 -type d ); do
         if [[ ! " ${workdirs[@]} " =~ " ${d} " ]]; then
             local confirm
             _get_confirm "${COLOR_WARN}Found package \"${d}\" that is unused. Do you want to remove it? [y/N]${COLOR_RESET}"
