@@ -1066,6 +1066,61 @@ install_head() {
     fi
 }
 
+initenv() {
+
+    apt_get_install software-properties-common python-software-properties apt-transport-https lsb-release
+    $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
+    $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
+
+    # Set primary DNS server 8.8.8.8
+    $SUDO sh -c 'echo "nameserver 8.8.8.8" >>/etc/resolvconf/resolv.conf.d/head'
+    $SUDO resolvconf -u
+
+    # setup ROS repository
+    $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+    $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
+        || $SUDO apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
+        || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+
+    # setup HEAD repository
+    #$SUDO sh -c 'echo "deb s3://dl.hansonrobotics.com stable main" > /etc/apt/sources.list.d/head-latest.list'
+    $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AADAAD53
+
+    case $OS_VERSION in
+    'trusty')
+        # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+        echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+        # https://packagecloud.io/github/git-lfs/install git-lfs repo
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
+        # setup python2.6 repository
+        # add_ppa ppa:fkrull/deadsnakes
+        # setup ruby2.3
+        add_ppa ppa:brightbox/ruby-ng
+        remove_ppa ppa:irie/blender
+        add_ppa ppa:thomas-schiex/blender
+        ;;
+    'xenial')
+        # https://github.com/hansonrobotics/librealsense/blob/master/doc/distribution_linux.md
+        $SUDO sh -c 'echo "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" > /etc/apt/sources.list.d/realsense-public.list'
+        $SUDO apt-key adv --keyserver keys.gnupg.net --recv-key 6F3EFCDE
+
+        # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+        echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+        # https://packagecloud.io/github/git-lfs/install git-lfs repo
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
+        remove_ppa ppa:fkrull/deadsnakes
+        remove_ppa ppa:irie/blender
+        add_ppa ppa:thomas-schiex/blender
+    *)
+        ;;
+    esac
+    $SUDO apt-get update
+}
+
 _install_hr_service() {
     if [[ -f ${HR_PREFIX}/hrtool/hrstop.service ]]; then
         mkdir -p $HOME/.config/systemd/user
@@ -1241,7 +1296,7 @@ _install_test_deps() {
     $SUDO pip install coverage
 }
 
-_install_webui_deps() {
+install_webui_deps() {
     # Remove npm and nodejs if needed
     # sudo npm uninstall -g npm
     # sudo apt-get remove nodejs
@@ -1628,123 +1683,28 @@ install_head-deps() {
     local force
     _parse_install_options $@
 
-    apt_get_install software-properties-common python-software-properties apt-transport-https lsb-release
+    initenv
 
-    # Set primary DNS server 8.8.8.8
-    $SUDO sh -c 'echo "nameserver 8.8.8.8" >>/etc/resolvconf/resolv.conf.d/head'
-    $SUDO resolvconf -u
-
-    # setup ROS repository
-    $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-    $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
-        || $SUDO apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
-        || $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
-
-    # setup HEAD repository
-    #$SUDO sh -c 'echo "deb s3://dl.hansonrobotics.com stable main" > /etc/apt/sources.list.d/head-latest.list'
-    $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AADAAD53
-
-    local pkgs=(bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool)
-
-    if [[ $OS_VERSION == 'trusty' ]]; then
-        # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-        echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-        # https://packagecloud.io/github/git-lfs/install git-lfs repo
-        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
-        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
-        # setup python2.6 repository
-        # add_ppa ppa:fkrull/deadsnakes
-        # setup ruby2.3
-        add_ppa ppa:brightbox/ruby-ng
-        remove_ppa ppa:irie/blender
-        add_ppa ppa:thomas-schiex/blender
-
-        $SUDO apt-get update
-
-        pkgs+=(
-            ros-indigo-cv-bridge
-            ros-indigo-desktop
-            ros-indigo-driver-common
-            ros-indigo-dynamixel-motor
-            ros-indigo-geometry-msgs
-            ros-indigo-image-proc
-            ros-indigo-image-transport
-            ros-indigo-joint-state-publisher
-            ros-indigo-message-runtime
-            ros-indigo-mjpeg-server
-            ros-indigo-openni-camera
-            ros-indigo-robot-state-publisher
-            ros-indigo-rosbridge-server
-            ros-indigo-roscpp
-            ros-indigo-rospy
-            ros-indigo-sensor-msgs
-            ros-indigo-std-msgs
-            ros-indigo-tf
-            ros-indigo-usb-cam
-        )
-
-        apt_get_install "${pkgs[@]}"
-        $SUDO pip2 install virtualenv
-        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
-
-        local version=0.2.0
-        local debname=head-deps-all_${version}_amd64.deb
-        local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
-        _download_deb_package
-        _install_deb_packages ${debname} ${force}
-        wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
-        $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
-
-    elif [[ $OS_VERSION == 'xenial' ]]; then
-        # https://github.com/hansonrobotics/librealsense/blob/master/doc/distribution_linux.md
-        $SUDO sh -c 'echo "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" > /etc/apt/sources.list.d/realsense-public.list'
-        $SUDO apt-key adv --keyserver keys.gnupg.net --recv-key 6F3EFCDE
-
-        # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-        echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-        # https://packagecloud.io/github/git-lfs/install git-lfs repo
-        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
-        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
-        remove_ppa ppa:fkrull/deadsnakes
-        remove_ppa ppa:irie/blender
-        add_ppa ppa:thomas-schiex/blender
-
-        $SUDO apt-get update
-
-        pkgs+=(
-            ros-kinetic-desktop
-            ros-kinetic-dynamixel-motor
-            ros-kinetic-image-proc
-            ros-kinetic-opencv-apps
-            ros-kinetic-openni-camera
-            ros-kinetic-rosbridge-server
-            ros-kinetic-usb-cam
-            librealsense2-dkms
-            librealsense2-utils
-            librealsense2-dev
-            librealsense2-dbg
-        )
-        apt_get_install "${pkgs[@]}"
-
-        $SUDO pip2 install virtualenv
-        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
-
-        local version=0.2.0
-        local debname=head-deps-xenial-all_${version}_amd64.deb
-        local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
-        _download_deb_package
-        _install_deb_packages ${debname} ${force}
-    fi
-
-    apt_get_install mongodb-org git-lfs openssh-server
+    local pkgs=(bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool mongodb-org git-lfs openssh-server)
     #$SUDO debconf-set-selections <<< 'mysql-server mysql-server/root_password password 2045'
     #$SUDO debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password 2045'
     #apt_get_install mysql-server
-    _install_webui_deps
+
+    if [[ $OS_VERSION == 'trusty' ]]; then
+        pkgs+=(ros-indigo-cv-bridge ros-indigo-desktop ros-indigo-driver-common ros-indigo-dynamixel-motor ros-indigo-geometry-msgs ros-indigo-image-proc ros-indigo-image-transport ros-indigo-joint-state-publisher ros-indigo-message-runtime ros-indigo-mjpeg-server ros-indigo-openni-camera ros-indigo-robot-state-publisher ros-indigo-rosbridge-server ros-indigo-roscpp ros-indigo-rospy ros-indigo-sensor-msgs ros-indigo-std-msgs ros-indigo-tf ros-indigo-usb-cam) 
+
+        apt_get_install "${pkgs[@]}"
+
+        # patch rosbridge
+        wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
+        $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
+    elif [[ $OS_VERSION == 'xenial' ]]; then
+        pkgs+=(ros-kinetic-desktop ros-kinetic-dynamixel-motor ros-kinetic-image-proc ros-kinetic-opencv-apps ros-kinetic-openni-camera ros-kinetic-rosbridge-server ros-kinetic-usb-cam librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg)
+
+        apt_get_install "${pkgs[@]}"
+    fi
+
+    install_webui_deps
 
     $SUDO service mongod start
     $SUDO systemctl enable mongod
@@ -1758,31 +1718,6 @@ install_head-deps() {
         future six \
         MySQL-python SQLAlchemy \
         bs4 xlrd Babel progressbar2
-
-    install_head-hr-msgs $@
-    install_head-saliency-tracker $@
-    install_head-chatbot $@
-    install_head-pocketsphinx $@
-    install_head-ros-audio-stream $@ # depends on head-pocketsphinx
-    install_head-python-ttsserver $@
-    install_head-python-pololu-motors $@
-    install_head-marky-markov $@
-    install_head-festival-api $@
-    #install_head-dynamixel-motor $@
-    install_head-webui $@
-    install_head-blender-api $@
-    install_head-blender-api-msgs $@
-    install_head-ros-pololu $@
-    install_head-motors-safety $@
-    install_head-basic-head-api $@
-    install_head-pau2motors $@
-    install_head-perception $@
-    #install_head-pi-vision $@
-    install_head-performances $@
-    install_head-ros-misc $@
-    install_head-ros-tts $@
-    install_head-ros-emotion $@
-    install_head-python-dynamixel-lib $@
 }
 
 install_head-sphinxbase() {
