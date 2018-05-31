@@ -1086,8 +1086,8 @@ initenv() {
     #$SUDO sh -c 'echo "deb s3://dl.hansonrobotics.com stable main" > /etc/apt/sources.list.d/head-latest.list'
     $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AADAAD53
 
-    case $OS_VERSION in
-    'trusty')
+    case "$OS_VERSION" in
+    trusty)
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
         echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
@@ -1101,7 +1101,7 @@ initenv() {
         remove_ppa ppa:irie/blender
         add_ppa ppa:thomas-schiex/blender
         ;;
-    'xenial')
+    xenial)
         # https://github.com/hansonrobotics/librealsense/blob/master/doc/distribution_linux.md
         $SUDO sh -c 'echo "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" > /etc/apt/sources.list.d/realsense-public.list'
         $SUDO apt-key adv --keyserver keys.gnupg.net --recv-key 6F3EFCDE
@@ -1115,7 +1115,9 @@ initenv() {
         remove_ppa ppa:fkrull/deadsnakes
         remove_ppa ppa:irie/blender
         add_ppa ppa:thomas-schiex/blender
+        ;;
     *)
+        warn "Unknown OS $OS_VERSION"
         ;;
     esac
     $SUDO apt-get update
