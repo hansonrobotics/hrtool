@@ -542,7 +542,7 @@ _get_git() {
 
 _get_repos() {
     _get_git
-    git config --global credential.helper 'cache --timeout=86400'
+    git config --global credential.helper 'cache --timeout=2592000'
     local repos=$@
     for item in ${repos[@]}
     do
