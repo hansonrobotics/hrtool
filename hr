@@ -2221,7 +2221,7 @@ update_head() {
         local repos=(${repos[@]} ${HR_DEV_REPOS[@]})
     fi
     if [[ $protocal == 'ssh' ]]; then
-        parallel -j$(nproc) _fetch_repo ::: ${repos[@]}
+        parallel --no-notice -j$(nproc) _fetch_repo ::: ${repos[@]}
     else
         echo "Hint: Add github ssh key 'https://help.github.com/articles/connecting-to-github-with-ssh/'"
         echo "Hint: and then run 'hr cmd use_git_ssh' to speed up"
@@ -2241,7 +2241,7 @@ update_full_head() {
 update_opencog() {
     read_workspace
     info "Updating OpenCog source code"
-    parallel -j$(nproc) _fetch_repo ::: ${OPENCOG_DEV_REPOS[@]}
+    parallel --no-notice -j$(nproc) _fetch_repo ::: ${OPENCOG_DEV_REPOS[@]}
     _update_repos ${OPENCOG_DEV_REPOS[@]}
     info "Updating OpenCog source code is done"
 }
