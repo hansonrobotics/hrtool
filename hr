@@ -1628,6 +1628,8 @@ install_head-deps() {
     local force
     _parse_install_options $@
 
+    apt_get_install software-properties-common python-software-properties apt-transport-https
+
     # Set primary DNS server 8.8.8.8
     $SUDO sh -c 'echo "nameserver 8.8.8.8" >>/etc/resolvconf/resolv.conf.d/head'
     $SUDO resolvconf -u
@@ -1642,7 +1644,7 @@ install_head-deps() {
     #$SUDO sh -c 'echo "deb s3://dl.hansonrobotics.com stable main" > /etc/apt/sources.list.d/head-latest.list'
     $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AADAAD53
 
-    local pkgs=( bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool)
+    local pkgs=(bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool)
 
     if [[ $OS_VERSION == 'trusty' ]]; then
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
@@ -1766,7 +1768,7 @@ install_head-deps() {
     install_head-python-pololu-motors $@
     install_head-marky-markov $@
     install_head-festival-api $@
-    install_head-dynamixel-motor $@
+    #install_head-dynamixel-motor $@
     install_head-webui $@
     install_head-blender-api $@
     install_head-blender-api-msgs $@
