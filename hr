@@ -2635,6 +2635,38 @@ disable_ipv6() {
         info "IPv6 is already disabled"
     fi
 }
+
+_init_vncpasswd() {
+    if [[ -f ~/.hr/.vncpasswd ]]; then
+        password_file=~/.hr/.vncpasswd
+    else
+        password_file=$HR_PREFIX/hrtool/vncpasswd
+    fi
+    if [[ ! -f $password_file ]]; then
+        password_file=~/.hr/.vncpasswd
+        vncpasswd $password_file
+    fi
+}
+
+vncpasswd0() {
+    local password_file=~/.hr/.vncpasswd
+    vncpasswd $password_file
+}
+
+vncserver0() {
+    local password_file
+    _init_vncpasswd
+    x0vncserver -rfbauth $password_file
+}
+
+vncviewer0() {
+    set -x
+    local password_file
+    _init_vncpasswd
+    vncviewer -passwd $password_file
+    set +x
+}
+
 ############# End of Functions #############
 
 ############# Main #############
