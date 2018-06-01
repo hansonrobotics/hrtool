@@ -1416,7 +1416,9 @@ _install_latest_repo_release() {
             error "No asset is found for version $ver"
         else
             for asset in ${assets[@]}; do
-                _install_asset $asset $force
+                if [[ $asset == *.deb ]]; then
+                    _install_asset $asset $force
+                fi
             done
         fi
     fi
