@@ -1067,10 +1067,8 @@ install_head() {
 }
 
 initenv() {
-
     apt_get_install software-properties-common python-software-properties apt-transport-https lsb-release
     $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-    $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
 
     # Set primary DNS server 8.8.8.8
     $SUDO sh -c 'echo "nameserver 8.8.8.8" >>/etc/resolvconf/resolv.conf.d/head'
@@ -1473,7 +1471,9 @@ _install_latest_repo_release() {
             error "No asset is found for version $ver"
         else
             for asset in ${assets[@]}; do
-                _install_asset $asset $force
+                if [[ $asset == *.deb ]]; then
+                    _install_asset $asset $force
+                fi
             done
         fi
     fi
@@ -1687,23 +1687,11 @@ install_head-deps() {
 
     initenv
 
-    local pkgs=(bc blender build-essential expect festival festival-dev gfortran git libatlas-base-dev libblas-dev liblapack-dev libopencv-dev openvpn portaudio19-dev pulseaudio python-bson python-catkin-pkg python-catkin-tools python-flask python-opencv python-pip python-pyaudio python-pyglet python-rospkg python-serial python-yaml python3-pip python3.6 ruby2.3 ruby2.3-dev software-properties-common swig telnet tmux wget xdotool mongodb-org git-lfs openssh-server)
-    #$SUDO debconf-set-selections <<< 'mysql-server mysql-server/root_password password 2045'
-    #$SUDO debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password 2045'
-    #apt_get_install mysql-server
-
+    apt_get_install head-full
     if [[ $OS_VERSION == 'trusty' ]]; then
-        pkgs+=(ros-indigo-cv-bridge ros-indigo-desktop ros-indigo-driver-common ros-indigo-dynamixel-motor ros-indigo-geometry-msgs ros-indigo-image-proc ros-indigo-image-transport ros-indigo-joint-state-publisher ros-indigo-message-runtime ros-indigo-mjpeg-server ros-indigo-openni-camera ros-indigo-robot-state-publisher ros-indigo-rosbridge-server ros-indigo-roscpp ros-indigo-rospy ros-indigo-sensor-msgs ros-indigo-std-msgs ros-indigo-tf ros-indigo-usb-cam) 
-
-        apt_get_install "${pkgs[@]}"
-
         # patch rosbridge
         wget_cache https://raw.githubusercontent.com/hansonrobotics/HEAD/master/scripts/patch/rosbridge.patch
         $SUDO patch -N /opt/ros/indigo/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
-    elif [[ $OS_VERSION == 'xenial' ]]; then
-        pkgs+=(ros-kinetic-desktop ros-kinetic-dynamixel-motor ros-kinetic-image-proc ros-kinetic-opencv-apps ros-kinetic-openni-camera ros-kinetic-rosbridge-server ros-kinetic-usb-cam librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg)
-
-        apt_get_install "${pkgs[@]}"
     fi
 
     install_webui_deps
@@ -1712,7 +1700,9 @@ install_head-deps() {
     $SUDO systemctl enable mongod
 
     # for blender to find ros packages
+    $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
     pip3_install rospkg catkin_pkg numpy pyyaml
+
     pip2_install \
         rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
         pinyin==0.2.5 pyparsing transitions flask EasyProcess \
