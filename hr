@@ -508,6 +508,54 @@ _check_deps() {
             continue
         fi
 
+        # check debian packages
+        if [[ ${line} == debian:* ]]; then
+            local curr_ver package package_name required_ver satisfied
+
+            if [[ ! -f /tmp/hr_deb_freeze ]]; then
+                dpkg-query -W -f='${Package} ${Status} ${Version}\n' ${HEAD_PACKAGES[*]} 2>/dev/null |grep "installed"|awk '{print $1 "==" $NF}'|sort >/tmp/hr_deb_freeze
+            fi
+            [[ -z $deb_freeze ]] && deb_freeze=$(</tmp/hr_deb_freeze)
+            package=$(echo $line|cut -d: -f2)
+            if [[ $package == *=* ]]; then
+                if [[ $package == *\>=* ]]; then
+                    package_name=${package%\>=*}
+                    required_ver=${package#*\>=}
+                elif [[ $package == *==* ]]; then
+                    package_name=${package%==*}
+                    required_ver=${package#*==}
+                fi
+                if ! echo "${deb_freeze[@]}" | grep -e "^$package_name==" &>/dev/null; then
+                    error "Debian package \"$package_name\" is required"
+                    error "See dependency spec file $filename"
+                    return 1
+                fi
+                curr_ver=$(echo "${deb_freeze[@]}"|grep -e "^$package_name=="|cut -d"=" -f3)
+                if [[ $package == *\>=* ]]; then
+                    if dpkg --compare-versions $curr_ver ge $required_ver; then
+                        satisfied=True
+                    fi
+                elif [[ $package == *==* ]]; then
+                    if dpkg --compare-versions $curr_ver eq $required_ver; then
+                        satisfied=True
+                    fi
+                fi
+                if [[ $satisfied != "True" ]]; then
+                    error "The version of Debian package \"$package_name\" is not satisfied"
+                    error "Current version \"$curr_ver\". Required version \"$required_ver\""
+                    error "See dependency spec file $filename"
+                    return 1
+                fi
+            else
+                if ! echo "${deb_freeze[@]}" | grep -e "^$package==" &>/dev/null; then
+                    error "Debian package \"$package\" is required but not found"
+                    error "See dependency spec file $filename"
+                    return 1
+                fi
+            fi
+            continue
+        fi
+
         dir=$(echo $line|awk -F: '{print $1}')
         commit=$(echo $line|awk -F: '{print $2}')
         workdir=$HR_WORKSPACE/$dir
@@ -1010,6 +1058,7 @@ hr_run() {
             done
             [[ -f /tmp/hr_pip_freeze ]] && rm /tmp/hr_pip_freeze
             [[ -f /tmp/hr_pip_freeze3 ]] && rm /tmp/hr_pip_freeze3
+            [[ -f /tmp/hr_deb_freeze ]] && rm /tmp/hr_deb_freeze
             cd $HR_LAUNCHPAD_DIR
             ./main_dev.sh --autoname --nogui $@
             ;;
