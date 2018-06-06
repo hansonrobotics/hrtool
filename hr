@@ -513,7 +513,7 @@ _check_deps() {
             local curr_ver package package_name required_ver satisfied
 
             if [[ ! -f /tmp/hr_deb_freeze ]]; then
-                dpkg-query -W -f='${Package} ${Status} ${Version}\n' ${HEAD_PACKAGES[*]} 2>/dev/null |grep "installed"|awk '{print $1 "==" $NF}'|sort >/tmp/hr_deb_freeze
+                dpkg-query -W -f='${Package} ${Status} ${Version}\n' 2>/dev/null |grep "installed"|awk '{print $1 "==" $NF}'|sort >/tmp/hr_deb_freeze
             fi
             [[ -z $deb_freeze ]] && deb_freeze=$(</tmp/hr_deb_freeze)
             package=$(echo $line|cut -d: -f2)
@@ -1040,6 +1040,9 @@ hr_run() {
             ;;
         developer)
             info "Starting"
+            [[ -f /tmp/hr_pip_freeze ]] && rm /tmp/hr_pip_freeze
+            [[ -f /tmp/hr_pip_freeze3 ]] && rm /tmp/hr_pip_freeze3
+            [[ -f /tmp/hr_deb_freeze ]] && rm /tmp/hr_deb_freeze
             local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
             local args owner repo workdir branch
             for item in ${repos[@]}; do
