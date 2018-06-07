@@ -22,6 +22,14 @@ HR_LAUNCHPAD_DIR=$HR_WORKSPACE/launchpad
 HR_CONFIGS_DIR=$HR_LAUNCHPAD_DIR/configs
 HR_APT_SOURCE=/etc/apt/sources.list.d/head-latest.list
 
+if [[ $OS_VERSION == 'trusty' ]]; then
+    DEPENDS_DIRS=(depends/trusty)
+else
+    if [[ $OS_VERSION == 'xenial' ]]; then
+        DEPENDS_DIRS=(depends depends/xenial)
+    fi
+fi
+
 HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv head-librealsense)
 
 DEFAULT_ROLE=developer
@@ -1044,20 +1052,23 @@ hr_run() {
             [[ -f /tmp/hr_pip_freeze3 ]] && rm /tmp/hr_pip_freeze3
             [[ -f /tmp/hr_deb_freeze ]] && rm /tmp/hr_deb_freeze
             local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
-            local args owner repo workdir branch
+            local args owner repo workdir branch deps_dir
             for item in ${repos[@]}; do
                 mapfile -t args <<<"$(_parse_repo_string $item)"
                 owner=${args[0]}
                 repo=${args[1]}
                 workdir=${args[2]}
-                if [[ -d ${workdir}/depends ]]; then
-                    find ${workdir}/depends -type f -print0 | while read -d $'\0' file
-                    do
-                        if [[ -f $file ]]; then
-                            _check_deps $file
-                        fi
-                    done
-                fi
+                for depends_dir in ${DEPENDS_DIRS[@]}; do
+                    deps_dir=${workdir}/${depends_dir}
+                    if [[ -d ${deps_dir} ]]; then
+                        find ${deps_dir} -type f -print0 | while read -d $'\0' file
+                        do
+                            if [[ -f $file ]]; then
+                                _check_deps $file
+                            fi
+                        done
+                    fi
+                done
             done
             [[ -f /tmp/hr_pip_freeze ]] && rm /tmp/hr_pip_freeze
             [[ -f /tmp/hr_pip_freeze3 ]] && rm /tmp/hr_pip_freeze3
