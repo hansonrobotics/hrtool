@@ -1837,6 +1837,9 @@ install_head-deps() {
     install_head-ros-tts $@
     install_head-ros-emotion $@
     install_head-python-dynamixel-lib $@
+    if [[ $OS_VERSION == 'xenial' ]]; then
+        install_head-librealsense $@
+    fi
 }
 
 install_head-sphinxbase() {
