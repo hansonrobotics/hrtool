@@ -2102,6 +2102,7 @@ install_elasticsearch() {
     $SUDO dpkg -i ${HR_CACHE}/elasticsearch-oss-6.3.0.deb
     $SUDO systemctl enable elasticsearch.service
     $SUDO systemctl start elasticsearch
+    $SUDO $PIP2 install "elasticsearch>=6.2.0,<7.0.0"
 }
 
 help_install() {
