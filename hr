@@ -2087,6 +2087,22 @@ install_obs() {
   $SUDO apt-get install obs-studio
 }
 
+install_oracle-jdk8() {
+    $SUDO apt-get install -y python-software-properties debconf-utils
+    $SUDO apt-get update
+    $SUDO debconf-set-selections <<< "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true"
+    $SUDO apt-get install -y oracle-java8-installer oracle-java8-set-default
+}
+
+install_elasticsearch() {
+    install_oracle-jdk8
+    local url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.3.0.deb
+    curl_cache ${url}
+    $SUDO dpkg -i ${HR_CACHE}/elasticsearch-oss-6.3.0.deb
+    $SUDO systemctl enable elasticsearch.service
+    $SUDO systemctl start elasticsearch
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
