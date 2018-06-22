@@ -2446,7 +2446,7 @@ build_head_python() {
     TARGET=$HR_WORKSPACE/HEAD/devel/lib/python2.7/dist-packages
     rm -rf $TARGET/roscom*
     info "Installing blender roscom"
-    $PIP3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
+    PYTHONPATH= $PIP3 install -t $TARGET $HR_WORKSPACE/HEAD/src/blender_api_msgs --no-deps
 
     rm -rf $TARGET/ttsserver*
     info "Installing ttsserver"
