@@ -2467,14 +2467,16 @@ build_head() {
         rt_audio_ros
         speech2command
         icog_face_tracker
-        faceshift_puppeteering
         pi_vision
         pi_face_tracker_gui
     )
 
     if [[ ${OS_VERSION} == "trusty" ]]; then
         blacklist+=(cv_bridge)
+    elif [[ ${OS_VERSION} == "xenial" ]]; then
+        blacklist+=(pi_face_tracker ros2opencv)
     fi
+
     _build_head ${blacklist[@]}
     _build_webui-js
 }
