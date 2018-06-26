@@ -2100,8 +2100,14 @@ install_elasticsearch() {
     local url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.3.0.deb
     curl_cache ${url}
     $SUDO dpkg -i ${HR_CACHE}/elasticsearch-oss-6.3.0.deb
-    $SUDO systemctl enable elasticsearch.service
-    $SUDO systemctl start elasticsearch
+    # ps -p 1
+    if [[ $OS_VERSION == 'trusty' ]]; then
+        $SUDO update-rc.d elasticsearch defaults 95 10
+        $SUDO -i service elasticsearch start
+    elif [[ $OS_VERSION == 'xenial' ]]; then
+        $SUDO systemctl enable elasticsearch.service
+        $SUDO systemctl start elasticsearch
+    fi
     $SUDO $PIP2 install "elasticsearch>=6.2.0,<7.0.0"
 }
 
