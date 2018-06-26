@@ -2105,6 +2105,16 @@ install_elasticsearch() {
     $SUDO $PIP2 install "elasticsearch>=6.2.0,<7.0.0"
 }
 
+install_postgresql() {
+    $SUDO add-apt-repository -y 'deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main'
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+    $SUDO apt-get update
+    $SUDO apt-get install -y postgresql-10
+    $SUDO $PIP2 install "psycopg2-binary"
+    $SUDO -u postgres createuser hr
+    $SUDO -u postgres createdb hr
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
