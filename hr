@@ -1701,6 +1701,7 @@ install_head-deps() {
     local force
     _parse_install_options $@
 
+    $SUDO apt-get remove -y command-not-found || true # cause trouble when it's under python2 environment
     apt_get_install software-properties-common python-software-properties apt-transport-https lsb-release
 
     # Set primary DNS server 8.8.8.8
