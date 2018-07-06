@@ -2112,6 +2112,19 @@ install_elasticsearch() {
     $SUDO $PIP2 install "elasticsearch>=6.2.0,<7.0.0"
 }
 
+install_elasticbeats() {
+    # filebeat
+    local fburl=https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.3.1-amd64.deb
+    curl_cache ${fburl}
+    $SUDO dpkg -i ${HR_CACHE}/filebeat-6.3.1-amd64.deb
+    # metricbeat
+    local mburl=https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.3.1-amd64.deb
+    curl_cache ${mburl}
+    $SUDO dpkg -i ${HR_CACHE}/metricbeat-6.3.1-amd64.deb
+    # TBD: curl configuration yml
+    # TBD: sudo service filebeat start
+}
+
 install_postgresql() {
     $SUDO add-apt-repository -y 'deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main'
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
