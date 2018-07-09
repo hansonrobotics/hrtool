@@ -472,6 +472,7 @@ _check_deps() {
         # check python packages
         if [[ ${line} == python* ]]; then
             local pip curr_ver package package_name required_ver satisfied
+            satisfied=False
             [[ ${line} == python:* ]] && pip=$PIP2
             [[ ${line} == python2:* ]] && pip=$PIP2
             [[ ${line} == python3:* ]] && pip=$PIP3
@@ -519,7 +520,7 @@ _check_deps() {
         # check debian packages
         if [[ ${line} == debian:* ]]; then
             local curr_ver package package_name required_ver satisfied
-
+            satisfied=False
             if [[ ! -f /tmp/hr_deb_freeze ]]; then
                 dpkg-query -W -f='${Package} ${Status} ${Version}\n' 2>/dev/null |grep "installed"|awk '{print $1 "==" $NF}'|sort >/tmp/hr_deb_freeze
             fi
