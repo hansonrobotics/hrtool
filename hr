@@ -596,6 +596,12 @@ _get_git() {
         info "Installing git"
         apt_get_install git
     fi
+    if ! hash git-lfs>/dev/null 2>&1; then
+        info "Installing git-lfs"
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | $SUDO tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | $SUDO apt-key add - &>/dev/null
+        apt_get_install git-lfs
+    fi
 }
 
 _get_repos() {
