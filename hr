@@ -1327,7 +1327,7 @@ _install_webui_deps() {
     else
         # See https://github.com/nodesource/distributions#debinstall
         info "Installing nodejs"
-        curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+        curl -sL https://deb.nodesource.com/setup_6.x | $SUDO -E bash -
         local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}' nodejs 2>/dev/null)
         if [[ ${pkg_status:1:1} == 'i' ]]; then
             info "Removing old nodejs"
@@ -1407,10 +1407,10 @@ _dpkg_install() {
     fi
     if ! $SUDO dpkg -i "${debname}"; then
         if [[ $OS_VERSION == 'trusty' ]]; then
-            sudo apt-get install -yf --force-yes
+            $SUDO apt-get install -yf --force-yes
         else
             if [[ $OS_VERSION == 'xenial' ]]; then
-                sudo apt-get install -yf --allow-unauthenticated
+                $SUDO apt-get install -yf --allow-unauthenticated
             fi
         fi
     fi
@@ -1738,11 +1738,11 @@ install_head-deps() {
 
     if [[ $OS_VERSION == 'trusty' ]]; then
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-        echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+        $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+        echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | $SUDO tee /etc/apt/sources.list.d/mongodb-org-3.4.list
         # https://packagecloud.io/github/git-lfs/install git-lfs repo
-        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
-        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | $SUDO tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | $SUDO apt-key add - &>/dev/null
         # setup python2.6 repository
         # add_ppa ppa:fkrull/deadsnakes
         # setup ruby2.3
@@ -1793,11 +1793,11 @@ install_head-deps() {
         $SUDO apt-key adv --keyserver keys.gnupg.net --recv-key 6F3EFCDE
 
         # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-        echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+        $SUDO apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+        echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | $SUDO tee /etc/apt/sources.list.d/mongodb-org-3.4.list
         # https://packagecloud.io/github/git-lfs/install git-lfs repo
-        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | sudo tee /etc/apt/sources.list.d/github_git-lfs.list
-        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | sudo apt-key add - &>/dev/null
+        echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | $SUDO tee /etc/apt/sources.list.d/github_git-lfs.list
+        curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | $SUDO apt-key add - &>/dev/null
         remove_ppa ppa:fkrull/deadsnakes
         remove_ppa ppa:irie/blender
         add_ppa ppa:thomas-schiex/blender
@@ -2161,7 +2161,7 @@ install_elasticbeats() {
 
 install_postgresql() {
     $SUDO add-apt-repository -y 'deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main'
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | $SUDO apt-key add -
     $SUDO apt-get update
     $SUDO apt-get install -y postgresql-10
     $SUDO $PIP2 install "psycopg2-binary"
@@ -2212,47 +2212,47 @@ EOF
 }
 
 uninstall_head-hr() {
-    sudo apt-get remove head-hr
+    $SUDO apt-get remove head-hr
 }
 
 uninstall_head-hr-ext() {
-    sudo apt-get remove head-hr-ext
+    $SUDO apt-get remove head-hr-ext
 }
 
 uninstall_head-hr-msgs() {
-    sudo apt-get remove head-hr-msgs
+    $SUDO apt-get remove head-hr-msgs
 }
 
 uninstall_head-chatbot() {
-    sudo apt-get remove head-chatbot
+    $SUDO apt-get remove head-chatbot
 }
 
 uninstall_head-saliency-tracker() {
-    sudo apt-get remove head-saliency-tracker
+    $SUDO apt-get remove head-saliency-tracker
 }
 
 uninstall_head-motor-control() {
-    sudo apt-get remove head-motor-control
+    $SUDO apt-get remove head-motor-control
 }
 
 uninstall_head-python-pololu-motors() {
-    sudo apt-get remove head-python-pololu-motors
+    $SUDO apt-get remove head-python-pololu-motors
 }
 
 uninstall_head-sound() {
-    sudo apt-get remove head-sound
+    $SUDO apt-get remove head-sound
 }
 
 uninstall_head-python-ttsserver() {
-    sudo apt-get remove head-python-ttsserver
+    $SUDO apt-get remove head-python-ttsserver
 }
 
 uninstall_head-marky-markov() {
-    sudo apt-get remove head-marky-markov
+    $SUDO apt-get remove head-marky-markov
 }
 
 uninstall_head-deps() {
-    sudo apt-get remove -y head-deps-all
+    $SUDO apt-get remove -y head-deps-all
 
     #remove_ppa ppa:brightbox/ruby-ng
     #remove_ppa ppa:fkrull/deadsnakes
@@ -2266,105 +2266,106 @@ uninstall_head-deps() {
 }
 
 uninstall_head-sphinxbase() {
-    sudo apt-get remove head-sphinxbase
+    $SUDO apt-get remove head-sphinxbase
 }
 
 uninstall_head-pocketsphinx() {
     uninstall_head-sphinxbase
-    sudo apt-get remove head-pocketsphinx
+    $SUDO apt-get remove head-pocketsphinx
 }
 
 uninstall_head-festival-api() {
-    sudo apt-get remove head-festival-api
+    $SUDO apt-get remove head-festival-api
 }
 
 uninstall_head-dynamixel-motor() {
-    sudo apt-get remove head-dynamixel-motor
+    $SUDO apt-get remove head-dynamixel-motor
 }
 
 uninstall_head-webui() {
-    sudo apt-get remove head-webui
+    $SUDO apt-get remove head-webui
 }
 
 uninstall_head-blender-api() {
-    sudo apt-get remove head-blender-api
+    $SUDO apt-get remove head-blender-api
 }
 
 uninstall_head-blender-api-msgs() {
-    sudo apt-get remove head-blender-api-msgs
+    $SUDO apt-get remove head-blender-api-msgs
 }
 
 uninstall_head-ros-pololu() {
-    sudo apt-get remove head-ros-pololu
+    $SUDO apt-get remove head-ros-pololu
 }
 
 uninstall_head-motors-safety() {
-    sudo apt-get remove head-motors-safety
+    $SUDO apt-get remove head-motors-safety
 }
 
 uninstall_head-basic-head-api() {
-    sudo apt-get remove head-basic-head-api
+    $SUDO apt-get remove head-basic-head-api
 }
 
 uninstall_head-pau2motors() {
-    sudo apt-get remove head-pau2motors
+    $SUDO apt-get remove head-pau2motors
 }
 
 uninstall_head-perception() {
-    sudo apt-get remove head-perception
+    $SUDO apt-get remove head-perception
 }
 
 uninstall_head-pi-vision() {
-    sudo apt-get remove head-pi-vision
+    $SUDO apt-get remove head-pi-vision
 }
 
 uninstall_head-performances() {
-    sudo apt-get remove head-performances
+    $SUDO apt-get remove head-performances
 }
 
 uninstall_head-ros-misc() {
-    sudo apt-get remove head-ros-misc
+    $SUDO apt-get remove head-ros-misc
 }
 
 uninstall_head-ros-tts() {
-    sudo apt-get remove head-ros-tts
+    $SUDO apt-get remove head-ros-tts
 }
 
 uninstall_head-python-emopy() {
     uninstall_head-ros-emotion
-    sudo apt-get remove head-python-emopy
+    $SUDO apt-get remove head-python-emopy
 }
 
 uninstall_head-data() {
-    sudo apt-get remove head-data
+    $SUDO apt-get remove head-data
 }
 
 uninstall_head-ros-emotion() {
-    sudo apt-get remove head-ros-emotion
+    $SUDO apt-get remove head-ros-emotion
 }
 
 uninstall_head-torch() {
-    sudo apt-get remove head-torch
+    $SUDO apt-get remove head-torch
 }
 
 uninstall_head-python-openface() {
-    sudo apt-get remove head-python-openface
+    $SUDO apt-get remove head-python-openface
 }
 
 uninstall_head-ros-face-recognition() {
-    sudo apt-get remove head-ros-face-recognition
+    $SUDO apt-get remove head-ros-face-recognition
 }
 
 uninstall_head-ros-audio-stream() {
-    sudo apt-get remove head-ros-audio-stream
+    $SUDO apt-get remove head-ros-audio-stream
 }
 
 uninstall_head-opencv() {
-    sudo apt-get remove head-opencv
+    $SUDO apt-get remove head-opencv
 }
 
 uninstall_head-librealsense() {
-    sudo apt-get remove head-librealsense
+    $SUDO apt-get remove head-librealsense
+}
 
 uninstall_head-tigervnc() {
     $SUDO apt-get remove head-tigervnc
