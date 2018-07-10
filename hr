@@ -2838,11 +2838,9 @@ vncserver0() {
 }
 
 vncviewer0() {
-    set -x
     local password_file
     _init_vncpasswd
     vncviewer -passwd $password_file
-    set +x
 }
 
 ############# End of Functions #############
