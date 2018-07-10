@@ -30,7 +30,7 @@ else
     fi
 fi
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv head-librealsense)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv head-librealsense head-tigervnc)
 
 DEFAULT_ROLE=developer
 DEFAULT_GIT_PROTOCAL=https
@@ -2163,6 +2163,17 @@ install_postgresql() {
     $SUDO service postgresql restart
 }
 
+install_head-tigervnc() {
+    local prerelease
+    local force
+    _parse_install_options $@
+    local version=1.8.0
+    local debname=head-tigervnc_${version}_amd64.deb
+    local url=${GITHUB_STORAGE_URL}/$debname
+    _download_deb_package
+    _install_deb_packages ${debname} ${force}
+}
+
 help_install() {
 cat << EOF
 hr install <dependency> [<dependency>] ...
@@ -2345,6 +2356,9 @@ uninstall_head-opencv() {
 
 uninstall_head-librealsense() {
     sudo apt-get remove head-librealsense
+
+uninstall_head-tigervnc() {
+    $SUDO apt-get remove head-tigervnc
 }
 
 help_uninstall() {
