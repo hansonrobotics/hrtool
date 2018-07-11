@@ -183,6 +183,10 @@ apt_get_install() {
 
 pip2_install() {
     [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
+    if [[ ! -e $HR_PY2_VIRTUALENV/bin/python ]]; then
+        $SUDO pip2 install virtualenv
+        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
+    fi
     $SUDO $PIP2 install $@
 }
 
@@ -193,6 +197,10 @@ pip2_uninstall() {
 
 pip3_install() {
     [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
+    if [[ ! -e $HR_PY3_VIRTUALENV/bin/python3.6 ]]; then
+        $SUDO pip2 install virtualenv
+        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
+    fi
     $SUDO $PIP3 install $@
 }
 
@@ -1775,9 +1783,6 @@ install_head-deps() {
         )
 
         apt_get_install "${pkgs[@]}"
-        $SUDO pip2 install virtualenv
-        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
 
         local version=0.2.0
         local debname=head-deps-all_${version}_amd64.deb
@@ -1818,10 +1823,6 @@ install_head-deps() {
             librealsense2-dbg
         )
         apt_get_install "${pkgs[@]}"
-
-        $SUDO pip2 install virtualenv
-        $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
-        $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
 
         local version=0.2.0
         local debname=head-deps-xenial-all_${version}_amd64.deb
