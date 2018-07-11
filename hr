@@ -458,6 +458,7 @@ _check_repo_changes() {
 
 _check_deps() {
     filename="$1"
+    unset PYTHONPATH
     local dir commit workdir branches curr_branch freeze freeze3
     if [[ -z $filename ]]; then
         return 1
