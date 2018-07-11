@@ -545,6 +545,7 @@ _check_deps() {
                 if ! echo "${deb_freeze[@]}" | grep -e "^$package_name==" &>/dev/null; then
                     error "Debian package \"$package_name\" is required"
                     error "See dependency spec file $filename"
+                    [[ $package_name == head-* ]] && error "Install with command \"hr install $package_name\""
                     #return 1
                 fi
                 curr_ver=$(echo "${deb_freeze[@]}"|grep -e "^$package_name=="|cut -d"=" -f3)
@@ -561,12 +562,14 @@ _check_deps() {
                     error "The version of Debian package \"$package_name\" is not satisfied"
                     error "Current version \"$curr_ver\". Required version \"$required_ver\""
                     error "See dependency spec file $filename"
+                    [[ $package_name == head-* ]] && error "Install with command \"hr install $package_name\""
                     #return 1
                 fi
             else
                 if ! echo "${deb_freeze[@]}" | grep -e "^$package==" &>/dev/null; then
                     error "Debian package \"$package\" is required but not found"
                     error "See dependency spec file $filename"
+                    [[ $package_name == head-* ]] && error "Install with command \"hr install $package_name\""
                     #return 1
                 fi
             fi
@@ -1844,7 +1847,7 @@ install_head-deps() {
     pip3_install rospkg catkin_pkg numpy pyyaml
     pip2_install \
         rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
-        pinyin==0.2.5 pyparsing transitions flask EasyProcess \
+        pyparsing transitions flask EasyProcess \
         psutil natsort apiai numexpr \
         future six \
         MySQL-python SQLAlchemy \
