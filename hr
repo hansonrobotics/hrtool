@@ -2091,7 +2091,6 @@ install_head-opencv() {
 }
 
 install_head-librealsense() {
-    [[ -e ${HR_APT_SOURCE} ]] && apt_get_install head-librealsense && return
     local prerelease
     local force
     _parse_install_options $@
