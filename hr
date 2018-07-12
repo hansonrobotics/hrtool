@@ -30,7 +30,7 @@ else
     fi
 fi
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-python-openface head-ros-face-recognition head-ros-audio-stream head-opencv head-librealsense head-tigervnc)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-librealsense head-tigervnc)
 
 DEFAULT_ROLE=developer
 DEFAULT_GIT_PROTOCAL=https
@@ -1876,7 +1876,7 @@ install_head-deps() {
     install_head-performances $@
     install_head-ros-misc $@
     install_head-ros-tts $@
-    install_head-ros-emotion $@
+    #install_head-ros-emotion $@
     install_head-python-dynamixel-lib $@
     install_elasticsearch $@
     if [[ $OS_VERSION == 'xenial' ]]; then
@@ -1885,28 +1885,14 @@ install_head-deps() {
 }
 
 install_head-sphinxbase() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/sphinxbase
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-sphinxbase_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-pocketsphinx() {
     install_head-sphinxbase $@
-    local prerelease
-    local force
-    _parse_install_options $@
-    repo=hansonrobotics/pocketsphinx
-    version=$(get_latest_version $repo $prerelease)
-    debname=head-pocketsphinx_${version#v}_amd64.deb
-    url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    local repo=hansonrobotics/pocketsphinx
+    _install_latest_repo_release $@
 }
 
 install_head-festival-api() {
@@ -1921,75 +1907,33 @@ install_head-festival-api() {
 }
 
 install_head-dynamixel-motor() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/dynamixel_motor
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-dynamixel-motor_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-webui() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/webui
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-webui_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-blender-api() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/blender_api
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-blender-api_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-blender-api-msgs() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/blender_api_msgs
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-blender-api-msgs_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-ros-tts() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/ros_tts
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-ros-tts_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-python-emopy() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/emopy
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-python-emopy_${version#v}_all.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-data() {
@@ -2005,78 +1949,35 @@ install_head-data() {
 
 install_head-ros-emotion() {
     install_head-python-emopy $@
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/ros_emotion
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-ros-emotion_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-torch() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/distro
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-torch_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-python-openface() {
-    install_head-torch $@
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/openface
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-python-openface_${version#v}_all.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-ros-face-recognition() {
     install_head-python-openface $@
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/ros_face_recognition
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-ros-face-recognition_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-ros-audio-stream() {
     uninstall_head-sound || true
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/audio_stream
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-ros-audio-stream_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-python-dynamixel-lib() {
-    local prerelease
-    local force
-    _parse_install_options $@
     local repo=hansonrobotics/DynamixelSDK
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-python-dynamixel-lib_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
+    _install_latest_repo_release $@
 }
 
 install_head-opencv() {
