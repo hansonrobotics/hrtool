@@ -1038,10 +1038,12 @@ export GIT_PROTOCAL=$protocal
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export ROS_LOG_DIR="$HOME/.hr/log"
+export ELK_LOG_DIR="$ROS_LOG_DIR/logs"
 export PATH=$HR_PREFIX/bin:$HR_PY2_VIRTUALENV/bin:\$PATH
 export LD_LIBRARY_PATH=$HR_PREFIX/lib:\$LD_LIBRARY_PATH
 EOF
     info HR_WORKSPACE=$HR_WORKSPACE
+    mkdir -p $ELK_LOG_DIR
 }
 
 hr_env() {
