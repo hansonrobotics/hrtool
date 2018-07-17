@@ -1028,6 +1028,7 @@ hr_cmd() {
 hr_init() {
     local role=$(read_role)
     local protocal=$(read_git_protocal)
+    local elk_log_dir="$HOME/.hr/log/logs"
     set_workspace $@
     echo export HR_WORKSPACE=$HR_WORKSPACE > $HR_ENVFILE_PATH
 cat <<EOF >>$HR_ENVFILE_PATH
@@ -1038,12 +1039,12 @@ export GIT_PROTOCAL=$protocal
 
 export ROS_PKG_PREFIX=$ROS_PKG_PREFIX
 export ROS_LOG_DIR="$HOME/.hr/log"
-export ELK_LOG_DIR="$ROS_LOG_DIR/logs"
+export ELK_LOG_DIR="$elk_log_dir"
 export PATH=$HR_PREFIX/bin:$HR_PY2_VIRTUALENV/bin:\$PATH
 export LD_LIBRARY_PATH=$HR_PREFIX/lib:\$LD_LIBRARY_PATH
 EOF
     info HR_WORKSPACE=$HR_WORKSPACE
-    mkdir -p $ELK_LOG_DIR
+    mkdir -p "$elk_log_dir"
 }
 
 hr_env() {
