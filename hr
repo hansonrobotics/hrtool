@@ -761,16 +761,17 @@ read_workspace() {
     if [[ -f $HR_ENVFILE_PATH ]]; then
         local str=$(cat $HR_ENVFILE_PATH|grep "export HR_WORKSPACE=")
         if [[ -z $str ]]; then
-            error "HR_WORKSPACE is not found in ${HR_ENVFILE_PATH}. Please re-run \"hr init\""
+            error "Workspace is not found in env file."
             return 1
         else
             HR_WORKSPACE=${str#export HR_WORKSPACE=}
             update_env_vars
         fi
         if [[ ! -d $HR_WORKSPACE ]]; then
-            warn "HR_WORKSPACE ${HR_WORKSPACE} doesn't exist."
+            warn "Workspace ${HR_WORKSPACE} doesn't exist."
         fi
     else
+        error "Workspace is not initialized."
         return 1
     fi
 }
@@ -1029,7 +1030,12 @@ hr_init() {
     local role=$(read_role)
     local protocal=$(read_git_protocal)
     local elk_log_dir="$HOME/.hr/log/logs"
-    set_workspace $@
+    read_workspace >/dev/null || true
+    if [[ $# > 0 ]]; then
+        set_workspace $@
+    else
+        set_workspace $HR_WORKSPACE
+    fi
     echo export HR_WORKSPACE=$HR_WORKSPACE > $HR_ENVFILE_PATH
 cat <<EOF >>$HR_ENVFILE_PATH
 export HR_PREFIX=$HR_PREFIX
@@ -1062,7 +1068,11 @@ hr_version() {
 }
 
 hr_run() {
-    read_workspace
+    hr_init
+    if [[ ! -d $HR_LAUNCHPAD_DIR ]]; then
+        error "Launchpad directory \"$HR_LAUNCHPAD_DIR\" doesn't exist"
+        return 1
+    fi
     local role=$(read_role)
     case $role in
         user)
@@ -1107,6 +1117,10 @@ hr_run() {
 
 hr_stop() {
     read_workspace
+    if [[ ! -d $HR_LAUNCHPAD_DIR ]]; then
+        error "Launchpad directory \"$HR_LAUNCHPAD_DIR\" doesn't exist"
+        return 1
+    fi
     cd $HR_LAUNCHPAD_DIR
     ./stop.sh $@
 }
