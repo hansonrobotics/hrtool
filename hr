@@ -2735,13 +2735,13 @@ vncpasswd0() {
 vncserver0() {
     local password_file
     _init_vncpasswd
-    x0vncserver -rfbauth $password_file
+    x0vncserver -rfbauth $password_file $@
 }
 
 vncviewer0() {
     local password_file
     _init_vncpasswd
-    vncviewer -passwd $password_file
+    vncviewer -passwd $password_file $@
 }
 
 ############# End of Functions #############
