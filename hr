@@ -360,7 +360,6 @@ use_git_https() {
 }
 
 _parse_repo_string() {
-    read_workspace
     local item=$1
     local ore owner repo dest workdir
     if [[ ! $item == *:* ]]; then
