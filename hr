@@ -2012,25 +2012,33 @@ install_head-librealsense() {
 }
 
 install_obs() {
-  $SUDO apt-get install ffmpeg
-  $SUDO add-apt-repository ppa:obsproject/obs-studio
-  $SUDO apt-get update
-  $SUDO apt-get install obs-studio
+    $SUDO apt-get install ffmpeg
+    $SUDO add-apt-repository ppa:obsproject/obs-studio
+    $SUDO apt-get update
+    $SUDO apt-get install obs-studio
 }
 
 install_oracle-jdk8() {
-    $SUDO apt-get install -y python-software-properties debconf-utils
-    $SUDO add-apt-repository -y ppa:webupd8team/java
-    $SUDO apt-get update
-    $SUDO debconf-set-selections <<< "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true"
-    $SUDO apt-get install -y oracle-java8-installer oracle-java8-set-default
+    if [[ ! -f /usr/lib/jvm/java-8-oracle/bin/javac ]]; then
+        $SUDO apt-get install -y python-software-properties debconf-utils
+        $SUDO add-apt-repository -y ppa:webupd8team/java
+        $SUDO apt-get update
+        $SUDO debconf-set-selections <<< "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true"
+        $SUDO apt-get install -y oracle-java8-installer oracle-java8-set-default
+    else
+        info "Oracle JDK8 has already been installed"
+    fi
 }
 
 install_elasticsearch() {
     install_oracle-jdk8
-    local url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.3.0.deb
-    curl_cache ${url}
-    $SUDO dpkg -i ${HR_CACHE}/elasticsearch-oss-6.3.0.deb
+    if [[ ! -f /usr/share/elasticsearch/bin/elasticsearch ]]; then
+        local url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.3.0.deb
+        curl_cache ${url}
+        $SUDO dpkg -i ${HR_CACHE}/elasticsearch-oss-6.3.0.deb
+    else
+        info "ElasticSearch has already been installed"
+    fi
     # ps -p 1
     if [[ $OS_VERSION == 'trusty' ]]; then
         $SUDO update-rc.d elasticsearch defaults 95 10
@@ -2041,13 +2049,16 @@ install_elasticsearch() {
         $SUDO systemctl start elasticsearch
     fi
     $SUDO $PIP2 install "elasticsearch>=6.2.0,<7.0.0"
-
 }
 
 install_kibana() {
-    local url=https://artifacts.elastic.co/downloads/kibana/kibana-6.3.0-amd64.deb
-    curl_cache ${url}
-    $SUDO dpkg -i ${HR_CACHE}/kibana-6.3.0-amd64.deb
+    if [[ ! -f /usr/share/kibana/bin/kibana ]]; then
+        local url=https://artifacts.elastic.co/downloads/kibana/kibana-6.3.0-amd64.deb
+        curl_cache ${url}
+        $SUDO dpkg -i ${HR_CACHE}/kibana-6.3.0-amd64.deb
+    else
+        info "Kibana has already been installed"
+    fi
 
     if [[ $OS_VERSION == 'trusty' ]]; then
         $SUDO update-rc.d kibana defaults 95 10
@@ -2057,19 +2068,6 @@ install_kibana() {
         $SUDO systemctl enable kibana.service
         $SUDO systemctl start kibana
     fi
-}
-
-install_elasticbeats() {
-    # filebeat
-    local fburl=https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.3.1-amd64.deb
-    curl_cache ${fburl}
-    $SUDO dpkg -i ${HR_CACHE}/filebeat-6.3.1-amd64.deb
-    # metricbeat
-    local mburl=https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.3.1-amd64.deb
-    curl_cache ${mburl}
-    $SUDO dpkg -i ${HR_CACHE}/metricbeat-6.3.1-amd64.deb
-    # TBD: curl configuration yml
-    # TBD: sudo service filebeat start
 }
 
 install_postgresql() {
