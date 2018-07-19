@@ -1546,7 +1546,6 @@ install_head-hr() {
     _download_deb_package
     _install_deb_packages ${debname} ${force}
     install_head-hr-ext $@
-    _update_head_deps
 }
 
 install_head-hr-ext() {
