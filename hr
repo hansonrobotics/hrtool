@@ -1867,7 +1867,7 @@ install_head-deps() {
         psutil natsort apiai numexpr \
         future six \
         MySQL-python SQLAlchemy \
-        bs4 xlrd Babel progressbar2
+        bs4 xlrd Babel progressbar2 python-json-logger
 
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
