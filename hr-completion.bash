@@ -53,7 +53,7 @@ _hr() {
       ;;
     python|python3)
       if (( ${cword} >= 2 )); then
-        _filedir '@(py)'
+        _filedir '@(*)'
       fi
       ;;
     *)
