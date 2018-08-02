@@ -44,8 +44,8 @@ HR_MODELS=$USER_DATA_DIR/models
 
 HR_PY2_VIRTUALENV=$HR_PREFIX/py2env
 HR_PY3_VIRTUALENV=$HR_PREFIX/py3env
-PIP2="$HR_PY2_VIRTUALENV/bin/python -m pip"
-PIP3="$HR_PY3_VIRTUALENV/bin/python -m pip"
+PIP2="$HR_PY2_VIRTUALENV/bin/python -m pip --disable-pip-version-check"
+PIP3="$HR_PY3_VIRTUALENV/bin/python -m pip --disable-pip-version-check"
 PYTHON2=$HR_PY2_VIRTUALENV/bin/python
 PYTHON3=$HR_PY2_VIRTUALENV/bin/python3
 
@@ -184,7 +184,7 @@ apt_get_install() {
 pip2_install() {
     [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
     if [[ ! -e $HR_PY2_VIRTUALENV/bin/python ]]; then
-        $SUDO pip2 install virtualenv
+        $SUDO pip2 --disable-pip-version-check install virtualenv
         $SUDO virtualenv -p /usr/bin/python2 $HR_PY2_VIRTUALENV
     fi
     $SUDO $PIP2 install $@
@@ -198,7 +198,7 @@ pip2_uninstall() {
 pip3_install() {
     [[ ! -z $SUDO ]] && SUDO="$SUDO -H"
     if [[ ! -e $HR_PY3_VIRTUALENV/bin/python3.6 ]]; then
-        $SUDO pip2 install virtualenv
+        $SUDO pip2 --disable-pip-version-check install virtualenv
         $SUDO virtualenv -p /usr/bin/python3.6 $HR_PY3_VIRTUALENV
     fi
     $SUDO $PIP3 install $@
