@@ -1859,6 +1859,8 @@ install_head-deps() {
     $SUDO service mongod start
     $SUDO systemctl enable mongod
 
+    $SUDO pip install python-json-logger # for ROS logging
+
     # for blender to find ros packages
     pip3_install rospkg catkin_pkg numpy pyyaml python-json-logger
     pip2_install \
