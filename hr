@@ -1137,7 +1137,7 @@ hr_role() {
 }
 
 hr_python() {
-    $HR_PY2_VIRTUALENV/bin/python $@
+    PYTHONPATH=$ROS_PKG_PREFIX/lib/python2.7/dist-packages/ $HR_PY2_VIRTUALENV/bin/python $@
 }
 
 hr_python3() {
