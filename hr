@@ -806,7 +806,7 @@ print_repo_info() {
     read_workspace >/dev/null
     local lg='git log -1 --no-merges --abbrev-commit --decorate --date=relative'
     local commit='--format=format:"%C(bold blue)%h%C(reset) %C(white)%<(50,trunc)%s%C(reset) %C(dim white)- %<(20,trunc)%an%C(reset) %C(bold green)%<(20,trunc)%ar%C(reset)"'
-    local format="%-32s %-15s %-8s %s"
+    local format="%-24s %-12s %-8s %s"
     local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
     local item args owner repo workdir branch
     printf "${format}\n" "Repository" "Branch" "Changes" "Commit"
@@ -823,13 +823,13 @@ print_repo_info() {
             local behind_count=$(echo $left_right_count | cut -d" " -f2)
             local changes=
             if (( $ahead_count > 0 )); then
-                changes="+$ahead_count"
+                changes+="+$ahead_count"
             fi
             if (( $behind_count > 0 )); then
-                changes="-$behind_count"
+                changes+="-$behind_count"
             fi
             if [[ $(git status -uno --porcelain --ignore-submodules|wc -c) != 0 ]]; then
-                branch="* $branch"
+                changes+="*"
             fi
             printf "${format}\n" "$repo" "$branch" "$changes" "$(eval $lg $commit)"
         fi
