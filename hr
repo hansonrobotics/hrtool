@@ -1147,7 +1147,7 @@ hr_role() {
 }
 
 hr_python() {
-    PYTHONPATH=$ROS_PKG_PREFIX/lib/python2.7/dist-packages/ $HR_PY2_VIRTUALENV/bin/python $@
+    PYTHONPATH=$ROS_PKG_PREFIX/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages $HR_PY2_VIRTUALENV/bin/python $@
 }
 
 hr_python3() {
@@ -2045,7 +2045,8 @@ install_oracle-jdk8() {
 install_elasticsearch() {
     install_oracle-jdk8
     if [[ ! -f /usr/share/elasticsearch/bin/elasticsearch ]]; then
-        local url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.3.0.deb
+        MD5SUMS["elasticsearch-oss-6.3.0.deb"]=c113c8c0789881d1b6208daa9a4e9d7c
+        local url=${GITHUB_STORAGE_URL}/elasticsearch-oss-6.3.0.deb
         curl_cache ${url}
         $SUDO dpkg -i ${HR_CACHE}/elasticsearch-oss-6.3.0.deb
     else
