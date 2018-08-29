@@ -1755,13 +1755,6 @@ install_head-deps() {
     $SUDO apt-get remove -y command-not-found || true # cause trouble when it's under python2 environment
     apt_get_install software-properties-common python-software-properties apt-transport-https lsb-release
 
-    # Set primary DNS server 8.8.8.8
-    if ! grep "nameserver 8.8.8.8" /etc/resolvconf/resolv.conf.d/head; then
-        info "Setting up DNS server 8.8.8.8"
-        $SUDO sh -c 'echo "nameserver 8.8.8.8" >>/etc/resolvconf/resolv.conf.d/head'
-        $SUDO resolvconf -u
-    fi
-
     # setup ROS repository
     $SUDO sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
     $SUDO apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
