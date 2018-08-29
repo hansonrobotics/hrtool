@@ -327,6 +327,7 @@ clone() {
 }
 
 _set_git_protocal() {
+    read_workspace >/dev/null
     local protocal=$1
     local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]} ${OPENCOG_DEV_REPOS[@]})
     local args owner repo workdir branch
