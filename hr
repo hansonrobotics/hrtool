@@ -1910,6 +1910,7 @@ install_head-deps() {
     if [[ $OS_VERSION == 'xenial' ]]; then
         install_head-librealsense $@
     fi
+    install_calib_tools $@
 }
 
 install_head-sphinxbase() {
