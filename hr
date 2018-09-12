@@ -2709,6 +2709,48 @@ push_repos() {
     fi
 }
 
+checkout_repos() {
+    local branch_name=$1
+    if [[ -z $branch_name ]]; then
+        error "Please provide branch name you want to push"
+        return 1
+    fi
+    read_workspace
+    local role=$(read_role)
+    if [[ $role != 'developer' ]]; then
+        error "Should be in developer mode"
+        return 1
+    fi
+    local repos=(${HR_LAUNCHPAD_REPOS[@]} ${HR_DEV_REPOS[@]})
+    local args owner repo workdir branch
+    local checked=0
+    for item in ${repos[@]}; do
+        mapfile -t args <<<"$(_parse_repo_string $item)"
+        owner=${args[0]}
+        repo=${args[1]}
+        workdir=${args[2]}
+        if [[ -d $workdir ]]; then
+            branch=$(git -C ${workdir} rev-parse --abbrev-ref HEAD)
+            if [[ $branch != $branch_name ]]; then
+                if git -C $workdir rev-parse --verify $branch_name >/dev/null 2>&1; then
+                    if git -C $workdir checkout -q $branch_name --; then
+                        info "$repo[$branch_name] has been checked out"
+                        checked=1
+                    else
+                        error "Failed to check out $repo[$branch_name]"
+                    fi
+                fi
+            else
+                info "$repo[$branch_name] has been checked out"
+                checked=1
+            fi
+        fi
+    done
+    if [[ $checked == 0 ]]; then
+        warn "No any repository has branch named $branch_name"
+    fi
+}
+
 disable_ipv6() {
     disable=$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)
     if [[ $disable == 0 ]]; then
