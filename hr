@@ -994,6 +994,19 @@ hr_fetch() {
     info "Fetching source code is done"
 }
 
+hr_rebase() {
+    read_workspace
+    info "Rebasing HEAD source code"
+    local role=$(read_role)
+    local protocal=$(read_git_protocal)
+    local repos=(${HR_LAUNCHPAD_REPOS[@]})
+    if [[ $role  == "developer" ]]; then
+        local repos=(${repos[@]} ${HR_DEV_REPOS[@]})
+    fi
+    _update_repos ${repos[@]}
+    info "Rebasing HEAD source code is done"
+}
+
 hr_update() {
     validate_component_args update $@
     for arg in $@; do
@@ -2828,13 +2841,14 @@ Usage: hr <command> [<args>]
     python                                  Run HEAD Python interpreter
     python3                                 Run HEAD Python3 interpreter
     fetch                                   Fetch source code (without updating repository)
+    rebase                                  Rebase source code
 
 EOF
 }
 
 execute() {
     case "$1" in
-        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role|python|python3|fetch)
+        install|uninstall|build|cmd|init|clean|env|update|run|stop|version|role|python|python3|fetch|rebase)
             command=$1
             shift
             hr_${command} $@
