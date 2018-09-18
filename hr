@@ -1421,6 +1421,8 @@ install_calib_tools() {
         $SUDO cp ${HR_CACHE}/mx_calib ${HR_PREFIX}/bin
         $SUDO chmod +x ${HR_PREFIX}/bin/mx_calib
     fi
+
+    apt_get_install vlc
 }
 
 _download_deb_package() {
