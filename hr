@@ -30,7 +30,7 @@ else
     fi
 fi
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-librealsense head-tigervnc)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-librealsense head-tigervnc head-calib-tools)
 
 DEFAULT_ROLE=developer
 DEFAULT_GIT_PROTOCAL=https
@@ -1423,6 +1423,10 @@ install_calib_tools() {
     fi
 
     apt_get_install vlc
+
+    # install camtool
+    local repo=hansonrobotics/calib_tools
+    _install_latest_repo_release $@
 }
 
 _download_deb_package() {
@@ -2807,14 +2811,20 @@ vncpasswd0() {
 
 vncserver0() {
     local password_file
+    if ! hash -r x0vncserver 2>/dev/null; then
+        install_head-tigervnc
+    fi
     _init_vncpasswd
-    x0vncserver -rfbauth $password_file $@
+    DISPLAY=${DISPLAY-:0} x0vncserver -rfbauth $password_file $@
 }
 
 vncviewer0() {
     local password_file
+    if ! hash -r vncviewer 2>/dev/null; then
+        install_head-tigervnc
+    fi
     _init_vncpasswd
-    vncviewer -passwd $password_file $@
+    DISPLAY=${DISPLAY-:0} vncviewer -passwd $password_file $@
 }
 
 ############# End of Functions #############
