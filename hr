@@ -420,7 +420,7 @@ _update_repo() {
         echo $(git -C $workdir status -uno --porcelain --ignore-submodules) 1>&2
         return
     fi
-    git -C ${workdir} rebase origin/$branch >/dev/null || (warn "Update [${repo}] failed. Abort" && git -C ${workdir} rebase --abort && return)
+    git -C ${workdir} rebase origin/$branch >/dev/null || (warn "Update [${repo}] failed. Abort" && if test -d "$(git -C ${workdir} rev-parse --git-path rebase-apply)"; then git -C ${workdir} rebase --abort; fi && return)
     if [[ -f ${workdir}/.gitmodules ]]; then
         git -C ${workdir} submodule sync
         git -C ${workdir} submodule update --init --recursive
