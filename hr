@@ -2800,31 +2800,31 @@ _init_vncpasswd() {
     fi
     if [[ ! -f $password_file ]]; then
         password_file=~/.hr/.vncpasswd
-        vncpasswd $password_file
+        ${HR_PREFIX}/bin/vncpasswd $password_file
     fi
 }
 
 vncpasswd0() {
     local password_file=~/.hr/.vncpasswd
-    vncpasswd $password_file
+    ${HR_PREFIX}/bin/vncpasswd $password_file
 }
 
 vncserver0() {
     local password_file
-    if ! hash -r x0vncserver 2>/dev/null; then
+    if [[ ! -f ${HR_PREFIX}/bin/x0vncserver ]]; then
         install_head-tigervnc
     fi
     _init_vncpasswd
-    DISPLAY=${DISPLAY-:0} x0vncserver -rfbauth $password_file $@
+    DISPLAY=${DISPLAY-:0} ${HR_PREFIX}/bin/x0vncserver -rfbauth $password_file $@
 }
 
 vncviewer0() {
     local password_file
-    if ! hash -r vncviewer 2>/dev/null; then
+    if [[ ! -f ${HR_PREFIX}/bin/vncviewer ]]; then
         install_head-tigervnc
     fi
     _init_vncpasswd
-    DISPLAY=${DISPLAY-:0} vncviewer -passwd $password_file $@
+    DISPLAY=${DISPLAY-:0} ${HR_PREFIX}/bin/vncviewer -passwd $password_file $@
 }
 
 ############# End of Functions #############
