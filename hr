@@ -14,7 +14,7 @@ DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
 
-HR_DEV_REPOS=(hansonrobotics/blender_api_msgs:HEAD/src hansonrobotics/blender_api:HEAD/src hansonrobotics/chatbot:HEAD/src hansonrobotics/basic_head_api:HEAD/src hansonrobotics/motors_safety:HEAD/src hansonrobotics/pau2motors:HEAD/src hansonrobotics/ros_pololu:HEAD/src hansonrobotics/webui:HEAD/src hansonrobotics/perception:HEAD/src hansonrobotics/pi_vision:HEAD/src hansonrobotics/performances:HEAD/src hansonrobotics/ros_tts:HEAD/src hansonrobotics/ttsserver:HEAD/src hansonrobotics/hr_reflexes:HEAD/src hansonrobotics/ros_face_recognition:HEAD/src hansonrobotics/hr_msgs:HEAD/src hansonrobotics/audio_stream:HEAD/src hansonrobotics/sys_monitor:HEAD/src hansonrobotics/ros_mongo:HEAD/src hansonrobotics/r2_behavior:HEAD/src hansonrobotics/eye_tracking:HEAD/src hansonrobotics/rospy_message_converter:HEAD/src)
+HR_DEV_REPOS=(hansonrobotics/blender_api_msgs:HEAD/src hansonrobotics/blender_api:HEAD/src hansonrobotics/chatbot:HEAD/src hansonrobotics/basic_head_api:HEAD/src hansonrobotics/motors_safety:HEAD/src hansonrobotics/pau2motors:HEAD/src hansonrobotics/ros_pololu:HEAD/src hansonrobotics/webui:HEAD/src hansonrobotics/perception:HEAD/src hansonrobotics/pi_vision:HEAD/src hansonrobotics/performances:HEAD/src hansonrobotics/ros_tts:HEAD/src hansonrobotics/ttsserver:HEAD/src hansonrobotics/hr_reflexes:HEAD/src hansonrobotics/ros_face_recognition:HEAD/src hansonrobotics/hr_msgs:HEAD/src hansonrobotics/audio_stream:HEAD/src hansonrobotics/sys_monitor:HEAD/src hansonrobotics/ros_mongo:HEAD/src hansonrobotics/r2_behavior:HEAD/src hansonrobotics/eye_tracking:HEAD/src hansonrobotics/rospy_message_converter:HEAD/src hansonrobotics/realsense:HEAD/src)
 HR_LAUNCHPAD_REPOS=(hansonrobotics/launchpad:)
 HR_OPENCOG_DEV_REPOS=(hansonrobotics/cogutils:HROpenCog hansonrobotics/atomspace:HROpenCog hansonrobotics/opencog:HROpenCog hansonrobotics/relex:HROpenCog hansonrobotics/external-tools:HROpenCog)
 OPENCOG_DEV_REPOS=(opencog/cogutil:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
@@ -1379,7 +1379,7 @@ _install_webui_deps() {
     else
         # See https://github.com/nodesource/distributions#debinstall
         info "Installing nodejs"
-        curl -sL https://deb.nodesource.com/setup_6.x | $SUDO -E bash -
+        curl -sL https://deb.nodesource.com/setup_8.x | $SUDO -E bash -
         local pkg_status=$(dpkg-query -W -f='${db:Status-Abbrev}' nodejs 2>/dev/null)
         if [[ ${pkg_status:1:1} == 'i' ]]; then
             info "Removing old nodejs"
@@ -2040,7 +2040,8 @@ install_head-opencv() {
 }
 
 install_head-librealsense() {
-    local repo=hansonrobotics/librealsense
+    $SUDO apt-get remove -y head-librealsense || true
+    local repo=hansonrobotics/realsense
     _install_latest_repo_release $@
 }
 
