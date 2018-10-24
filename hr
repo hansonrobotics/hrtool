@@ -151,6 +151,7 @@ check_apt_installed() {
     local ver
     local pkg
     for pkg in $pkgs; do
+        if [[ ${pkg} == -* ]] ; then continue; fi
         if [[ ${pkg} =~ .*"=".* ]]; then
             ver=${pkg##*=}
             pkg=${pkg%=*}
@@ -1889,12 +1890,16 @@ install_head-deps() {
             ros-kinetic-openni-camera
             ros-kinetic-rosbridge-server
             ros-kinetic-usb-cam
+        )
+        realsense_pkgs=(
             librealsense2-dkms
             librealsense2-utils
             librealsense2-dev
             librealsense2-dbg
         )
         apt_get_install "${pkgs[@]}"
+        apt_get_install --upgrade "${realsense_pkgs[@]}"
+
         $SUDO systemctl enable mongod
         $SUDO systemctl start mongod
 
