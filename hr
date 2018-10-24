@@ -2404,6 +2404,7 @@ Update components
 
     head        Update HEAD source code
     opencog     Update OpenCog source code
+    full_head   Update the whole HEAD stack including hrtool, dependencies, and source code.  Can add option such as "-p" to install prerelease packages.
 EOF
 }
 
@@ -2580,8 +2581,12 @@ hr build <component> [<component>] ...
 
 Build components
 
-    head        Build only whitelist packages HEAD
-    opencog     Build OpenCog components
+    head            Build only whitelist packages HEAD
+    opencog         Build OpenCog components
+    head_python     Build HEAD python packages
+    roodle          Build roodle
+    ros_posenet-js  Build posenet
+
 EOF
 }
 
@@ -2880,7 +2885,7 @@ Usage: hr <command> [<args>]
     python                                  Run HEAD Python interpreter
     python3                                 Run HEAD Python3 interpreter
     fetch                                   Fetch source code (without updating repository)
-    rebase                                  Rebase source code
+    rebase                                  Run git rebase on current branch for all the source code (often used after hr fetch)
 
 EOF
 }
