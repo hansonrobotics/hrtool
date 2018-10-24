@@ -944,6 +944,8 @@ hr_install() {
             options="$options ${arg}"
             continue;
         fi
+    done
+    for arg in $@; do
         local func=install_${arg}
         info "Installing ${arg}"
         local ret=0
@@ -1009,9 +1011,24 @@ hr_rebase() {
 
 hr_update() {
     validate_component_args update $@
+    local options
+    for arg in $@; do
+        if [[ ${arg} == -* ]]; then
+            options="$options ${arg}"
+            continue;
+        fi
+    done
     for arg in $@; do
         local func=update_${arg}
-        eval $func
+        info "Updating ${arg}"
+        local ret=0
+        ($func $options) || ret=$? && true
+        if [[ $ret != 0 ]]; then
+            error "Update ${arg} FAILED, return code $ret"
+            return $ret
+        else
+            info "Update ${arg} SUCCESS"
+        fi
     done
 }
 
