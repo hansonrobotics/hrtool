@@ -30,7 +30,7 @@ else
     fi
 fi
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-librealsense head-tigervnc head-calib-tools)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-tigervnc head-calib-tools)
 
 DEFAULT_ROLE=developer
 DEFAULT_GIT_PROTOCAL=https
@@ -1927,7 +1927,7 @@ install_head-deps() {
     install_head-python-dynamixel-lib $@
     install_elasticsearch $@
     if [[ $OS_VERSION == 'xenial' ]]; then
-        install_head-librealsense $@
+        uninstall_head-librealsense $@ || true
     fi
     install_calib_tools $@
 }
@@ -2040,7 +2040,6 @@ install_head-opencv() {
 }
 
 install_head-librealsense() {
-    $SUDO apt-get remove -y head-librealsense || true
     local repo=hansonrobotics/realsense
     _install_latest_repo_release $@
 }
