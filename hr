@@ -1920,9 +1920,9 @@ install_head-deps() {
     $SUDO /usr/bin/python -m pip --disable-pip-version-check install python-json-logger # for ROS logging
 
     # for blender to find ros packages
-    pip3_install rospkg catkin_pkg numpy pyyaml python-json-logger
+    pip3_install rospkg catkin_pkg==0.4.9 numpy pyyaml python-json-logger
     pip2_install \
-        rospkg catkin_pkg pyyaml numpy pandas scipy num2words \
+        rospkg catkin_pkg==0.4.9 pyyaml numpy pandas scipy num2words \
         pyparsing transitions flask EasyProcess \
         psutil natsort apiai numexpr \
         future six \
