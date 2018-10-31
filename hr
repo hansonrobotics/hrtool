@@ -1397,7 +1397,7 @@ _install_webui_deps() {
         local major=$(echo ${ver#v} | cut -d. -f1)
         if (( $major < 8 )); then
             curl -sL https://deb.nodesource.com/setup_8.x | $SUDO -E bash -
-            apt_get_install nodejs
+            $SUDO apt-get install nodejs
         fi
     else
         # See https://github.com/nodesource/distributions#debinstall
@@ -1408,7 +1408,7 @@ _install_webui_deps() {
             info "Removing old nodejs"
             $SUDO apt-get remove -y nodejs
         fi
-        apt_get_install nodejs
+        $SUDO apt-get install nodejs
         info "Installing nodejs done"
     fi
     if ! npm ls -g webpack >/dev/null; then
@@ -1893,6 +1893,7 @@ install_head-deps() {
             ros-kinetic-usb-cam
         )
         realsense_pkgs=(
+            librealsense2
             librealsense2-dkms
             librealsense2-utils
             librealsense2-dev
