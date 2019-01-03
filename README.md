@@ -1,6 +1,6 @@
  - [Installation](#installation)
    - [Install hrtool](#hrtool)
-   - [Install hrtool extension (optional)](#hrtoolext)
+   - [Install hrtool extension](#hrtoolext)
    - [Initialize Workspace](#init)
    - [Install HEAD](#head)
  - [Run robot](#run)
@@ -15,7 +15,7 @@ Run this single command to install hrtool.
 
 `curl https://raw.githubusercontent.com/hansonrobotics/hrtool/master/get_hr.bash|bash`
 
-## <a name="hrtoolext"></a>Install hrtool extension (optional)
+## <a name="hrtoolext"></a>Install hrtool extension
 
 **This allows you to access private resources**
 
