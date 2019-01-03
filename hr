@@ -56,6 +56,7 @@ fi
 export HR_WORKSPACE
 export PKG_CONFIG_PATH=${HR_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 export PATH=/usr/lib/ccache:$PATH
+export LC_ALL=C # for some env that has no LC_ALL
 
 if [[ -z $ASSUME_YES ]]; then
     ASSUME_YES=0
@@ -1830,8 +1831,8 @@ install_head-deps() {
         # https://packagecloud.io/github/git-lfs/install git-lfs repo
         echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ trusty main" | $SUDO tee /etc/apt/sources.list.d/github_git-lfs.list
         curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | $SUDO apt-key add - &>/dev/null
-        # setup python2.6 repository
-        # add_ppa ppa:fkrull/deadsnakes
+        # setup python2.x python3.x repository
+        add_ppa ppa:fkrull/deadsnakes
         # setup ruby2.3
         add_ppa ppa:brightbox/ruby-ng
         remove_ppa ppa:irie/blender
@@ -1883,7 +1884,7 @@ install_head-deps() {
         # https://packagecloud.io/github/git-lfs/install git-lfs repo
         echo "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main" | $SUDO tee /etc/apt/sources.list.d/github_git-lfs.list
         curl -L "https://packagecloud.io/github/git-lfs/gpgkey" 2> /dev/null | $SUDO apt-key add - &>/dev/null
-        remove_ppa ppa:fkrull/deadsnakes
+        add_ppa ppa:fkrull/deadsnakes
         remove_ppa ppa:irie/blender
         add_ppa ppa:thomas-schiex/blender
 
