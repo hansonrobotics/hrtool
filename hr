@@ -2807,14 +2807,13 @@ checkout_repos() {
             if [[ $branch != $branch_name ]]; then
                 if git -C $workdir rev-parse --verify $branch_name >/dev/null 2>&1; then
                     if git -C $workdir checkout -q $branch_name --; then
-                        info "$repo[$branch_name] has been checked out"
+                        info "$repo: [$branch] -> [$branch_name]"
                         checked=1
                     else
                         error "Failed to check out $repo[$branch_name]"
                     fi
                 fi
             else
-                info "$repo[$branch_name] has been checked out"
                 checked=1
             fi
         fi
