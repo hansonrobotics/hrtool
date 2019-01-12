@@ -1939,6 +1939,8 @@ install_head-deps() {
         MySQL-python SQLAlchemy \
         bs4 xlrd Babel progressbar2 python-json-logger
 
+    pip2_install python-dateutil --upgrade
+
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
     install_head-chatbot $@
