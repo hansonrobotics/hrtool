@@ -15,7 +15,7 @@ Run this single command to install hrtool.
 
 `curl https://raw.githubusercontent.com/hansonrobotics/hrtool/master/get_hr.bash|bash`
 
-## <a name="hrtoolext"></a>Install hrtool extension
+## <a name="hrtoolext"></a>Install hrtool extension - for internal use
 
 **This allows you to access private resources**
 
