@@ -3,7 +3,7 @@
 OS_VERSION=$(lsb_release --codename --short)
 if [[ $OS_VERSION == 'trusty' ]]; then
     version=v0.9.0
-elif [[ $OS_VERSION == 'xenial' ]]; then
+elif [[ $OS_VERSION == 'xenial' || $OS_VERSION == 'bionic' ]]; then
     # Should choose version greater than v0.9.0
     version=$(curl https://github.com/hansonrobotics/hrtool/releases/latest | sed 's#^.*<a href=".*/\(.*\)">.*</a>.*#\1#')
     pkg_ver=${version##v}
