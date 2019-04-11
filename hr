@@ -1919,6 +1919,9 @@ install_head-deps() {
         local url=https://github.com/hansonrobotics/binary_dependency/raw/master/$debname
         _download_deb_package
         _install_deb_packages ${debname} ${force}
+
+        wget_cache https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master/rosbridge.patch
+        $SUDO patch -N /opt/ros/kinetic/lib/python2.7/dist-packages/rosbridge_library/internal/publishers.py ${HR_CACHE}/rosbridge.patch || true
     fi
 
     apt_get_install mongodb-org git-lfs openssh-server
