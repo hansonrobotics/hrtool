@@ -14,7 +14,7 @@ DEFAULT_HR_WORKSPACE=$HOME/hansonrobotics
 USER_DATA_DIR=$HOME/.hr
 HR_PREFIX=/opt/hansonrobotics
 
-HR_DEV_REPOS=(hansonrobotics/blender_api_msgs:HEAD/src hansonrobotics/blender_api:HEAD/src hansonrobotics/chatbot:HEAD/src hansonrobotics/basic_head_api:HEAD/src hansonrobotics/motors_safety:HEAD/src hansonrobotics/pau2motors:HEAD/src hansonrobotics/ros_pololu:HEAD/src hansonrobotics/webui:HEAD/src hansonrobotics/perception:HEAD/src hansonrobotics/pi_vision:HEAD/src hansonrobotics/performances:HEAD/src hansonrobotics/ros_tts:HEAD/src hansonrobotics/ttsserver:HEAD/src hansonrobotics/hr_reflexes:HEAD/src hansonrobotics/ros_face_recognition:HEAD/src hansonrobotics/hr_msgs:HEAD/src hansonrobotics/audio_stream:HEAD/src hansonrobotics/sys_monitor:HEAD/src hansonrobotics/ros_mongo:HEAD/src hansonrobotics/r2_behavior:HEAD/src hansonrobotics/eye_tracking:HEAD/src hansonrobotics/rospy_message_converter:HEAD/src hansonrobotics/realsense:HEAD/src)
+HR_DEV_REPOS=(hansonrobotics/blender_api_msgs:HEAD/src hansonrobotics/blender_api:HEAD/src hansonrobotics/basic_head_api:HEAD/src hansonrobotics/motors_safety:HEAD/src hansonrobotics/pau2motors:HEAD/src hansonrobotics/ros_pololu:HEAD/src hansonrobotics/webui:HEAD/src hansonrobotics/perception:HEAD/src hansonrobotics/pi_vision:HEAD/src hansonrobotics/performances:HEAD/src hansonrobotics/ros_tts:HEAD/src hansonrobotics/ttsserver:HEAD/src hansonrobotics/hr_reflexes:HEAD/src hansonrobotics/ros_face_recognition:HEAD/src hansonrobotics/hr_msgs:HEAD/src hansonrobotics/audio_stream:HEAD/src hansonrobotics/sys_monitor:HEAD/src hansonrobotics/ros_mongo:HEAD/src hansonrobotics/r2_behavior:HEAD/src hansonrobotics/eye_tracking:HEAD/src hansonrobotics/rospy_message_converter:HEAD/src hansonrobotics/realsense:HEAD/src)
 HR_LAUNCHPAD_REPOS=(hansonrobotics/launchpad:)
 HR_OPENCOG_DEV_REPOS=(hansonrobotics/cogutils:HROpenCog hansonrobotics/atomspace:HROpenCog hansonrobotics/opencog:HROpenCog hansonrobotics/relex:HROpenCog hansonrobotics/external-tools:HROpenCog)
 OPENCOG_DEV_REPOS=(opencog/cogutil:OpenCog opencog/atomspace:OpenCog opencog/opencog:OpenCog opencog/relex:OpenCog opencog/external-tools:OpenCog)
@@ -30,7 +30,7 @@ else
     fi
 fi
 
-HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-chatbot head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-tigervnc head-calib-tools head-ros-posenet)
+HEAD_PACKAGES=(head-hr head-hr-ext head-hr-msgs head-saliency-tracker head-motor-control head-python-ttsserver head-python-pololu-motors head-marky-markov head-deps head-pocketsphinx head-festival-api head-dynamixel-motor head-webui head-blender-api head-blender-api-msgs head-ros-pololu head-motors-safety head-basic-head-api head-pau2motors head-perception head-pi-vision head-performances head-ros-misc head-ros-tts head-python-emopy head-data head-ros-emotion head-torch head-ros-audio-stream head-opencv head-tigervnc head-calib-tools head-ros-posenet)
 
 DEFAULT_ROLE=developer
 DEFAULT_GIT_PROTOCAL=https
@@ -1382,9 +1382,6 @@ _install_marytts() {
 _install_test_deps() {
     apt_get_install socat
 
-    # WebUI compatable webserver
-    $SUDO npm install xmlhttprequest --prefix $HR_WORKSPACE/HEAD/src/chatbot/scripts
-
     # for python test coverage
     $SUDO pip install coverage
 }
@@ -1627,19 +1624,6 @@ install_head-saliency-tracker() {
     local repo=hansonrobotics/ros_nmpt_saliency
     local version=$(get_latest_version $repo $prerelease)
     local debname=head-saliency-tracker_${version#v}_amd64.deb
-    local url=https://github.com/$repo/releases/download/${version}/$debname
-    _download_deb_package
-    _install_deb_packages ${debname} ${force}
-}
-
-install_head-chatbot() {
-    install_head-data $@
-    local prerelease
-    local force
-    _parse_install_options $@
-    local repo=hansonrobotics/chatbot
-    local version=$(get_latest_version $repo $prerelease)
-    local debname=head-chatbot_${version#v}_amd64.deb
     local url=https://github.com/$repo/releases/download/${version}/$debname
     _download_deb_package
     _install_deb_packages ${debname} ${force}
@@ -1942,11 +1926,10 @@ install_head-deps() {
         MySQL-python SQLAlchemy \
         bs4 xlrd Babel progressbar2 python-json-logger
 
-    pip2_install python-dateutil --upgrade
+    pip2_install python-dateutil --upgrade # for pandas
 
     install_head-hr-msgs $@
     install_head-saliency-tracker $@
-    install_head-chatbot $@
     install_head-pocketsphinx $@
     install_head-ros-audio-stream $@ # depends on head-pocketsphinx
     install_head-python-ttsserver $@
@@ -2190,7 +2173,6 @@ Install dependencies
     opencog-deps            Install OpenCog dependencies
     head-hr-msgs            Install hr_msgs, a shared set of ROS messages for HR
     head-hr-ext             Install hr tool extension
-    head-chatbot            Install chatbot
     head-saliency-tracker   Install saliency tracker
     head-sound              Install sound tools
     head-python-ttsserver   Install tts server
@@ -2215,10 +2197,6 @@ uninstall_head-hr-ext() {
 
 uninstall_head-hr-msgs() {
     $SUDO apt-get remove head-hr-msgs
-}
-
-uninstall_head-chatbot() {
-    $SUDO apt-get remove head-chatbot
 }
 
 uninstall_head-saliency-tracker() {
@@ -2379,7 +2357,6 @@ Uninstall components
     head-hr                 Uninstall hr tool
     head-hr-ext             Uninstall hr-ext
     head-hr-msgs            Uninstall hr_msgs
-    head-chatbot            Uninstall chatbot
     head-saliency-tracker   Uninstall saliency tracker
     head-motor-control      Uninstall motor control
     head-sound              Uninstall sound tools
