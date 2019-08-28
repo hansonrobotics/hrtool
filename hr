@@ -1561,6 +1561,7 @@ _update_head_deps() {
 install_head-hr() {
     local repo=hansonrobotics/hrtool
     _install_latest_repo_release $@
+    install_head-hr-ext $@
 }
 uninstall_head-hr() {
     $SUDO apt-get remove head-hr
