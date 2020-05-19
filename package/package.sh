@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2013-2018 Hanson Robotics, Ltd. 
 
-package_ros_chatbot() {
+package_ros_env() {
     local reponame=hrtool
 
     mkdir -p $BASEDIR/src
@@ -17,7 +17,7 @@ package_ros_chatbot() {
     local url="https://api.github.com/repos/hansonrobotics/$reponame/releases"
 
     fpm -C "${BASEDIR}" -s dir -t deb -n "${name}" -v "${version#v}" --vendor "${VENDOR}" \
-        --url "${url}" --description "${desc}" ${ms} \
+        --url "${url}" --description "${desc}" ${ms} --force \
         --deb-no-default-config-files \
         -p $BASEDIR/${name}_VERSION_ARCH.deb \
         src/$reponame/rosenv/=${HR_ROS_PREFIX}/
@@ -31,5 +31,5 @@ if [[ $(readlink -f ${BASH_SOURCE[0]}) == $(readlink -f $0) ]]; then
     source $BASEDIR/config.sh
     set -e
 
-    package_ros_chatbot $1
+    package_ros_env $1
 fi
