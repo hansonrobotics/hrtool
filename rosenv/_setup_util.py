@@ -268,8 +268,9 @@ if __name__ == '__main__':
             print(e, file=sys.stderr)
             sys.exit(1)
 
+        CMAKE_PREFIX_PATH = ""
         # environment at generation time
-        for p in ['indigo', 'kinetic']:
+        for p in ['indigo', 'kinetic', 'melodic', 'noetic']:
             p = os.path.join('/opt/ros', p)
             if os.path.exists(p):
                 CMAKE_PREFIX_PATH = p.split(';')
