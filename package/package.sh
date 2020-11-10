@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2013-2018 Hanson Robotics, Ltd. 
 
-package_ros_env() {
+package() {
     local reponame=hrtool
 
     mkdir -p $BASEDIR/src
@@ -28,8 +28,7 @@ package_ros_env() {
 if [[ $(readlink -f ${BASH_SOURCE[0]}) == $(readlink -f $0) ]]; then
     BASEDIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
     source $BASEDIR/common.sh
-    source $BASEDIR/config.sh
     set -e
 
-    package_ros_env $1
+    package $1
 fi

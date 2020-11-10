@@ -1,35 +1,54 @@
-if ! hash gem >/dev/null 2>&1; then
-    echo "Installing ruby-full"
-    sudo apt-get install ruby-full
-fi
+env() {
+    export HR_PREFIX=/opt/hansonrobotics
+    export HR_BIN_PREFIX=$HR_PREFIX/bin
+    export HRTOOL_PREFIX=${HR_PREFIX}/hrtool
+    export HR_ROS_PREFIX=${HR_PREFIX}/ros
+    export HR_TOOLS_PREFIX=$HR_PREFIX/tools
+    export HR_DATA_PREFIX=$HR_PREFIX/data
+    export VOICE_CACHE_DIR=$HOME/.hr/tts/voice
+    export URL_PREFIX=https://github.com/hansonrobotics
+    export GITHUB_STORAGE_URL=https://raw.githubusercontent.com/hansonrobotics/binary_dependency/master
+    export GITHUB_STORAGE_URL2=https://$GITHUB_TOKEN@raw.githubusercontent.com/hansonrobotics/binary_dependency2/master
+    export VENDOR="Hanson Robotics"
+    export PYTHON_PKG_PREFIX=$HR_PREFIX/py2env/lib/python2.7/dist-packages
+    export PYTHON3_PKG_PREFIX=$HR_PREFIX/py3env/lib/python3.6/dist-packages
+    export ROS_PYTHON_PKG_PREFIX=$HR_ROS_PREFIX/lib/python2.7/dist-packages
+}
 
-if ! hash fpm >/dev/null 2>&1; then
-    gem install fpm
-    gem install deb-s3
-fi
+install_deps() {
+    if ! hash gem >/dev/null 2>&1; then
+        echo "Installing ruby-full"
+        sudo apt-get install ruby-full
+    fi
 
-if ! hash chrpath >/dev/null 2>&1; then
-    echo "Installing chrpath"
-    sudo apt-get install chrpath
-fi
+    if ! hash fpm >/dev/null 2>&1; then
+        gem install fpm
+        gem install deb-s3
+    fi
 
-if ! hash autoconf >/dev/null 2>&1; then
-    echo "Installing autoconf"
-    sudo apt-get install autoconf
-fi
+    if ! hash chrpath >/dev/null 2>&1; then
+        echo "Installing chrpath"
+        sudo apt-get install chrpath
+    fi
 
-if ! hash jq >/dev/null 2>&1; then
-    echo "Installing jq"
-    sudo apt-get install jq
-fi
+    if ! hash autoconf >/dev/null 2>&1; then
+        echo "Installing autoconf"
+        sudo apt-get install autoconf
+    fi
 
-if [[ ! -f /usr/local/go/bin/go ]]; then
-    echo "Installing go"
-    wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz -O /tmp/go1.14.2.linux-amd64.tar.gz
-    sudo tar -C /usr/local -xzf /tmp/go1.14.2.linux-amd64.tar.gz
-fi
+    if ! hash jq >/dev/null 2>&1; then
+        echo "Installing jq"
+        sudo apt-get install jq
+    fi
 
-export PATH=/usr/local/go/bin:$PATH
+    if [[ ! -f /usr/local/go/bin/go ]]; then
+        echo "Installing go"
+        wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz -O /tmp/go1.14.2.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xzf /tmp/go1.14.2.linux-amd64.tar.gz
+    fi
+
+    export PATH=/usr/local/go/bin:$PATH
+}
 
 COLOR_INFO='\033[32m'
 COLOR_WARN='\033[33m'
@@ -46,12 +65,13 @@ error() {
 }
 
 source_ros() {
-    if [[ -e /opt/ros/indigo/setup.bash ]]; then
-        source /opt/ros/indigo/setup.bash
-    else if [[ -e /opt/ros/kinetic/setup.bash ]]; then
-            source /opt/ros/kinetic/setup.bash
+    local ros_dists=(noetic melodic kinetic indigo)
+    for ros_dist in ${ros_dists[@]}; do
+        if [[ -e /opt/ros/$ros_dist/setup.bash ]]; then
+            info "ROS distribution $ros_dist"
+            source /opt/ros/$ros_dist/setup.bash
         fi
-    fi
+    done
 }
 
 add_control_scripts() {
@@ -72,48 +92,6 @@ add_control_scripts() {
         return 1
     fi
     echo $ms
-}
-
-create_postint_for_python_deps() {
-local output=$1
-if [[ -z $output ]]; then
-    error "No output file is specified. \ncreate_postint_for_python_deps output deps [[deps2] deps3]"
-    return 1
-fi
-shift
-if (( $# >= 1 )); then
-mkdir -p $(dirname ${output})
-touch ${output}
-cat << EOF >${output}
-#!/usr/bin/env bash
-
-hr cmd pip2_install "$@"
-EOF
-else
-    error "No dependency is specified. \ncreate_postint_for_python_deps output deps [[deps2] deps3]"
-    return 1
-fi
-}
-
-create_postint_for_python3_deps() {
-local output=$1
-if [[ -z $output ]]; then
-    error "No output file is specified. \ncreate_postint_for_python3_deps output deps [[deps2] deps3]"
-    return 1
-fi
-shift
-if (( $# >= 1 )); then
-mkdir -p $(dirname ${output})
-touch ${output}
-cat << EOF >${output}
-#!/usr/bin/env bash
-
-hr cmd pip3_install "$@"
-EOF
-else
-    error "No dependency is specified. \ncreate_postint_for_python3_deps output deps [[deps2] deps3]"
-    return 1
-fi
 }
 
 cleanup_ros_package_build() {
@@ -138,3 +116,5 @@ get_version() {
     fi
 }
 
+env
+install_deps
