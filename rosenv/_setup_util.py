@@ -49,6 +49,15 @@ system = platform.system()
 IS_DARWIN = (system == 'Darwin')
 IS_WINDOWS = (system == 'Windows')
 
+ROS_PYTHON_VERSION = os.environ.get('ROS_PYTHON_VERSION', 2)
+
+if ROS_PYTHON_VERSION == 2:
+    PYTHONPATH = ['lib/python2.7/dist-packages', 'lib/python2.7/site-packages']
+    HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py2env')
+elif ROS_PYTHON_VERSION == 3:
+    PYTHONPATH = ['lib/python3.8/dist-packages', 'lib/python3.8/site-packages']
+    HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py3env')
+
 # subfolder of workspace prepended to CMAKE_PREFIX_PATH
 ENV_VAR_SUBFOLDERS = {
     'CMAKE_PREFIX_PATH': '',
@@ -56,10 +65,8 @@ ENV_VAR_SUBFOLDERS = {
     'LD_LIBRARY_PATH' if not IS_DARWIN else 'DYLD_LIBRARY_PATH': ['lib', os.path.join('lib', 'x86_64-linux-gnu')],
     'PATH': 'bin',
     'PKG_CONFIG_PATH': [os.path.join('lib', 'pkgconfig'), os.path.join('lib', 'x86_64-linux-gnu', 'pkgconfig')],
-    'PYTHONPATH': ['lib/python2.7/dist-packages', 'lib/python2.7/site-packages']
+    'PYTHONPATH': PYTHONPATH
 }
-
-HR_PY2ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py2env')
 
 def rollback_env_variables(environ, env_var_subfolders):
     '''
@@ -156,9 +163,9 @@ def _prefix_env_variable(environ, name, paths, subfolders):
     environ_paths = [path for path in value.split(os.pathsep) if path]
     checked_paths = []
 
-    # Add hansonrobotics py2env to PYTHONPATH
+    # Add hansonrobotics python env to PYTHONPATH
     if name == 'PYTHONPATH':
-        paths.append(HR_PY2ENV)
+        paths.append(HR_PY_ENV)
 
     for path in paths:
         if not isinstance(subfolders, list):
