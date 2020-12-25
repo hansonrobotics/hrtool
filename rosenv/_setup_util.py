@@ -49,14 +49,20 @@ system = platform.system()
 IS_DARWIN = (system == 'Darwin')
 IS_WINDOWS = (system == 'Windows')
 
-ROS_PYTHON_VERSION = os.environ.get('ROS_PYTHON_VERSION', "2")
+ROS_DISTRO = os.environ.get('ROS_DISTRO')
+
+if ROS_DISTRO in ['indigo', 'kinetic', 'melodic']:
+    ROS_PYTHON_VERSION = os.environ.get('ROS_PYTHON_VERSION', "2")
+elif ROS_DISTRO == 'noetic':
+    ROS_PYTHON_VERSION = os.environ.get('ROS_PYTHON_VERSION', "3")
 
 if ROS_PYTHON_VERSION == "2":
     PYTHONPATH = ['lib/python2.7/dist-packages', 'lib/python2.7/site-packages']
-    HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py2env')
+    HR_PATHS = ['/opt/hansonrobotics/py2env', '/opt/hansonrobotics/ros']
 elif ROS_PYTHON_VERSION == "3":
-    PYTHONPATH = ['lib/python3/dist-packages', 'lib/python3/site-packages']
-    HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py3env')
+    PYTHONPATH = ['lib/python3/dist-packages', 'lib/python3/site-packages',
+            'lib/python3.8/dist-packages', 'lib/python3.8/site-packages']
+    HR_PATHS = ['/opt/hansonrobotics/py3env', '/opt/hansonrobotics/ros']
 
 # subfolder of workspace prepended to CMAKE_PREFIX_PATH
 ENV_VAR_SUBFOLDERS = {
@@ -165,7 +171,7 @@ def _prefix_env_variable(environ, name, paths, subfolders):
 
     # Add hansonrobotics python env to PYTHONPATH
     if name == 'PYTHONPATH':
-        paths.append(HR_PY_ENV)
+        paths.extend(HR_PATHS)
 
     for path in paths:
         if not isinstance(subfolders, list):
