@@ -49,12 +49,12 @@ system = platform.system()
 IS_DARWIN = (system == 'Darwin')
 IS_WINDOWS = (system == 'Windows')
 
-ROS_PYTHON_VERSION = os.environ.get('ROS_PYTHON_VERSION', 2)
+ROS_PYTHON_VERSION = os.environ.get('ROS_PYTHON_VERSION', "2")
 
-if ROS_PYTHON_VERSION == 2:
+if ROS_PYTHON_VERSION == "2":
     PYTHONPATH = ['lib/python2.7/dist-packages', 'lib/python2.7/site-packages']
     HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py2env')
-elif ROS_PYTHON_VERSION == 3:
+elif ROS_PYTHON_VERSION == "3":
     PYTHONPATH = ['lib/python3.8/dist-packages', 'lib/python3.8/site-packages']
     HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py3env')
 
