@@ -55,7 +55,7 @@ if ROS_PYTHON_VERSION == "2":
     PYTHONPATH = ['lib/python2.7/dist-packages', 'lib/python2.7/site-packages']
     HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py2env')
 elif ROS_PYTHON_VERSION == "3":
-    PYTHONPATH = ['lib/python3.8/dist-packages', 'lib/python3.8/site-packages']
+    PYTHONPATH = ['lib/python3/dist-packages', 'lib/python3/site-packages']
     HR_PY_ENV = os.path.join(os.environ.get('HR_PREFIX', '/opt/hansonrobotics'), 'py3env')
 
 # subfolder of workspace prepended to CMAKE_PREFIX_PATH
